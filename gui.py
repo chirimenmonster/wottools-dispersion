@@ -25,6 +25,9 @@ class Application(object):
         moduleSelectorBar = tkinter.Entry(self.__root, borderwidth=0)
         moduleSelectorBar.pack(side='top', expand=1, fill='x')
 
+        modulePanel = tkinter.Entry(self.__root, borderwidth=8, background='white', foreground='white', relief='flat')
+        modulePanel.pack(side='top', expand=1, fill='x', padx=0, pady=0)
+
         itemPanel = tkinter.Entry(self.__root, borderwidth=8, background='white', foreground='white', relief='flat')
         itemPanel.pack(side='top', expand=1, fill='x', padx=0, pady=0)
         
@@ -53,17 +56,17 @@ class Application(object):
 
         self.__turretSelector = DropdownList(moduleSelectorBar)
         self.__turretSelector.setWidth(40)
-        self.__turretSelector.setCallback(self.cbChangeModules)
+        self.__turretSelector.setCallback(self.cbChangeTurret)
 
         self.__gunSelector = DropdownList(moduleSelectorBar)
         self.__gunSelector.setWidth(40)
         self.__gunSelector.setCallback(self.cbChangeModules)
 
         self.__item = {}
-        self.__item['vehicle'] = PanelItem(itemPanel, 'Vehicle:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
-        self.__item['chassis'] = PanelItem(itemPanel, 'Chassis:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
-        self.__item['turret'] = PanelItem(itemPanel, 'Turret:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
-        self.__item['gun'] = PanelItem(itemPanel, 'Gun:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['vehicle'] = PanelItem(modulePanel, 'Vehicle:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['chassis'] = PanelItem(modulePanel, 'Chassis:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['turret'] = PanelItem(modulePanel, 'Turret:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['gun'] = PanelItem(modulePanel, 'Gun:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
         self.__item['shotDispersionRadius'] = PanelItem(itemPanel, 'ShotDispersionRadius:', ' (m)')
         PanelItem(itemPanel, 'DispersionFactor', '', labelAnchor='w')
         self.__item['vehicleMovement'] = PanelItem(itemPanel, '... VehicleMovement:', '')
@@ -92,24 +95,31 @@ class Application(object):
             vehicleInfo = g_strage.fetchVehicleInfo(vehicleId)
             self.__chassisSelector.setValues(*g_strage.fetchChassisList(vehicleId))
             self.__turretSelector.setValues(*g_strage.fetchTurretList(vehicleId))
-            self.__gunSelector.setValues(*g_strage.fetchGunList(vehicleId))
-            self.changeModules()
         else:
-            self.__vehiclePanel['text'] = ''
+            self.__chassisSelector.setValues([ '' ], [ None ])
+            self.__turretSelector.setValues([ '' ], [ None ])
+        self.changeTurret()
+
+    def changeTurret(self):
+        vehicleId = self.__vehicleSelector.getSelected()
+        if vehicleId:
+            turretTag = self.__turretSelector.getSelected()
+            self.__gunSelector.setValues(*g_strage.fetchGunList(vehicleId, turretTag))
+        else:
+            self.__gunSelector.setValues([ '' ], [ None ])
+        self.changeModules()
 
     def changeModules(self):
         vehicleId = self.__vehicleSelector.getSelected()
         if vehicleId:
             vehicleInfo = g_strage.fetchVehicleInfo(vehicleId)
             self.__item['vehicle'].setValue('{} ({})'.format(vehicleInfo['name'], vehicleInfo['id']))
-        chassisTag = self.__chassisSelector.getSelected()
-        turretTag = self.__turretSelector.getSelected()
-        gunTag = self.__gunSelector.getSelected()
-        print(vehicleId, chassisTag, turretTag, gunTag)
-        chassis = g_strage.fetchChassisInfo(vehicleId, chassisTag)
-        turret = g_strage.fetchTurretInfo(vehicleId, turretTag)
-        gun = g_strage.fetchGunInfo(vehicleId, gunTag)
-        if chassis:
+            chassisTag = self.__chassisSelector.getSelected()
+            turretTag = self.__turretSelector.getSelected()
+            gunTag = self.__gunSelector.getSelected()
+            chassis = g_strage.fetchChassisInfo(vehicleId, chassisTag)
+            turret = g_strage.fetchTurretInfo(vehicleId, turretTag)
+            gun = g_strage.fetchGunInfo(vehicleId, turretTag, gunTag)
             self.__item['chassis'].setValue('{} ({})'.format(chassis['name'], chassis['tag']))
             self.__item['turret'].setValue('{} ({})'.format(turret['name'], turret['tag']))
             self.__item['gun'].setValue('{} ({})'.format(gun['name'], gun['tag']))
@@ -119,12 +129,18 @@ class Application(object):
             self.__item['turretRotation'].setValue(gun['turretRotation'])
             self.__item['afterShot'].setValue(gun['afterShot'])
             self.__item['whileGunDamaged'].setValue(gun['whileGunDamaged'])
-    
+        else:
+            for panel in self.__item.values():
+                panel.setValue('')
+
     def cbChangeVehicleFilter(self, event):
         self.changeVehicleFilter()
 
     def cbChangeVehicle(self, event):
         self.changeVehicle()
+
+    def cbChangeTurret(self, event):
+        self.changeTurret()
 
     def cbChangeModules(self, event):
         self.changeModules()

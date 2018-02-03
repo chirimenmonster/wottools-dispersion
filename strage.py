@@ -122,7 +122,8 @@ class Strage(object):
             desc['tag'] = turret.tag
             desc['userString'] = turret.find('userString').text
             desc['name'] = translate(desc['userString'])
-            desc['guns'] = [ e.tag for e in turret.find('guns') ]
+            desc['gun'] = {}
+            desc['gunList'] = []
             entry['turret'][desc['tag']] = desc
             entry['turretList'].append(desc['tag'])
             for gun in turret.find('guns'):
@@ -135,8 +136,8 @@ class Strage(object):
                 gunDesc['turretRotation'] = self.getSharedGunEntry(shotDispersionFactors, 'turretRotation', nation, gun.tag, 'turretRotation')
                 gunDesc['afterShot'] = self.getSharedGunEntry(shotDispersionFactors, 'afterShot', nation, gun.tag, 'afterShot')
                 gunDesc['whileGunDamaged'] = self.getSharedGunEntry(shotDispersionFactors, 'whileGunDamaged', nation, gun.tag, 'whileGunDamaged')
-                entry['gun'][gunDesc['tag']] = gunDesc
-                entry['gunList'].append(gunDesc['tag'])
+                desc['gun'][gunDesc['tag']] = gunDesc
+                desc['gunList'].append(gunDesc['tag'])
         return entry
 
     def fetchChassisInfo(self, vid, tag):
@@ -147,8 +148,8 @@ class Strage(object):
         turret = self.fetchVehicleInfo(vid)['turret']
         return turret[tag]
 
-    def fetchGunInfo(self, vid, tag):
-        gun = self.fetchVehicleInfo(vid)['gun']
+    def fetchGunInfo(self, vid, tid, tag):
+        gun = self.fetchVehicleInfo(vid)['turret'][tid]['gun']
         return gun[tag]
         
     def fetchNationList(self):
@@ -175,10 +176,11 @@ class Strage(object):
         labels = [ 'turret: ' + vehicleInfo['turret'][tag]['name'] for tag in vehicleInfo['turretList'] ]
         return [ labels, vehicleInfo['turretList'] ]
 
-    def fetchGunList(self, vid):
+    def fetchGunList(self, vid, tid):
         vehicleInfo = self.fetchVehicleInfo(vid)
-        labels = [ 'gun: ' + vehicleInfo['gun'][tag]['name'] for tag in vehicleInfo['gunList'] ]
-        return [ labels, vehicleInfo['gunList'] ]
+        gunList = vehicleInfo['turret'][tid]['gunList']
+        labels = [ 'gun: ' + vehicleInfo['turret'][tid]['gun'][tag]['name'] for tag in gunList ]
+        return [ labels, vehicleInfo['turret'][tid]['gunList'] ]
 
 if __name__ == '__main__':
     import io, sys
@@ -194,8 +196,8 @@ if __name__ == '__main__':
     g_strage = Strage()
 
     print(configs.BASEDIR)
-    print(g_strage.fetchVehicleList('ussr', '1', 'LT'))
 
+    print(g_strage.fetchGunList('germany/G25_PzII_Luchs'))
     #print(g_strage.fetchVehicleList('germany', '7', 'TD'))
     #print(g_strage.fetchVehicleInfo('germany/G18_JagdPanther'))
     #print(g_strage.fetchGunList('germany/G18_JagdPanther'))
