@@ -13,8 +13,10 @@ configs.LOCALE_RELPATH = 'res'
 configs.GUISETTINGS_VPATH = 'gui/gui_settings.xml'
 
 TIERS = [ str(tier) for tier in range(1, 10 + 1) ]
-TYPES = [ 'lightTank', 'mediumTank', 'heavyTank', 'AT-SPG', 'SPG' ]
+TIERS_LABEL = { '1':'I', '2':'II', '3':'III', '4':'IV', '5':'V', '6':'VI', '7':'VII', '8':'VIII', '9':'IX', '10':'X'}
+TIERS_LIST = [ TIERS_LABEL[t] for t in TIERS ]
 
+TYPES = [ 'lightTank', 'mediumTank', 'heavyTank', 'AT-SPG', 'SPG' ]
 TYPES_LABEL = { 'lightTank':'LT', 'mediumTank':'MT', 'heavyTank':'HT', 'AT-SPG':'TD', 'SPG':'SPG' }
 TYPES_LIST = [ TYPES_LABEL[t] for t in TYPES ]
 
@@ -90,6 +92,8 @@ class Strage(object):
                 entry['tag'] = gun.tag
                 entry['nation'] = nation
                 entry['userString'] = gun.find('userString').text
+                entry['reloadTime'] = gun.find('reloadTime').text
+                entry['aimingTime'] = gun.find('aimingTime').text
                 entry['shotDispersionRadius'] = gun.find('shotDispersionRadius').text
                 shotDispersionFactors = gun.find('shotDispersionFactors')
                 entry['turretRotation'] = shotDispersionFactors.find('turretRotation').text
@@ -139,6 +143,8 @@ class Strage(object):
                 gunDesc['tag'] = gun.tag
                 gunDesc['userString'] = self.getSharedGunEntry(gun, 'userString', nation, gun.tag, 'userString')
                 gunDesc['name'] = translate(gunDesc['userString'])
+                gunDesc['reloadTime'] = self.getSharedGunEntry(gun, 'reloadTime', nation, gun.tag, 'reloadTime')
+                gunDesc['aimingTime'] = self.getSharedGunEntry(gun, 'aimingTime', nation, gun.tag, 'aimingTime')
                 gunDesc['shotDispersionRadius'] = self.getSharedGunEntry(gun, 'shotDispersionRadius', nation, gun.tag, 'shotDispersionRadius')
                 shotDispersionFactors = gun.find('shotDispersionFactors')
                 gunDesc['turretRotation'] = self.getSharedGunEntry(shotDispersionFactors, 'turretRotation', nation, gun.tag, 'turretRotation')
@@ -164,7 +170,7 @@ class Strage(object):
         return [ s.upper() for s in self.__nations ], self.__nations
 
     def fetchTierList(self):
-        return TIERS, TIERS
+        return TIERS_LIST, TIERS
 
     def fetchTypeList(self):
         return TYPES_LIST, TYPES_LIST
