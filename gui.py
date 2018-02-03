@@ -2,7 +2,7 @@ import tkinter
 import tkinter.ttk
 import tkinter.font
 
-from strage import g_strage
+from strage import Strage, configs
 
 class Application(object):
 
@@ -60,10 +60,10 @@ class Application(object):
         self.__gunSelector.setCallback(self.cbChangeModules)
 
         self.__item = {}
-        self.__item['vehicle'] = PanelItem(itemPanel, 'Vehicle:', '', labelWidth=8, valueWidth=40, valueAnchor='w')
-        self.__item['chassis'] = PanelItem(itemPanel, 'Chassis:', '', labelWidth=8, valueWidth=40, valueAnchor='w')
-        self.__item['turret'] = PanelItem(itemPanel, 'Turret:', '', labelWidth=8, valueWidth=40, valueAnchor='w')
-        self.__item['gun'] = PanelItem(itemPanel, 'Gun:', '', labelWidth=8, valueWidth=40, valueAnchor='w')
+        self.__item['vehicle'] = PanelItem(itemPanel, 'Vehicle:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['chassis'] = PanelItem(itemPanel, 'Chassis:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['turret'] = PanelItem(itemPanel, 'Turret:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['gun'] = PanelItem(itemPanel, 'Gun:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
         self.__item['shotDispersionRadius'] = PanelItem(itemPanel, 'ShotDispersionRadius:', ' (m)')
         PanelItem(itemPanel, 'DispersionFactor', '', labelAnchor='w')
         self.__item['vehicleMovement'] = PanelItem(itemPanel, '... VehicleMovement:', '')
@@ -170,10 +170,16 @@ class DropdownList(object):
         return self.__values[index]
 
 
-
 if __name__ == '__main__':
     import io, sys
     sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', dest='BASEDIR', help='specify <WoT_game_folder>')
+    parser.parse_args(namespace=configs)
+
+    g_strage = Strage()
     g_app = Application()

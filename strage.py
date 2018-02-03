@@ -2,8 +2,14 @@ import os
 import gettext
 from xml.etree import ElementTree
 
-BASE_DIR = 'c:/Git/wot.scripts/scripts/item_defs/vehicles'
-LOCALE_DIR = 'C:/Games/World_of_Tanks_EU/res'
+class Configs:
+    pass
+
+configs = Configs()
+configs.BASEDIR = 'C:/Games/World_of_Tanks'
+configs.PKG_RELPATH = 'res/packages/scripts.pkg'
+configs.BASEREL_DIR = 'scripts/item_defs/vehicles'
+configs.LOCALE_RELPATH = 'res'
 
 NATIONS = [ 'germany', 'ussr', 'usa', 'uk', 'france', 'china', 'japan', 'czech', 'sweden', 'poland' ]
 TIERS = [ str(tier) for tier in range(1, 10 + 1) ]
@@ -23,12 +29,25 @@ def translate(text):
     prefix, name = text.split(':')
     if not _currentDomain == prefix.replace('#', ''):
         _currentDomain = prefix.replace('#', '')
-        _translation = gettext.translation(_currentDomain, languages=['text'], localedir=LOCALE_DIR)
+        localedir = configs.BASEDIR + '/' + configs.LOCALE_RELPATH
+        _translation = gettext.translation(_currentDomain, languages=['text'], localedir=localedir)
         _translation.install()
-    name = _(name)
-    return name
+    name2 = _(name)
+    return name2
 
 
+def readPackedXml(relPath):
+    import io
+    import zipfile
+    from XmlUnpacker import XmlUnpacker
+    xmlunpacker = XmlUnpacker()
+    root = None
+    pkgPath = configs.BASEDIR + '/' + configs.PKG_RELPATH
+    with zipfile.ZipFile(pkgPath, 'r') as zip:
+        with zip.open(relPath, 'r') as file:
+            root = xmlunpacker.read(io.BytesIO(file.read()))
+            return root
+    return None
 
 def getEntryTextSafe(e):
     if e is not None:
@@ -42,7 +61,7 @@ class Strage(object):
         self.__strage = {}
         self.__strageSharedGun = {}
         for nation in NATIONS:
-            root = ElementTree.parse(os.path.join(BASE_DIR, nation, 'list.xml')).getroot()
+            root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/list.xml')
             for child in root:
                 entry = {}
                 id = nation + '/' + child.tag
@@ -55,7 +74,7 @@ class Strage(object):
                 entry['userString'] = child.find('userString').text
                 entry['name'] = translate(entry['userString'])
                 self.__strage[id] = entry
-            root = ElementTree.parse(os.path.join(BASE_DIR, nation, 'components/guns.xml')).getroot()
+            root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/components/guns.xml')
             for gun in root.find('shared'):
                 entry = {}
                 id = nation + '/' + gun.tag
@@ -80,7 +99,7 @@ class Strage(object):
                 
     def fetchVehicleInfo(self, id):
         nation, tag = id.split('/')
-        root = ElementTree.parse(os.path.join(BASE_DIR, nation, tag + '.xml')).getroot()
+        root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/' + tag + '.xml')
         entry = { k:v for k,v in self.__strage[id].items() }
         entry['chassis'] = {}
         entry['chassisList'] = []
@@ -161,17 +180,26 @@ class Strage(object):
         labels = [ 'gun: ' + vehicleInfo['gun'][tag]['name'] for tag in vehicleInfo['gunList'] ]
         return [ labels, vehicleInfo['gunList'] ]
 
-g_strage = Strage()
-
 if __name__ == '__main__':
     import io, sys
     sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-    print(g_strage.fetchVehicleList('germany', '7', 'TD'))
-    print(g_strage.fetchVehicleInfo('germany/G18_JagdPanther'))
-    print(g_strage.fetchGunList('germany/G18_JagdPanther'))
-    print(g_strage.fetchGunInfo('germany/G18_JagdPanther', '_88mm_PaK_36_L56'))
-    print(g_strage.fetchGunInfo('germany/G18_JagdPanther', '_75mm_StuK42_L70'))
+    
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', dest='BASEDIR', help='specify <WoT_game_folder>')
+    parser.parse_args(namespace=configs)
+
+    g_strage = Strage()
+
+    print(configs.BASEDIR)
+    print(g_strage.fetchVehicleList('ussr', '1', 'LT'))
+
+    #print(g_strage.fetchVehicleList('germany', '7', 'TD'))
+    #print(g_strage.fetchVehicleInfo('germany/G18_JagdPanther'))
+    #print(g_strage.fetchGunList('germany/G18_JagdPanther'))
+    #print(g_strage.fetchGunInfo('germany/G18_JagdPanther', '_88mm_PaK_36_L56'))
+    #print(g_strage.fetchGunInfo('germany/G18_JagdPanther', '_75mm_StuK42_L70'))
     #print(g_strage.fetchVehicleInfo('germany/G110_Typ_205'))
     #print(g_strage.fetchGunInfo('germany/G110_Typ_205', '_128mm_KwK44_L55'))
