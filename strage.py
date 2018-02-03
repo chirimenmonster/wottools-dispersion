@@ -1,4 +1,3 @@
-import os
 import gettext
 from xml.etree import ElementTree
 
@@ -8,10 +7,11 @@ class Configs:
 configs = Configs()
 configs.BASEDIR = 'C:/Games/World_of_Tanks'
 configs.PKG_RELPATH = 'res/packages/scripts.pkg'
+configs.GUI_RELPATH = 'res/packages/gui.pkg'
 configs.BASEREL_DIR = 'scripts/item_defs/vehicles'
 configs.LOCALE_RELPATH = 'res'
+configs.GUISETTINGS_VPATH = 'gui/gui_settings.xml'
 
-NATIONS = [ 'germany', 'ussr', 'usa', 'uk', 'france', 'china', 'japan', 'czech', 'sweden', 'poland' ]
 TIERS = [ str(tier) for tier in range(1, 10 + 1) ]
 TYPES = [ 'lightTank', 'mediumTank', 'heavyTank', 'AT-SPG', 'SPG' ]
 
@@ -36,13 +36,16 @@ def translate(text):
     return name2
 
 
-def readPackedXml(relPath):
+def readPackedXml(relPath, package=None):
     import io
     import zipfile
     from XmlUnpacker import XmlUnpacker
     xmlunpacker = XmlUnpacker()
     root = None
-    pkgPath = configs.BASEDIR + '/' + configs.PKG_RELPATH
+    if not package:
+        pkgPath = configs.BASEDIR + '/' + configs.PKG_RELPATH
+    else:
+        pkgPath = configs.BASEDIR + '/' + package
     with zipfile.ZipFile(pkgPath, 'r') as zip:
         with zip.open(relPath, 'r') as file:
             root = xmlunpacker.read(io.BytesIO(file.read()))
@@ -60,7 +63,12 @@ class Strage(object):
     def __init__(self):
         self.__strage = {}
         self.__strageSharedGun = {}
-        for nation in NATIONS:
+        root = readPackedXml(configs.GUISETTINGS_VPATH, package=configs.GUI_RELPATH)
+        for child in root:
+            if child.tag == 'setting' and child.find('name') is not None and child.find('name').text == 'nations_order':
+                self.__nations = [ i.text for i in child.find('value') ]
+                break
+        for nation in self.__nations:
             root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/list.xml')
             for child in root:
                 entry = {}
@@ -153,7 +161,7 @@ class Strage(object):
         return gun[tag]
         
     def fetchNationList(self):
-        return [ s.upper() for s in NATIONS ], NATIONS
+        return [ s.upper() for s in self.__nations ], self.__nations
 
     def fetchTierList(self):
         return TIERS, TIERS
@@ -197,11 +205,7 @@ if __name__ == '__main__':
 
     print(configs.BASEDIR)
 
-    print(g_strage.fetchGunList('germany/G25_PzII_Luchs'))
+    print(g_strage.fetchGunList('germany/G25_PzII_Luchs', 'PzIIL_Grosseturm'))
     #print(g_strage.fetchVehicleList('germany', '7', 'TD'))
     #print(g_strage.fetchVehicleInfo('germany/G18_JagdPanther'))
-    #print(g_strage.fetchGunList('germany/G18_JagdPanther'))
-    #print(g_strage.fetchGunInfo('germany/G18_JagdPanther', '_88mm_PaK_36_L56'))
-    #print(g_strage.fetchGunInfo('germany/G18_JagdPanther', '_75mm_StuK42_L70'))
     #print(g_strage.fetchVehicleInfo('germany/G110_Typ_205'))
-    #print(g_strage.fetchGunInfo('germany/G110_Typ_205', '_128mm_KwK44_L55'))
