@@ -51,155 +51,240 @@ def readPackedXml(relPath, package=None):
     with zipfile.ZipFile(pkgPath, 'r') as zip:
         with zip.open(relPath, 'r') as file:
             root = xmlunpacker.read(io.BytesIO(file.read()))
-            return root
-    return None
+    return root
 
-def getEntryTextSafe(e):
-    if e is not None:
-        return e.text
-    return ''
+
+def getEntityTextSafe(entity, default):
+    if entity is not None:
+        return entity.text
+    return default
 
 
 class Strage(object):
 
     def __init__(self):
-        self.__strage = {}
-        self.__strageSharedGun = {}
+        self.__strageVehicleList = {}
+        self.__strageSharedGuns = {}
+        self.__cacheVehicleInfo = {}
+        self.__nationOrder = self.__fetchNationOrder()
+        for nation in self.__nationOrder:
+            self.__strageVehicleList[nation] = StrageVehicleList(nation)
+            self.__strageSharedGuns[nation] = StrageSharedGuns(nation)
+
+    def __fetchNationOrder(self):
         root = readPackedXml(configs.GUISETTINGS_VPATH, package=configs.GUI_RELPATH)
         for child in root:
             if child.tag == 'setting' and child.find('name') is not None and child.find('name').text == 'nations_order':
-                self.__nations = [ i.text for i in child.find('value') ]
-                break
-        for nation in self.__nations:
-            root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/list.xml')
-            for child in root:
-                entry = {}
-                id = nation + '/' + child.tag
-                entry['id'] = id
-                entry['tag'] = child.tag
-                entry['nation'] = nation
-                entry['tier'] = child.find('level').text
-                entry['order'] = int(child.find('id').text)
-                entry['type'] = [ TYPES_LABEL[t] for t in child.find('tags').text.split(' ') if t in TYPES ][0]
-                entry['userString'] = child.find('userString').text
-                try:
-                    entry['shortUserString'] = translate(child.find('shortUserString').text)
-                except:
-                    entry['shortUserString'] = ''
-                entry['description'] = translate(child.find('description').text)
-                entry['name'] = translate(entry['userString'])
-                self.__strage[id] = entry
-            root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/components/guns.xml')
-            for gun in root.find('shared'):
-                entry = {}
-                id = nation + '/' + gun.tag
-                entry['id'] = id
-                entry['tag'] = gun.tag
-                entry['nation'] = nation
-                entry['userString'] = gun.find('userString').text
-                entry['reloadTime'] = gun.find('reloadTime').text
-                entry['aimingTime'] = gun.find('aimingTime').text
-                entry['shotDispersionRadius'] = gun.find('shotDispersionRadius').text
-                shotDispersionFactors = gun.find('shotDispersionFactors')
-                entry['turretRotation'] = shotDispersionFactors.find('turretRotation').text
-                entry['afterShot'] = shotDispersionFactors.find('afterShot').text
-                entry['whileGunDamaged'] = shotDispersionFactors.find('whileGunDamaged').text
-                self.__strageSharedGun[id] = entry
+                return [ i.text for i in child.find('value') ]
 
-    def getSharedGunEntry(self, entry, target, nation, gunTag, label):
-        if entry is not None:
-            result = entry.find(target)
-            if result is not None:
-                return result.text
-        id = nation + '/' + gunTag
-        return self.__strageSharedGun[id][label]
-                
-    def fetchVehicleInfo(self, id):
-        nation, tag = id.split('/')
-        root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/' + tag + '.xml')
-        entry = { k:v for k,v in self.__strage[id].items() }
-        entry['chassis'] = {}
-        entry['chassisList'] = []
-        for chassis in root.find('chassis'):
-            desc = {}
-            desc['tag'] = chassis.tag
-            desc['userString'] = chassis.find('userString').text
-            desc['name'] = translate(desc['userString'])
-            shotDispersionFactors = chassis.find('shotDispersionFactors')
-            desc['vehicleMovement'] = shotDispersionFactors.find('vehicleMovement').text
-            desc['vehicleRotation'] = shotDispersionFactors.find('vehicleRotation').text
-            entry['chassis'][desc['tag']] = desc
-            entry['chassisList'].append(desc['tag'])
-        entry['turret'] = {}
-        entry['turretList'] = []
-        entry['gun'] = {}
-        entry['gunList'] = []
-        for turret in root.find('turrets0'):
-            desc = {}
-            desc['tag'] = turret.tag
-            desc['userString'] = turret.find('userString').text
-            desc['name'] = translate(desc['userString'])
-            desc['gun'] = {}
-            desc['gunList'] = []
-            entry['turret'][desc['tag']] = desc
-            entry['turretList'].append(desc['tag'])
-            for gun in turret.find('guns'):
-                gunDesc = {}
-                gunDesc['tag'] = gun.tag
-                gunDesc['userString'] = self.getSharedGunEntry(gun, 'userString', nation, gun.tag, 'userString')
-                gunDesc['name'] = translate(gunDesc['userString'])
-                gunDesc['reloadTime'] = self.getSharedGunEntry(gun, 'reloadTime', nation, gun.tag, 'reloadTime')
-                gunDesc['aimingTime'] = self.getSharedGunEntry(gun, 'aimingTime', nation, gun.tag, 'aimingTime')
-                gunDesc['shotDispersionRadius'] = self.getSharedGunEntry(gun, 'shotDispersionRadius', nation, gun.tag, 'shotDispersionRadius')
-                shotDispersionFactors = gun.find('shotDispersionFactors')
-                gunDesc['turretRotation'] = self.getSharedGunEntry(shotDispersionFactors, 'turretRotation', nation, gun.tag, 'turretRotation')
-                gunDesc['afterShot'] = self.getSharedGunEntry(shotDispersionFactors, 'afterShot', nation, gun.tag, 'afterShot')
-                gunDesc['whileGunDamaged'] = self.getSharedGunEntry(shotDispersionFactors, 'whileGunDamaged', nation, gun.tag, 'whileGunDamaged')
-                desc['gun'][gunDesc['tag']] = gunDesc
-                desc['gunList'].append(gunDesc['tag'])
-        return entry
+    def getVehicleEntry(self, nation, vehicle):
+        return self.__strageVehicleList[nation].getEntry(vehicle)
 
-    def fetchChassisInfo(self, vid, tag):
-        chassis = self.fetchVehicleInfo(vid)['chassis']
-        return chassis[tag]
+    def getSharedGunEntry(self, nation, gun):
+        return self.__strageSharedGuns[nation].getEntry(gun)
 
-    def fetchTurretInfo(self, vid, tag):
-        turret = self.fetchVehicleInfo(vid)['turret']
-        return turret[tag]
+    def fetchVehicleInfo(self, nation, vehicle):
+        if vehicle not in self.__cacheVehicleInfo:
+            self.__cacheVehicleInfo[vehicle] = StrageVehicle(nation, vehicle)
+        return self.__cacheVehicleInfo[vehicle]
 
-    def fetchGunInfo(self, vid, tid, tag):
-        gun = self.fetchVehicleInfo(vid)['turret'][tid]['gun']
-        return gun[tag]
-        
-    def fetchNationList(self):
-        return [ s.upper() for s in self.__nations ], self.__nations
+    def fetchChassisInfo(self, nation, vehicle, chassis):
+        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        return vehicleInfo.fetchChassisInfo(chassis)
 
-    def fetchTierList(self):
-        return TIERS_LIST, TIERS
+    def fetchTurretInfo(self, nation, vehicle, turret):
+        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        return vehicleInfo.fetchTurretInfo(turret)
 
-    def fetchTypeList(self):
-        return TYPES_LIST, TYPES_LIST
+    def fetchGunInfo(self, nation, vehicle, turret, gun):
+        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        return vehicleInfo.fetchGunInfo(turret, gun)
 
     def fetchVehicleList(self, nation, tier, type):
-        list = [ v for v in self.__strage.values() if v['nation'] == nation and v['tier'] == tier and v['type'] == type ]
-        list = sorted(list, key=lambda x: x['order'])
-        return [ v['shortUserString'] or v['name'] for v in list ], [ v['id'] for v in list ]
+        list = [ v for v in self.__strageVehicleList[nation].getStrage().values() if v['tier'] == tier and v['type'] == type ]
+        list = sorted(list, key=lambda x: x['id'])
+        return [ v['shortUserString'] or v['name'] for v in list ], [ v['tag'] for v in list ]
 
-    def fetchChassisList(self, vid):
-        vehicleInfo = self.fetchVehicleInfo(vid)
-        labels = [ vehicleInfo['chassis'][tag]['name'] for tag in vehicleInfo['chassisList'] ]
-        return [ labels, vehicleInfo['chassisList'] ]
+    def fetchNationList(self):
+        return [ [ s, s.upper() ] for s in self.__nationOrder ]
 
-    def fetchTurretList(self, vid):
-        vehicleInfo = self.fetchVehicleInfo(vid)
-        labels = [ vehicleInfo['turret'][tag]['name'] for tag in vehicleInfo['turretList'] ]
-        return [ labels, vehicleInfo['turretList'] ]
+    def fetchTierList(self):
+        return [ [ tier, TIERS_LABEL[tier] ] for tier in TIERS_LIST ]
 
-    def fetchGunList(self, vid, ttag):
-        vehicleInfo = self.fetchVehicleInfo(vid)
-        gunList = vehicleInfo['turret'][ttag]['gunList']
-        labels = [ vehicleInfo['turret'][ttag]['gun'][gtag]['name'] for gtag in gunList ]
-        return [ labels, vehicleInfo['turret'][ttag]['gunList'] ]
+    def fetchTypeList(self):
+        return [ [ type, type ] for type in TYPES_LIST ]
+
+    def fetchChassisList(self, nation, vehicle):
+        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        return vehicleInfo.fetchChassisList()
+
+    def fetchTurretList(self, nation, vehicle):
+        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        return vehicleInfo.fetchTurretList()
+
+    def fetchGunList(self, nation, vehicle, turret):
+        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        gunList = vehicleInfo.fetchGunList(turret)
+        return gunList
+
+
+class StrageVehicleList(object):
+
+    def __init__(self, nation):
+        root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/list.xml')
+        self.__strage = {}
+        for vehicle in root:
+            entry = {}
+            entry['id'] = int(vehicle.find('id').text)
+            entry['tag'] = vehicle.tag
+            entry['nation'] = nation
+            entry['tier'] = vehicle.find('level').text
+            entry['type'] = [ TYPES_LABEL[t] for t in vehicle.find('tags').text.split(' ') if t in TYPES ][0]
+            entry['userString'] = vehicle.find('userString').text
+            entry['name'] = translate(entry['userString'])
+            shortUserString = vehicle.find('shortUserString')
+            if shortUserString:
+                entry['shortUserString'] = translate(shortUserString.text)
+            else:
+                entry['shortUserString'] = ''
+            entry['description'] = translate(vehicle.find('description').text)
+            self.__strage[vehicle.tag] = entry
+
+    def getEntry(self, tag):
+        return self.__strage[tag]
+
+    def getStrage(self):
+        return self.__strage
+
+
+class StrageSharedGuns(object):
+    __strage = {}
+
+    def __init__(self, nation):
+        root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/components/guns.xml')
+        for gun in root.find('ids'):
+            entry = {}
+            entry['id'] = int(gun.text)
+            entry['tag'] = gun.tag
+            entry['nation'] = nation
+            self.__strage[gun.tag] = entry
+        for gun in root.find('shared'):
+            entry = self.__fetchGunEntry(gun)
+            for k,v in entry.items():
+                self.__strage[gun.tag][k] = v
+
+    def __fetchGunEntry(self, gun):
+        entry = {}
+        entry['userString'] = gun.find('userString').text
+        entry['reloadTime'] = gun.find('reloadTime').text
+        entry['aimingTime'] = gun.find('aimingTime').text
+        entry['shotDispersionRadius'] = gun.find('shotDispersionRadius').text
+        factors = gun.find('shotDispersionFactors')
+        entry['turretRotation'] = factors.find('turretRotation').text
+        entry['afterShot'] = factors.find('afterShot').text
+        entry['whileGunDamaged'] = factors.find('whileGunDamaged').text
+        return entry
+    
+    def getEntry(self, tag):
+        return self.__strage[tag]
+
+
+class StrageVehicle(object):
+
+    def __init__(self, nation, vehicle):
+        self.__currentNation = nation
+        root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/' + vehicle + '.xml')
+        
+        entry = self.__fetchVehicleEntry(root, vehicle)
+        self.__vehicle = entry
+        
+        self.__chassis = {}
+        self.__chassisList = []
+        for chassis in root.find('chassis'):
+            entry = self.__fetchChassisEntry(chassis, chassis.tag)
+            self.__chassis[chassis.tag] = entry
+            self.__chassisList.append(chassis.tag)
+        
+        self.__turret = {}
+        self.__turretList = []
+        for turret in root.find('turrets0'):
+            entry = self.__fetchTurretEntry(turret, turret.tag)
+            self.__turret[turret.tag] = entry
+            self.__turretList.append(turret.tag)
+
+        self.__gun = {}
+        self.__gunList = {}
+        for turret in root.find('turrets0'):
+            self.__gun[turret.tag] = {}
+            self.__gunList[turret.tag] = []
+            for gun in turret.find('guns'):
+                entry = self.__fetchGunEntry(gun, gun.tag)
+                self.__gun[turret.tag][gun.tag] = entry
+                self.__gunList[turret.tag].append(gun.tag)
+
+    def __fetchVehicleEntry(self, tree, vehicle):
+        shared = g_strage.getVehicleEntry(self.__currentNation, vehicle)
+        entry = { k:v for k,v in shared.items() }
+        return entry
+
+    def __fetchChassisEntry(self, tree, chassis):
+        entry = {}
+        entry['tag'] = chassis
+        entry['userString'] = tree.find('userString').text
+        entry['name'] = translate(entry['userString'])
+        factors = tree.find('shotDispersionFactors')
+        entry['vehicleMovement'] = factors.find('vehicleMovement').text
+        entry['vehicleRotation'] = factors.find('vehicleRotation').text
+        return entry
+
+    def __fetchTurretEntry(self, tree, turret):
+        entry = {}
+        entry['tag'] = turret
+        entry['userString'] = tree.find('userString').text
+        entry['name'] = translate(entry['userString'])
+        return entry
+
+    def __fetchGunEntry(self, tree, gun):
+        shared = g_strage.getSharedGunEntry(self.__currentNation, gun)
+        entry = {}
+        entry['tag'] = gun
+        entry['userString'] = getEntityTextSafe(tree.find('userString'), shared['userString'])
+        entry['name'] = translate(entry['userString'])
+        entry['reloadTime'] = getEntityTextSafe(tree.find('reloadTime'), shared['reloadTime'])
+        entry['aimingTime'] = getEntityTextSafe(tree.find('aimingTime'), shared['aimingTime'])
+        entry['shotDispersionRadius'] = getEntityTextSafe(tree.find('shotDispersionRadius'), shared['shotDispersionRadius'])
+        factors = tree.find('shotDispersionFactors')
+        if factors is not None:
+            entry['turretRotation'] = getEntityTextSafe(factors.find('turretRotation'), shared['turretRotation'])
+            entry['afterShot'] = getEntityTextSafe(factors.find('afterShot'), shared['afterShot'])
+            entry['whileGunDamaged'] = getEntityTextSafe(factors.find('whileGunDamaged'), shared['whileGunDamaged'])
+        else:
+            for k in [ 'turretRotation', 'afterShot', 'whileGunDamaged' ]:
+                entry[k] = shared[k]
+        return entry
+ 
+    def fetchVehicleInfo(self):
+        return self.__vehicle
+
+    def fetchChassisInfo(self, chassis):
+        return self.__chassis[chassis]
+
+    def fetchTurretInfo(self, turret):
+        return self.__turret[turret]
+
+    def fetchGunInfo(self, turret, gun):
+        return self.__gun[turret][gun]
+
+    def fetchChassisList(self):
+        return [ [ tag, self.__chassis[tag]['name'] ] for tag in self.__chassisList ]
+
+    def fetchTurretList(self):
+        return [ [ tag, self.__turret[tag]['name'] ] for tag in self.__turretList ]
+        
+    def fetchGunList(self, turret):
+        return [ [ tag, self.__gun[turret][tag]['name'] ] for tag in self.__gunList[turret] ]
+
+
 
 if __name__ == '__main__':
     import io, sys
@@ -215,8 +300,9 @@ if __name__ == '__main__':
     g_strage = Strage()
 
     print(configs.BASEDIR)
-
-    print(g_strage.fetchGunList('germany/G25_PzII_Luchs', 'PzIIL_Grosseturm'))
-    #print(g_strage.fetchVehicleList('germany', '7', 'TD'))
+    
+    print(g_strage.fetchVehicleList('germany', '7', 'TD'))
+    print(g_strage.fetchVehicleInfo('germany', 'G110_Typ_205'))
+    #print(g_strage.fetchVehicleInfo('germany', 'G18_JagdPanther'))
+    print(g_strage.fetchGunList('germany', 'G25_PzII_Luchs', 'PzIIL_Grosseturm'))
     #print(g_strage.fetchVehicleInfo('germany/G18_JagdPanther'))
-    #print(g_strage.fetchVehicleInfo('germany/G110_Typ_205'))
