@@ -4,62 +4,60 @@ import tkinter.font
 
 from strage import Strage, configs
 
-class Application(object):
+class Application(tkinter.Frame):
 
-    def __init__(self):
-        self.__root = tkinter.Tk()
-        self.__root.title('Vehicle Selector')
+    def __init__(self, master=None):
+        tkinter.Frame.__init__(self, master)
+        self.font = tkinter.font.Font(family='Arial', size=11, weight='normal')
+        self.option_add('*font', self.font)
+        self.option_add('*background', 'white')
+        self.option_add('*relief', 'flat')
+        self.master.title('Vehicle Selector')
+        self.master.config(background='white', relief='flat')
+        self.createWidgets()
 
-        font = tkinter.font.Font(self.__root, family='Arial', size=11, weight='normal')
-        self.__root.option_add('*Font', font)
+    def createWidgets(self):
+        vehicleSelectorBar = tkinter.Frame(self.master)
+        vehicleSelectorBar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
 
-        self.buildLayout()
+        moduleSelectorBar = tkinter.Frame(self.master)
+        moduleSelectorBar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
 
-        self.__root.mainloop()
+        modulePanel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
+        modulePanel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
 
-
-    def buildLayout(self):
-        vehicleSelectorBar = tkinter.Entry(self.__root, borderwidth=0)
-        vehicleSelectorBar.pack(side='top', expand=1, fill='x')
-
-        moduleSelectorBar = tkinter.Entry(self.__root, borderwidth=0)
-        moduleSelectorBar.pack(side='top', expand=1, fill='x')
-
-        modulePanel = tkinter.Entry(self.__root, borderwidth=8, background='white', foreground='white', relief='flat')
-        modulePanel.pack(side='top', expand=1, fill='x', padx=0, pady=0)
-
-        itemPanel = tkinter.Entry(self.__root, borderwidth=8, background='white', foreground='white', relief='flat')
-        itemPanel.pack(side='top', expand=1, fill='x', padx=0, pady=0)
+        itemPanel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
+        itemPanel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
         
-        self.__nationSelector = DropdownList(vehicleSelectorBar)
-        self.__nationSelector.setWidth(10)
+        self.__nationSelector = DropdownList(vehicleSelectorBar, width=10, label='Nation')
+        self.__nationSelector.pack(side='left')
         self.__nationSelector.setValues(*g_strage.fetchNationList())
         self.__nationSelector.setCallback(self.cbChangeVehicleFilter)
 
-        self.__tierSelector = DropdownList(vehicleSelectorBar)
-        self.__tierSelector.setWidth(4)
+        self.__tierSelector = DropdownList(vehicleSelectorBar, width=3, label='Tier')
+        self.__tierSelector.pack(side='left')
         self.__tierSelector.setValues(*g_strage.fetchTierList())
         self.__tierSelector.setCallback(self.cbChangeVehicleFilter)
 
-        self.__typeSelector = DropdownList(vehicleSelectorBar)
+        self.__typeSelector = DropdownList(vehicleSelectorBar, width=4, label='Type')
+        self.__typeSelector.pack(side='left')
         self.__typeSelector.setValues(*g_strage.fetchTypeList())
-        self.__typeSelector.setWidth(10)
         self.__typeSelector.setCallback(self.cbChangeVehicleFilter)
 
-        self.__vehicleSelector = DropdownList(vehicleSelectorBar)
-        self.__vehicleSelector.setWidth(40)
+        self.__vehicleSelector = DropdownList(vehicleSelectorBar, width=60, label='Vehicle')
+        self.__vehicleSelector.pack(side='left')
         self.__vehicleSelector.setCallback(self.cbChangeVehicle)
 
-        self.__chassisSelector = DropdownList(moduleSelectorBar)
-        self.__chassisSelector.setWidth(40)
+        self.__chassisSelector = DropdownList(moduleSelectorBar, width=32, label='Chassis')
+        self.__chassisSelector.pack(side='left')
         self.__chassisSelector.setCallback(self.cbChangeModules)
 
-        self.__turretSelector = DropdownList(moduleSelectorBar)
-        self.__turretSelector.setWidth(40)
+        self.__turretSelector = DropdownList(moduleSelectorBar, width=32, label='Turret')
+        self.__turretSelector.pack(side='left')
         self.__turretSelector.setCallback(self.cbChangeTurret)
 
-        self.__gunSelector = DropdownList(moduleSelectorBar)
-        self.__gunSelector.setWidth(40)
+        self.__gunSelector = DropdownList(moduleSelectorBar, width=32, label='Gun')
+        self.__gunSelector.pack(side='left')
         self.__gunSelector.setCallback(self.cbChangeModules)
 
         self.__item = {}
@@ -152,27 +150,38 @@ class Application(object):
 
 class PanelItem(object):
     def __init__(self, parent, label, unit, labelWidth=20, labelAnchor='e', valueWidth=6, valueAnchor='e'):
-        self.__panel = tkinter.Entry(parent)
+        self.__panel = tkinter.Frame(parent)
         self.__panel['borderwidth'] = 0
         self.__panel.pack(side='top', expand=1, fill='x', pady=1)
-        self.__label = tkinter.Label(self.__panel, width=labelWidth, anchor=labelAnchor, borderwidth=0, background='white')
+        self.__label = tkinter.Label(self.__panel, width=labelWidth, anchor=labelAnchor)
         self.__label['text'] = label
         self.__label.pack(side='left')
-        self.__value = tkinter.Label(self.__panel, width=valueWidth, anchor=valueAnchor, borderwidth=0, background='white')
+        self.__value = tkinter.Label(self.__panel, width=valueWidth, anchor=valueAnchor)
         self.__value.pack(side='left')
-        self.__unit = tkinter.Label(self.__panel, width=5, anchor='w', borderwidth=0, background='white')
+        self.__unit = tkinter.Label(self.__panel, width=5, anchor='w')
         self.__unit['text'] = unit
         self.__unit.pack(side='left')
 
     def setValue(self, value):
         self.__value['text'] = value
+        #self.__value.delete(0, tkinter.END)
+        #self.__value.insert(0, value)
 
 class DropdownList(object):
     __values = [ '' ]
 
-    def __init__(self, parent):
-        self.__combobox = tkinter.ttk.Combobox(parent, state='readonly')
+    def __init__(self, parent, width=None, label=None, labelwidth=None, valueJustify=None):
+        self.__frame = tkinter.Frame(parent, padx=4)
+        if label:
+            self.__label = tkinter.Label(self.__frame, text=label, width=labelwidth, anchor='e')
+            self.__label.pack(side='left')
+        self.__combobox = tkinter.ttk.Combobox(self.__frame, state='readonly', justify=valueJustify)
         self.__combobox.pack(side='left')
+        if width:
+            self.setWidth(width)
+    
+    def pack(self, *args, **kvargs):
+        self.__frame.pack(*args,**kvargs)
 
     def setWidth(self, value):
         self.__combobox['width'] = value
@@ -202,4 +211,7 @@ if __name__ == '__main__':
     parser.parse_args(namespace=configs)
 
     g_strage = Strage()
-    g_app = Application()
+
+    app = Application()
+    app.mainloop()
+    

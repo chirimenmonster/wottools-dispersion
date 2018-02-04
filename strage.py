@@ -182,19 +182,19 @@ class Strage(object):
 
     def fetchChassisList(self, vid):
         vehicleInfo = self.fetchVehicleInfo(vid)
-        labels = [ 'chassis: ' + vehicleInfo['chassis'][tag]['name'] for tag in vehicleInfo['chassisList'] ]
+        labels = [ vehicleInfo['chassis'][tag]['name'] for tag in vehicleInfo['chassisList'] ]
         return [ labels, vehicleInfo['chassisList'] ]
 
     def fetchTurretList(self, vid):
         vehicleInfo = self.fetchVehicleInfo(vid)
-        labels = [ 'turret: ' + vehicleInfo['turret'][tag]['name'] for tag in vehicleInfo['turretList'] ]
+        labels = [ vehicleInfo['turret'][tag]['name'] for tag in vehicleInfo['turretList'] ]
         return [ labels, vehicleInfo['turretList'] ]
 
-    def fetchGunList(self, vid, tid):
+    def fetchGunList(self, vid, ttag):
         vehicleInfo = self.fetchVehicleInfo(vid)
-        gunList = vehicleInfo['turret'][tid]['gunList']
-        labels = [ 'gun: ' + vehicleInfo['turret'][tid]['gun'][tag]['name'] for tag in gunList ]
-        return [ labels, vehicleInfo['turret'][tid]['gunList'] ]
+        gunList = vehicleInfo['turret'][ttag]['gunList']
+        labels = [ vehicleInfo['turret'][ttag]['gun'][gtag]['name'] for gtag in gunList ]
+        return [ labels, vehicleInfo['turret'][ttag]['gunList'] ]
 
 if __name__ == '__main__':
     import io, sys
