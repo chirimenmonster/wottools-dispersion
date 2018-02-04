@@ -34,17 +34,17 @@ class Application(tkinter.Frame):
         
         self.__nationSelector = DropdownList(vehicleSelectorBar, width=10, label='Nation', name='nationSelector', valueJustify='center')
         self.__nationSelector.pack(side='left')
-        self.__nationSelector.setValues(*g_strage.fetchNationList())
+        self.__nationSelector.setValues(g_strage.fetchNationList())
         self.__nationSelector.setCallback(self.cbChangeVehicleFilter)
 
         self.__tierSelector = DropdownList(vehicleSelectorBar, width=3, label='Tier', name='tierSelector', valueJustify='center')
         self.__tierSelector.pack(side='left')
-        self.__tierSelector.setValues(*g_strage.fetchTierList())
+        self.__tierSelector.setValues(g_strage.fetchTierList())
         self.__tierSelector.setCallback(self.cbChangeVehicleFilter)
 
         self.__typeSelector = DropdownList(vehicleSelectorBar, width=4, label='Type', name='typeSelector', valueJustify='center')
         self.__typeSelector.pack(side='left')
-        self.__typeSelector.setValues(*g_strage.fetchTypeList())
+        self.__typeSelector.setValues(g_strage.fetchTypeList())
         self.__typeSelector.setCallback(self.cbChangeVehicleFilter)
 
         self.__vehicleSelector = DropdownList(vehicleSelectorBar, width=40, label='Vehicle')
@@ -88,41 +88,45 @@ class Application(tkinter.Frame):
         type = self.__typeSelector.getSelected()
         vehicles = g_strage.fetchVehicleList(nation, tier, type)
         if not vehicles[0]:
-            vehicles = [ [ '' ], [ None ] ]
-        self.__vehicleSelector.setValues(*vehicles)
+            vehicles = [ [ None, '' ] ]
+        self.__vehicleSelector.setValues(vehicles)
         self.changeVehicle()
 
     def changeVehicle(self):
+        nation = self.__nationSelector.getSelected()
         vehicleId = self.__vehicleSelector.getSelected()
         if vehicleId:
-            vehicleInfo = g_strage.fetchVehicleInfo(vehicleId)
-            self.__chassisSelector.setValues(*g_strage.fetchChassisList(vehicleId))
-            self.__turretSelector.setValues(*g_strage.fetchTurretList(vehicleId))
+            print(nation, vehicleId)
+            vehicleInfo = g_strage.fetchVehicleInfo(nation, vehicleId)
+            self.__chassisSelector.setValues(g_strage.fetchChassisList(nation, vehicleId))
+            self.__turretSelector.setValues(g_strage.fetchTurretList(nation, vehicleId))
         else:
-            self.__chassisSelector.setValues([ '' ], [ None ])
-            self.__turretSelector.setValues([ '' ], [ None ])
+            self.__chassisSelector.setValues([ None, '' ])
+            self.__turretSelector.setValues([ None, '' ])
         self.changeTurret()
 
     def changeTurret(self):
+        nation = self.__nationSelector.getSelected()
         vehicleId = self.__vehicleSelector.getSelected()
         if vehicleId:
             turretTag = self.__turretSelector.getSelected()
-            self.__gunSelector.setValues(*g_strage.fetchGunList(vehicleId, turretTag))
+            self.__gunSelector.setValues(g_strage.fetchGunList(nation, vehicleId, turretTag))
         else:
-            self.__gunSelector.setValues([ '' ], [ None ])
+            self.__gunSelector.setValues([ None, '' ])
         self.changeModules()
 
     def changeModules(self):
+        nation = self.__nationSelector.getSelected()
         vehicleId = self.__vehicleSelector.getSelected()
         if vehicleId:
-            vehicleInfo = g_strage.fetchVehicleInfo(vehicleId)
+            vehicleInfo = g_strage.fetchVehicleInfo(nation, vehicleId)
             self.__item['vehicle'].setValue('{} ({}), {}: {}'.format(vehicleInfo['name'], vehicleInfo['id'], vehicleInfo['shortUserString'], vehicleInfo['description']))
             chassisTag = self.__chassisSelector.getSelected()
             turretTag = self.__turretSelector.getSelected()
             gunTag = self.__gunSelector.getSelected()
-            chassis = g_strage.fetchChassisInfo(vehicleId, chassisTag)
-            turret = g_strage.fetchTurretInfo(vehicleId, turretTag)
-            gun = g_strage.fetchGunInfo(vehicleId, turretTag, gunTag)
+            chassis = g_strage.fetchChassisInfo(nation, vehicleId, chassisTag)
+            turret = g_strage.fetchTurretInfo(nation, vehicleId, turretTag)
+            gun = g_strage.fetchGunInfo(nation, vehicleId, turretTag, gunTag)
             self.__item['chassis'].setValue('{} ({})'.format(chassis['name'], chassis['tag']))
             self.__item['turret'].setValue('{} ({})'.format(turret['name'], turret['tag']))
             self.__item['gun'].setValue('{} ({})'.format(gun['name'], gun['tag']))
@@ -223,9 +227,9 @@ class DropdownList(object):
     def setCallback(self, cbFunc):
         self.__combobox.bind('<<ComboboxSelected>>', cbFunc)
 
-    def setValues(self, labels, values):
-        self.__values = values
-        self.__combobox['values'] = labels
+    def setValues(self, list):
+        self.__values = [ t[0] for t in list ]
+        self.__combobox['values'] = [ t[1] for t in list ]
         self.__combobox.current(0)
 
     def getSelected(self):

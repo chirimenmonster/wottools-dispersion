@@ -83,47 +83,51 @@ class Strage(object):
     def getSharedGunEntry(self, nation, gun):
         return self.__strageSharedGuns[nation].getEntry(gun)
 
-    def fetchVehicleInfo(self, nation, vehicle):
+    def __fetchVehicleInfo(self, nation, vehicle):
         if vehicle not in self.__cacheVehicleInfo:
-            self.__cacheVehicleInfo[vehicle] = StrageVehicle(nation, vehicle)
+            self.__cacheVehicleInfo[vehicle] = StrageVehicle(nation, vehicle, self)
         return self.__cacheVehicleInfo[vehicle]
 
+    def fetchVehicleInfo(self, nation, vehicle):
+        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
+        return vehicleInfo.fetchVehicleInfo()
+
     def fetchChassisInfo(self, nation, vehicle, chassis):
-        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
         return vehicleInfo.fetchChassisInfo(chassis)
 
     def fetchTurretInfo(self, nation, vehicle, turret):
-        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
         return vehicleInfo.fetchTurretInfo(turret)
 
     def fetchGunInfo(self, nation, vehicle, turret, gun):
-        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
         return vehicleInfo.fetchGunInfo(turret, gun)
 
     def fetchVehicleList(self, nation, tier, type):
         list = [ v for v in self.__strageVehicleList[nation].getStrage().values() if v['tier'] == tier and v['type'] == type ]
         list = sorted(list, key=lambda x: x['id'])
-        return [ v['shortUserString'] or v['name'] for v in list ], [ v['tag'] for v in list ]
+        return [ [ v['tag'], v['shortUserString'] or v['name'] ] for v in list ]
 
     def fetchNationList(self):
         return [ [ s, s.upper() ] for s in self.__nationOrder ]
 
     def fetchTierList(self):
-        return [ [ tier, TIERS_LABEL[tier] ] for tier in TIERS_LIST ]
+        return [ [ tier, TIERS_LABEL[tier] ] for tier in TIERS ]
 
     def fetchTypeList(self):
         return [ [ type, type ] for type in TYPES_LIST ]
 
     def fetchChassisList(self, nation, vehicle):
-        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
         return vehicleInfo.fetchChassisList()
 
     def fetchTurretList(self, nation, vehicle):
-        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
         return vehicleInfo.fetchTurretList()
 
     def fetchGunList(self, nation, vehicle, turret):
-        vehicleInfo = self.fetchVehicleInfo(nation, vehicle)
+        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
         gunList = vehicleInfo.fetchGunList(turret)
         return gunList
 
@@ -143,7 +147,7 @@ class StrageVehicleList(object):
             entry['userString'] = vehicle.find('userString').text
             entry['name'] = translate(entry['userString'])
             shortUserString = vehicle.find('shortUserString')
-            if shortUserString:
+            if shortUserString is not None:
                 entry['shortUserString'] = translate(shortUserString.text)
             else:
                 entry['shortUserString'] = ''
@@ -191,7 +195,8 @@ class StrageSharedGuns(object):
 
 class StrageVehicle(object):
 
-    def __init__(self, nation, vehicle):
+    def __init__(self, nation, vehicle, common):
+        self.__common = common
         self.__currentNation = nation
         root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/' + vehicle + '.xml')
         
@@ -223,7 +228,7 @@ class StrageVehicle(object):
                 self.__gunList[turret.tag].append(gun.tag)
 
     def __fetchVehicleEntry(self, tree, vehicle):
-        shared = g_strage.getVehicleEntry(self.__currentNation, vehicle)
+        shared = self.__common.getVehicleEntry(self.__currentNation, vehicle)
         entry = { k:v for k,v in shared.items() }
         return entry
 
@@ -245,7 +250,7 @@ class StrageVehicle(object):
         return entry
 
     def __fetchGunEntry(self, tree, gun):
-        shared = g_strage.getSharedGunEntry(self.__currentNation, gun)
+        shared = self.__common.getSharedGunEntry(self.__currentNation, gun)
         entry = {}
         entry['tag'] = gun
         entry['userString'] = getEntityTextSafe(tree.find('userString'), shared['userString'])
@@ -285,7 +290,6 @@ class StrageVehicle(object):
         return [ [ tag, self.__gun[turret][tag]['name'] ] for tag in self.__gunList[turret] ]
 
 
-
 if __name__ == '__main__':
     import io, sys
     sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
@@ -301,8 +305,8 @@ if __name__ == '__main__':
 
     print(configs.BASEDIR)
     
-    print(g_strage.fetchVehicleList('germany', '7', 'TD'))
-    print(g_strage.fetchVehicleInfo('germany', 'G110_Typ_205'))
-    #print(g_strage.fetchVehicleInfo('germany', 'G18_JagdPanther'))
+    print(g_strage.fetchVehicleList('germany', '1', 'LT'))
+    print(g_strage.fetchVehicleInfo('germany', 'G110_Typ_205')['name'])
+    print(g_strage.fetchVehicleInfo('germany', 'G18_JagdPanther'))
+    print(g_strage.fetchVehicleInfo('germany', 'G18_JagdPanther')['shortUserString'])
     print(g_strage.fetchGunList('germany', 'G25_PzII_Luchs', 'PzIIL_Grosseturm'))
-    #print(g_strage.fetchVehicleInfo('germany/G18_JagdPanther'))
