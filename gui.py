@@ -28,23 +28,26 @@ class Application(tkinter.Frame):
 
         itemPanel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
         itemPanel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
+
+        copyButton = tkinter.Button(self.master, text='copy to clipboard', command=self.cleateMessage, relief='ridge', borderwidth=2)
+        copyButton.pack(side='top', expand=1, fill='x')
         
-        self.__nationSelector = DropdownList(vehicleSelectorBar, width=10, label='Nation')
+        self.__nationSelector = DropdownList(vehicleSelectorBar, width=10, label='Nation', name='nationSelector', valueJustify='center')
         self.__nationSelector.pack(side='left')
         self.__nationSelector.setValues(*g_strage.fetchNationList())
         self.__nationSelector.setCallback(self.cbChangeVehicleFilter)
 
-        self.__tierSelector = DropdownList(vehicleSelectorBar, width=3, label='Tier')
+        self.__tierSelector = DropdownList(vehicleSelectorBar, width=3, label='Tier', name='tierSelector', valueJustify='center')
         self.__tierSelector.pack(side='left')
         self.__tierSelector.setValues(*g_strage.fetchTierList())
         self.__tierSelector.setCallback(self.cbChangeVehicleFilter)
 
-        self.__typeSelector = DropdownList(vehicleSelectorBar, width=4, label='Type')
+        self.__typeSelector = DropdownList(vehicleSelectorBar, width=4, label='Type', name='typeSelector', valueJustify='center')
         self.__typeSelector.pack(side='left')
         self.__typeSelector.setValues(*g_strage.fetchTypeList())
         self.__typeSelector.setCallback(self.cbChangeVehicleFilter)
 
-        self.__vehicleSelector = DropdownList(vehicleSelectorBar, width=60, label='Vehicle')
+        self.__vehicleSelector = DropdownList(vehicleSelectorBar, width=40, label='Vehicle')
         self.__vehicleSelector.pack(side='left')
         self.__vehicleSelector.setCallback(self.cbChangeVehicle)
 
@@ -61,19 +64,19 @@ class Application(tkinter.Frame):
         self.__gunSelector.setCallback(self.cbChangeModules)
 
         self.__item = {}
-        self.__item['vehicle'] = PanelItem(modulePanel, 'Vehicle:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['vehicle'] = PanelItem(modulePanel, 'Vehicle:', '', labelWidth=8, valueWidth=100, valueAnchor='w')
         self.__item['chassis'] = PanelItem(modulePanel, 'Chassis:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
         self.__item['turret'] = PanelItem(modulePanel, 'Turret:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
         self.__item['gun'] = PanelItem(modulePanel, 'Gun:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
-        self.__item['reloadTime'] = PanelItem(itemPanel, 'reload time:', ' (s)')
-        self.__item['aimingTime'] = PanelItem(itemPanel, 'aiming time:', ' (s)')
-        self.__item['shotDispersionRadius'] = PanelItem(itemPanel, 'shot dispersion radius:', ' (m)')
+        self.__item['reloadTime'] = PanelItem(itemPanel, 'reload time:', 's', valueWidth=4)
+        self.__item['aimingTime'] = PanelItem(itemPanel, 'aiming time:', 's', valueWidth=4)
+        self.__item['shotDispersionRadius'] = PanelItem(itemPanel, 'shot dispersion radius:', 'm', valueWidth=4)
         PanelItem(itemPanel, 'DispersionFactor', '', labelAnchor='w')
-        self.__item['vehicleMovement'] = PanelItem(itemPanel, '... vehicle movement:', '')
-        self.__item['vehicleRotation'] = PanelItem(itemPanel, '... vehicle rotation:', '')
-        self.__item['turretRotation'] = PanelItem(itemPanel, '... turret rotation:', '')
-        self.__item['afterShot'] = PanelItem(itemPanel, '... after shot:', '')
-        self.__item['whileGunDamaged'] = PanelItem(itemPanel, '... while gun damaged:', '')
+        self.__item['vehicleMovement'] = PanelItem(itemPanel, '... vehicle movement:', '', valueWidth=4)
+        self.__item['vehicleRotation'] = PanelItem(itemPanel, '... vehicle rotation:', '', valueWidth=4)
+        self.__item['turretRotation'] = PanelItem(itemPanel, '... turret rotation:', '', valueWidth=4)
+        self.__item['afterShot'] = PanelItem(itemPanel, '... after shot:', '', valueWidth=4)
+        self.__item['whileGunDamaged'] = PanelItem(itemPanel, '... while gun damaged:', '', valueWidth=4)
 
         self.changeVehicleFilter()
         self.changeVehicle()
@@ -113,7 +116,7 @@ class Application(tkinter.Frame):
         vehicleId = self.__vehicleSelector.getSelected()
         if vehicleId:
             vehicleInfo = g_strage.fetchVehicleInfo(vehicleId)
-            self.__item['vehicle'].setValue('{} ({})'.format(vehicleInfo['name'], vehicleInfo['id']))
+            self.__item['vehicle'].setValue('{} ({}), {}: {}'.format(vehicleInfo['name'], vehicleInfo['id'], vehicleInfo['shortUserString'], vehicleInfo['description']))
             chassisTag = self.__chassisSelector.getSelected()
             turretTag = self.__turretSelector.getSelected()
             gunTag = self.__gunSelector.getSelected()
@@ -134,6 +137,38 @@ class Application(tkinter.Frame):
         else:
             for panel in self.__item.values():
                 panel.setValue('')
+ 
+    def cleateMessage(self):
+        import io
+        import csv
+        output = io.StringIO(newline='')
+        writer = csv.writer(output, dialect='excel', lineterminator='\n')
+        
+        vehicleId = self.__vehicleSelector.getSelected()
+        chassisTag = self.__chassisSelector.getSelected()
+        turretTag = self.__turretSelector.getSelected()
+        gunTag = self.__gunSelector.getSelected()
+        vehicleInfo = g_strage.fetchVehicleInfo(vehicleId)
+        chassis = g_strage.fetchChassisInfo(vehicleId, chassisTag)
+        turret = g_strage.fetchTurretInfo(vehicleId, turretTag)
+        gun = g_strage.fetchGunInfo(vehicleId, turretTag, gunTag)
+        
+        writer.writerow([ 'vehicle', vehicleInfo['name'], vehicleInfo['id'], vehicleInfo['shortUserString'], vehicleInfo['description'] ])
+        writer.writerow([ 'chassis', chassis['name'], chassis['tag'] ])
+        writer.writerow([ 'turret', turret['name'], turret['tag'] ])
+        writer.writerow([ 'gun', gun['name'], gun['tag'] ])
+        writer.writerow([ 'reloadTime', gun['reloadTime'], 's' ])
+        writer.writerow([ 'aimingTime', gun['aimingTime'], 's' ])
+        writer.writerow([ 'shotDispersionRadius', gun['shotDispersionRadius'], 'm' ])
+        writer.writerow([ 'vehicleMovement', chassis['vehicleMovement'], '' ])
+        writer.writerow([ 'vehicleRotation', chassis['vehicleRotation'], '' ])
+        writer.writerow([ 'turretRotation', gun['turretRotation'], '' ])
+        writer.writerow([ 'afterShot', gun['afterShot'], '' ])
+        writer.writerow([ 'whileGunDamaged', gun['whileGunDamaged'], '' ])
+
+        self.master.clipboard_clear()
+        self.master.clipboard_append(output.getvalue())
+        output.close()
 
     def cbChangeVehicleFilter(self, event):
         self.changeVehicleFilter()
@@ -149,36 +184,35 @@ class Application(tkinter.Frame):
 
 
 class PanelItem(object):
-    def __init__(self, parent, label, unit, labelWidth=20, labelAnchor='e', valueWidth=6, valueAnchor='e'):
+    def __init__(self, parent, label, unit, labelWidth=20, labelAnchor='e', valueWidth=None, valueAnchor='e'):
         self.__panel = tkinter.Frame(parent)
         self.__panel['borderwidth'] = 0
-        self.__panel.pack(side='top', expand=1, fill='x', pady=1)
+        self.__panel.pack(side='top', fill='x', pady=1)
         self.__label = tkinter.Label(self.__panel, width=labelWidth, anchor=labelAnchor)
         self.__label['text'] = label
         self.__label.pack(side='left')
         self.__value = tkinter.Label(self.__panel, width=valueWidth, anchor=valueAnchor)
         self.__value.pack(side='left')
-        self.__unit = tkinter.Label(self.__panel, width=5, anchor='w')
-        self.__unit['text'] = unit
-        self.__unit.pack(side='left')
+        if unit:
+            self.__unit = tkinter.Label(self.__panel, width=5, anchor='w')
+            self.__unit['text'] = unit
+            self.__unit.pack(side='left')
 
     def setValue(self, value):
         self.__value['text'] = value
-        #self.__value.delete(0, tkinter.END)
-        #self.__value.insert(0, value)
 
 class DropdownList(object):
     __values = [ '' ]
 
-    def __init__(self, parent, width=None, label=None, labelwidth=None, valueJustify=None):
-        self.__frame = tkinter.Frame(parent, padx=4)
+    def __init__(self, parent, width=None, label=None, labelwidth=None, valueJustify=None, name=None):
+        self.__frame = tkinter.Frame(parent, padx=4, name=name)
         if label:
             self.__label = tkinter.Label(self.__frame, text=label, width=labelwidth, anchor='e')
             self.__label.pack(side='left')
-        self.__combobox = tkinter.ttk.Combobox(self.__frame, state='readonly', justify=valueJustify)
+        self.__combobox = tkinter.ttk.Combobox(self.__frame, state='readonly', width=width, justify=valueJustify)
         self.__combobox.pack(side='left')
-        if width:
-            self.setWidth(width)
+        if name and valueJustify:
+            self.__label.option_add('*' + name + '*justify', valueJustify)
     
     def pack(self, *args, **kvargs):
         self.__frame.pack(*args,**kvargs)

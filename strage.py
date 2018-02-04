@@ -82,6 +82,11 @@ class Strage(object):
                 entry['order'] = int(child.find('id').text)
                 entry['type'] = [ TYPES_LABEL[t] for t in child.find('tags').text.split(' ') if t in TYPES ][0]
                 entry['userString'] = child.find('userString').text
+                try:
+                    entry['shortUserString'] = translate(child.find('shortUserString').text)
+                except:
+                    entry['shortUserString'] = ''
+                entry['description'] = translate(child.find('description').text)
                 entry['name'] = translate(entry['userString'])
                 self.__strage[id] = entry
             root = readPackedXml(configs.BASEREL_DIR + '/' + nation + '/components/guns.xml')
@@ -178,7 +183,7 @@ class Strage(object):
     def fetchVehicleList(self, nation, tier, type):
         list = [ v for v in self.__strage.values() if v['nation'] == nation and v['tier'] == tier and v['type'] == type ]
         list = sorted(list, key=lambda x: x['order'])
-        return [ v['name'] for v in list ], [ v['id'] for v in list ]
+        return [ v['shortUserString'] or v['name'] for v in list ], [ v['id'] for v in list ]
 
     def fetchChassisList(self, vid):
         vehicleInfo = self.fetchVehicleInfo(vid)
