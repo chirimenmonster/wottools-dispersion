@@ -2,11 +2,12 @@ import tkinter
 import tkinter.ttk
 import tkinter.font
 
-from strage import Strage, configs
+import strage
 
 class Application(tkinter.Frame):
 
-    def __init__(self, master=None):
+    def __init__(self, master=None, strage=strage):
+        self.__strage = strage
         tkinter.Frame.__init__(self, master)
         self.font = tkinter.font.Font(family='Arial', size=11, weight='normal')
         self.option_add('*font', self.font)
@@ -29,22 +30,22 @@ class Application(tkinter.Frame):
         itemPanel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
         itemPanel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
 
-        copyButton = tkinter.Button(self.master, text='copy to clipboard', command=self.cleateMessage, relief='ridge', borderwidth=2)
+        copyButton = tkinter.Button(self.master, text='copy to clipboard', command=self.createMessage, relief='ridge', borderwidth=2)
         copyButton.pack(side='top', expand=1, fill='x')
         
         self.__nationSelector = DropdownList(vehicleSelectorBar, width=10, label='Nation', name='nationSelector', valueJustify='center')
         self.__nationSelector.pack(side='left')
-        self.__nationSelector.setValues(g_strage.fetchNationList())
+        self.__nationSelector.setValues(self.__strage.fetchNationList())
         self.__nationSelector.setCallback(self.cbChangeVehicleFilter)
 
         self.__tierSelector = DropdownList(vehicleSelectorBar, width=3, label='Tier', name='tierSelector', valueJustify='center')
         self.__tierSelector.pack(side='left')
-        self.__tierSelector.setValues(g_strage.fetchTierList())
+        self.__tierSelector.setValues(self.__strage.fetchTierList())
         self.__tierSelector.setCallback(self.cbChangeVehicleFilter)
 
         self.__typeSelector = DropdownList(vehicleSelectorBar, width=4, label='Type', name='typeSelector', valueJustify='center')
         self.__typeSelector.pack(side='left')
-        self.__typeSelector.setValues(g_strage.fetchTypeList())
+        self.__typeSelector.setValues(self.__strage.fetchTypeList())
         self.__typeSelector.setCallback(self.cbChangeVehicleFilter)
 
         self.__vehicleSelector = DropdownList(vehicleSelectorBar, width=40, label='Vehicle')
@@ -86,8 +87,8 @@ class Application(tkinter.Frame):
         nation = self.__nationSelector.getSelected()
         tier = self.__tierSelector.getSelected()
         type = self.__typeSelector.getSelected()
-        vehicles = g_strage.fetchVehicleList(nation, tier, type)
-        if not vehicles[0]:
+        vehicles = self.__strage.fetchVehicleList(nation, tier, type)
+        if not vehicles or not vehicles[0]:
             vehicles = [ [ None, '' ] ]
         self.__vehicleSelector.setValues(vehicles)
         self.changeVehicle()
@@ -96,13 +97,12 @@ class Application(tkinter.Frame):
         nation = self.__nationSelector.getSelected()
         vehicleId = self.__vehicleSelector.getSelected()
         if vehicleId:
-            print(nation, vehicleId)
-            vehicleInfo = g_strage.fetchVehicleInfo(nation, vehicleId)
-            self.__chassisSelector.setValues(g_strage.fetchChassisList(nation, vehicleId))
-            self.__turretSelector.setValues(g_strage.fetchTurretList(nation, vehicleId))
+            vehicleInfo = self.__strage.fetchVehicleInfo(nation, vehicleId)
+            self.__chassisSelector.setValues(self.__strage.fetchChassisList(nation, vehicleId))
+            self.__turretSelector.setValues(self.__strage.fetchTurretList(nation, vehicleId))
         else:
-            self.__chassisSelector.setValues([ None, '' ])
-            self.__turretSelector.setValues([ None, '' ])
+            self.__chassisSelector.setValues([ [ None, '' ] ])
+            self.__turretSelector.setValues([ [ None, '' ] ])
         self.changeTurret()
 
     def changeTurret(self):
@@ -110,23 +110,23 @@ class Application(tkinter.Frame):
         vehicleId = self.__vehicleSelector.getSelected()
         if vehicleId:
             turretTag = self.__turretSelector.getSelected()
-            self.__gunSelector.setValues(g_strage.fetchGunList(nation, vehicleId, turretTag))
+            self.__gunSelector.setValues(self.__strage.fetchGunList(nation, vehicleId, turretTag))
         else:
-            self.__gunSelector.setValues([ None, '' ])
+            self.__gunSelector.setValues([ [ None, '' ] ])
         self.changeModules()
 
     def changeModules(self):
         nation = self.__nationSelector.getSelected()
         vehicleId = self.__vehicleSelector.getSelected()
         if vehicleId:
-            vehicleInfo = g_strage.fetchVehicleInfo(nation, vehicleId)
+            vehicleInfo = self.__strage.fetchVehicleInfo(nation, vehicleId)
             self.__item['vehicle'].setValue('{} ({}), {}: {}'.format(vehicleInfo['name'], vehicleInfo['id'], vehicleInfo['shortUserString'], vehicleInfo['description']))
             chassisTag = self.__chassisSelector.getSelected()
             turretTag = self.__turretSelector.getSelected()
             gunTag = self.__gunSelector.getSelected()
-            chassis = g_strage.fetchChassisInfo(nation, vehicleId, chassisTag)
-            turret = g_strage.fetchTurretInfo(nation, vehicleId, turretTag)
-            gun = g_strage.fetchGunInfo(nation, vehicleId, turretTag, gunTag)
+            chassis = self.__strage.fetchChassisInfo(nation, vehicleId, chassisTag)
+            turret = self.__strage.fetchTurretInfo(nation, vehicleId, turretTag)
+            gun = self.__strage.fetchGunInfo(nation, vehicleId, turretTag, gunTag)
             self.__item['chassis'].setValue('{} ({})'.format(chassis['name'], chassis['tag']))
             self.__item['turret'].setValue('{} ({})'.format(turret['name'], turret['tag']))
             self.__item['gun'].setValue('{} ({})'.format(gun['name'], gun['tag']))
@@ -142,20 +142,21 @@ class Application(tkinter.Frame):
             for panel in self.__item.values():
                 panel.setValue('')
  
-    def cleateMessage(self):
+    def createMessage(self):
         import io
         import csv
         output = io.StringIO(newline='')
         writer = csv.writer(output, dialect='excel', lineterminator='\n')
         
+        nation = self.__nationSelector.getSelected()
         vehicleId = self.__vehicleSelector.getSelected()
         chassisTag = self.__chassisSelector.getSelected()
         turretTag = self.__turretSelector.getSelected()
         gunTag = self.__gunSelector.getSelected()
-        vehicleInfo = g_strage.fetchVehicleInfo(vehicleId)
-        chassis = g_strage.fetchChassisInfo(vehicleId, chassisTag)
-        turret = g_strage.fetchTurretInfo(vehicleId, turretTag)
-        gun = g_strage.fetchGunInfo(vehicleId, turretTag, gunTag)
+        vehicleInfo = self.__strage.fetchVehicleInfo(nation, vehicleId)
+        chassis = self.__strage.fetchChassisInfo(nation, vehicleId, chassisTag)
+        turret = self.__strage.fetchTurretInfo(nation, vehicleId, turretTag)
+        gun = self.__strage.fetchGunInfo(nation, vehicleId, turretTag, gunTag)
         
         writer.writerow([ 'vehicle', vehicleInfo['name'], vehicleInfo['id'], vehicleInfo['shortUserString'], vehicleInfo['description'] ])
         writer.writerow([ 'chassis', chassis['name'], chassis['tag'] ])
@@ -242,14 +243,9 @@ if __name__ == '__main__':
     sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-    
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', dest='BASEDIR', help='specify <WoT_game_folder>')
-    parser.parse_args(namespace=configs)
 
-    g_strage = Strage()
+    strage.parseArgument()
 
-    app = Application()
+    app = Application(strage=strage.Strage())
     app.mainloop()
     
