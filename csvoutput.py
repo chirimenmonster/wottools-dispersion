@@ -2,29 +2,44 @@
 import io
 import csv
 
+labeldesc = {
+    'vehicle':  [ 'name', 'id', 'shortUserString', 'description' ],
+    'chassis':  [ 'name', 'tag' ],
+    'turret':   [ 'name', 'tag' ],
+    'gun':      [ 'name', 'tag' ],
+    'shell':    [ 'name', 'tag' ],
+}
+
+datadesc = [
+    [ 'gun',        'reloadTime',           's' ],
+    [ 'gun',        'aimingTime',           's' ],
+    [ 'gun',        'shotDispersionRadius', 'm' ],
+    [ 'chassis',    'vehicleMovement',      ''  ],
+    [ 'chassis',    'vehicleRotation',      ''  ],
+    [ 'gun',        'turretRotation',       ''  ],
+    [ 'gun',        'afterShot',            ''  ],
+    [ 'gun',        'whileGunDamaged',      ''  ],
+    [ 'shell',      'damage_armor',         ''  ],
+    [ 'shell',      'damage_devices',       ''  ],
+]
+
+
 def createMessage(strage, nation, vehicle, chassis, turret, gun, shell):
     output = io.StringIO(newline='')
     writer = csv.writer(output, dialect='excel', lineterminator='\n')
-        
-    vehicleInfo = strage.fetchVehicleInfo(nation, vehicle)
-    chassisInfo = strage.fetchChassisInfo(nation, vehicle, chassis)
-    turretInfo = strage.fetchTurretInfo(nation, vehicle, turret)
-    gunInfo = strage.fetchGunInfo(nation, vehicle, turret, gun)
-    shellInfo = strage.fetchShellInfo(nation, gun, shell)
-    
-    writer.writerow([ 'vehicle', vehicleInfo['name'], vehicleInfo['id'], vehicleInfo['shortUserString'], vehicleInfo['description'] ])
-    writer.writerow([ 'chassis', chassisInfo['name'], chassisInfo['tag'] ])
-    writer.writerow([ 'turret', turretInfo['name'], turretInfo['tag'] ])
-    writer.writerow([ 'gun', gunInfo['name'], gunInfo['tag'] ])
-    writer.writerow([ 'shell', shellInfo['name'], shellInfo['tag'] ])
 
-    writer.writerow([ 'reloadTime', gunInfo['reloadTime'], 's' ])
-    writer.writerow([ 'aimingTime', gunInfo['aimingTime'], 's' ])
-    writer.writerow([ 'shotDispersionRadius', gunInfo['shotDispersionRadius'], 'm' ])
-    writer.writerow([ 'vehicleMovement', chassisInfo['vehicleMovement'], '' ])
-    writer.writerow([ 'vehicleRotation', chassisInfo['vehicleRotation'], '' ])
-    writer.writerow([ 'turretRotation', gunInfo['turretRotation'], '' ])
-    writer.writerow([ 'afterShot', gunInfo['afterShot'], '' ])
-    writer.writerow([ 'whileGunDamaged', gunInfo['whileGunDamaged'], '' ])
+    info = {}
+    info['vehicle'] = strage.fetchVehicleInfo(nation, vehicle)
+    info['chassis'] = strage.fetchChassisInfo(nation, vehicle, chassis)
+    info['turret'] = strage.fetchTurretInfo(nation, vehicle, turret)
+    info['gun'] = strage.fetchGunInfo(nation, vehicle, turret, gun)
+    info['shell'] = strage.fetchShellInfo(nation, gun, shell)
+
+    for category in [ 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+        data = [ category ] + [ strage[category][name] for name in labeldesc[category] ]
+        writer.writerow(data)
+
+    for category, name, unit in datadesc:
+        writer.writerow([ name, strage[category][name], unit ])
 
     return output.getvalue()
