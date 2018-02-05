@@ -36,9 +36,9 @@ def translate(text):
         _currentDomain = prefix.replace('#', '')
         localedir = config.BASE_DIR + '/' + config.LOCALE_RELPATH
         _translation = gettext.translation(_currentDomain, languages=['text'], localedir=localedir, fallback=True)
-    if isinstance(_translation, gettext.NullTranslations):
-        return text
-    return _translation.gettext(name)
+    if isinstance(_translation, gettext.GNUTranslations):
+        return _translation.gettext(name)
+    return text
 
 def readPackedXml(relpath, package=None, basedir=None):
     import io
