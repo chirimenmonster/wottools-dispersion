@@ -85,12 +85,14 @@ class Strage(object):
     def __init__(self):
         self.__strageVehicleList = {}
         self.__strageSharedGuns = {}
+        self.__strageSharedShells = {}
         self.__dictVehicle = {}
         self.__cacheVehicleInfo = {}
         self.__nationOrder = self.__fetchNationOrder()
         for nation in self.__nationOrder:
             self.__strageVehicleList[nation] = StrageVehicleList(nation)
             self.__strageSharedGuns[nation] = StrageSharedGuns(nation)
+            self.__strageSharedShells[nation] = StrageSharedShells(nation)
             for k,v in self.__strageVehicleList[nation].getStrage().items():
                 self.__dictVehicle[k] = v
 
@@ -103,6 +105,9 @@ class Strage(object):
                         return [ i.text for i in child.find('value') ]
         except:
             return NATIONS
+
+    def getSharedGunsStrage(self, nation):
+        return self.__strageSharedGuns[nation]
 
     def getVehicleEntry(self, nation, vehicle):
         return self.__strageVehicleList[nation].getEntry(vehicle)
@@ -148,6 +153,12 @@ class Strage(object):
         result.update({ 'gun:'+k:v for k,v in gunInfo.items() })
         return result
 
+    def fetchShellInfo(self, nation, gun, shell):
+        result = {}
+        result.update(self.__strageSharedShells[nation].getEntry(shell))
+        result.update(self.__strageSharedGuns[nation].getShotEntry(gun, shell))
+        return result
+
     def fetchVehicleList(self, nation, tier, type):
         nations = [ n[0] for n in self.fetchNationList() ] if nation == '*' else [ nation ]
         tiers = TIERS if tier == '*' else [ tier ]
@@ -186,6 +197,11 @@ class Strage(object):
         gunList = vehicleInfo.fetchGunList(turret)
         return gunList
 
+    def fetchShellList(self, nation, gun):
+        shells = self.__strageSharedGuns[nation].getShotList(gun)
+        strage = self.__strageSharedShells[nation]
+        return [ [ shell, strage.getEntry(shell)['name'] ] for shell in shells ]
+
 
 class StrageVehicleList(object):
 
@@ -217,24 +233,34 @@ class StrageVehicleList(object):
 
 
 class StrageSharedGuns(object):
-    __strage = {}
 
     def __init__(self, nation):
         root = readVehicleData(nation, 'components/guns.xml')
+        self.__gun = {}
         for gun in root.find('ids'):
             entry = {}
             entry['id'] = int(gun.text)
             entry['tag'] = gun.tag
             entry['nation'] = nation
-            self.__strage[gun.tag] = entry
+            self.__gun[gun.tag] = entry
         for gun in root.find('shared'):
             entry = self.__fetchGunEntry(gun)
             for k,v in entry.items():
-                self.__strage[gun.tag][k] = v
+                self.__gun[gun.tag][k] = v
+        self.__shot = {}
+        self.__shotList = {}
+        for gun in root.find('shared'):
+            self.__shot[gun.tag] = {}
+            self.__shotList[gun.tag] = []
+            for shot in gun.find('shots'):
+                entry = self.__fetchShotEntry(shot, gun.tag, shot.tag)
+                self.__shot[gun.tag][shot.tag] = entry
+                self.__shotList[gun.tag].append(shot.tag)            
 
     def __fetchGunEntry(self, gun):
         entry = {}
         entry['userString'] = gun.find('userString').text
+        entry['name'] = translate(entry['userString'])
         entry['reloadTime'] = gun.find('reloadTime').text
         entry['aimingTime'] = gun.find('aimingTime').text
         entry['shotDispersionRadius'] = gun.find('shotDispersionRadius').text
@@ -243,9 +269,46 @@ class StrageSharedGuns(object):
         entry['afterShot'] = factors.find('afterShot').text
         entry['whileGunDamaged'] = factors.find('whileGunDamaged').text
         return entry
+
+    def __fetchShotEntry(self, tree, gun, shot):
+        entry = {}
+        entry['tag'] = shot
+        entry['speed'] = tree.find('speed').text
+        entry['piercingPower'] = tree.find('piercingPower').text
+        return entry
+        
+    def getEntry(self, gun):
+        return self.__gun[gun]
+
+    def getShotList(self, gun):
+        return self.__shotList[gun]
+
+    def getShotEntry(self, gun, shell):
+        return self.__shot[gun][shell]
+
+
+class StrageSharedShells(object):
+
+    def __init__(self, nation):
+        root = readVehicleData(nation, 'components/shells.xml')
+        self.__shell = {}
+        for shell in root:
+            entry = {}
+            try:
+                entry['id'] = shell.find('id').text
+            except:
+                continue
+            entry['tag'] = shell.tag
+            entry['userString'] = shell.find('userString').text
+            entry['name'] = translate(entry['userString'])
+            entry['kind'] = shell.find('kind').text
+            entry['caliber'] = shell.find('caliber').text
+            entry['damage_armor'] = shell.find('damage').find('armor').text
+            entry['damage_devices'] = shell.find('damage').find('devices').text
+            self.__shell[shell.tag] = entry
     
-    def getEntry(self, tag):
-        return self.__strage[tag]
+    def getEntry(self, shell):
+        return self.__shell[shell]
 
 
 class StrageVehicle(object):
@@ -321,6 +384,7 @@ class StrageVehicle(object):
         else:
             for k in [ 'turretRotation', 'afterShot', 'whileGunDamaged' ]:
                 entry[k] = shared[k]
+        entry['shots'] = ' '.join(self.__common.getSharedGunsStrage(self.__currentNation).getShotList(gun))
         return entry
  
     def fetchVehicleInfo(self):
@@ -340,7 +404,7 @@ class StrageVehicle(object):
 
     def fetchTurretList(self):
         return [ [ tag, self.__turret[tag]['name'] ] for tag in self.__turretList ]
-        
+   
     def fetchGunList(self, turret):
         return [ [ tag, self.__gun[turret][tag]['name'] ] for tag in self.__gunList[turret] ]
 
@@ -384,6 +448,11 @@ class Command:
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
+    def listShell(strage, nation, gun):
+        for r in strage.fetchShellList(nation, gun):
+            print('{0[0]:<32}: {0[1]}'.format(r))
+
+    @staticmethod
     def infoVehicle(strage, vehicle):
         nation, v = strage.searchVehicle(vehicle)
         for k,v in strage.fetchVehicleInfo(nation, vehicle).items():
@@ -413,6 +482,11 @@ class Command:
         for k,v in strage.fetchVehicleMergedInfo(nation, vehicle, chassis, turret, gun).items():
             print('{0:>32}: {1}'.format(k, v))
 
+    @staticmethod
+    def infoShell(strage, nation, gun, shell):
+        for k,v in strage.fetchShellInfo(nation, gun, shell).items():
+            print('{0:>32}: {1}'.format(k, v))
+
 
 def parseArgument():
     import argparse
@@ -428,11 +502,14 @@ def parseArgument():
         parser.add_argument('--list-chassis', dest='vehicle_chassis', help='list chassis for vehicle.  ex. "R80_KV1"')
         parser.add_argument('--list-turret', dest='vehicle_turret', help='list turret for vehicle.  ex. "R80_KV1"')
         parser.add_argument('--list-gun', dest='vehicle_gun', help='list gun for vehicle and turret.  ex. "R80_KV1:Turret_2_KV1"')
+        parser.add_argument('--list-shell', dest='gun_shell', help='list shell for gun and turret.  ex. "ussr:_85mm_F-30"')
+
         parser.add_argument('--info', dest='vehicle', help='view vehicle info')
         parser.add_argument('--info-chassis', dest='info_chassis', help='view chassis info for vehicle.  ex. "R80_KV1:Chassis_KV1_2"')
         parser.add_argument('--info-turret', dest='info_turret', help='view turret info for vehicle.  ex. "R80_KV1:Turret_2_KV1"')
         parser.add_argument('--info-gun', dest='info_gun', help='view gun info for vehicle.  ex. "R80_KV1:Turret_2_KV1:_85mm_F-30"')
         parser.add_argument('--info-full', dest='info_full', help='full view for vehicle.  ex. "R80_KV1:Chassis_KV1_2:Turret_2_KV1:_85mm_F-30"')
+        parser.add_argument('--info-shell', dest='info_shell', help='view for shell.  ex. "ussr:_85mm_F-30:_85mm_UBR-365K"')
 
     parser.parse_args(namespace=config)
 
@@ -462,6 +539,9 @@ if __name__ == '__main__':
         Command.listTurret(strage, config.vehicle_turret)
     if config.vehicle_gun:
         Command.listGun(strage, *config.vehicle_gun.split(':'))
+    if config.gun_shell:
+        Command.listShell(strage, *config.gun_shell.split(':'))
+
     if config.info_chassis:
         Command.infoChassis(strage, *config.info_chassis.split(':'))
     if config.info_turret:
@@ -470,3 +550,5 @@ if __name__ == '__main__':
         Command.infoGun(strage, *config.info_gun.split(':'))
     if config.info_full:
         Command.infoVehicleFull(strage, *config.info_full.split(':'))
+    if config.info_shell:
+        Command.infoShell(strage, *config.info_shell.split(':'))

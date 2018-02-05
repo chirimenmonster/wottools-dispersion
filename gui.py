@@ -3,6 +3,7 @@ import tkinter.ttk
 import tkinter.font
 
 import strage
+import csvoutput
 
 class Application(tkinter.Frame):
 
@@ -23,6 +24,9 @@ class Application(tkinter.Frame):
 
         moduleSelectorBar = tkinter.Frame(self.master)
         moduleSelectorBar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
+
+        shellSelectorBar = tkinter.Frame(self.master)
+        shellSelectorBar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
 
         modulePanel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
         modulePanel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
@@ -62,13 +66,19 @@ class Application(tkinter.Frame):
 
         self.__gunSelector = DropdownList(moduleSelectorBar, width=32, label='Gun')
         self.__gunSelector.pack(side='left')
-        self.__gunSelector.setCallback(self.cbChangeModules)
+        self.__gunSelector.setCallback(self.cbChangeGun)
+
+        self.__shellSelector = DropdownList(shellSelectorBar, width=32, label='Shell')
+        self.__shellSelector.pack(side='left')
+        self.__shellSelector.setCallback(self.cbChangeModules)
 
         self.__item = {}
         self.__item['vehicle'] = PanelItem(modulePanel, 'Vehicle:', '', labelWidth=8, valueWidth=100, valueAnchor='w')
         self.__item['chassis'] = PanelItem(modulePanel, 'Chassis:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
         self.__item['turret'] = PanelItem(modulePanel, 'Turret:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
         self.__item['gun'] = PanelItem(modulePanel, 'Gun:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        self.__item['shell'] = PanelItem(modulePanel, 'Shell:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+
         self.__item['reloadTime'] = PanelItem(itemPanel, 'reload time:', 's', valueWidth=4)
         self.__item['aimingTime'] = PanelItem(itemPanel, 'aiming time:', 's', valueWidth=4)
         self.__item['shotDispersionRadius'] = PanelItem(itemPanel, 'shot dispersion radius:', 'm', valueWidth=4)
@@ -78,6 +88,8 @@ class Application(tkinter.Frame):
         self.__item['turretRotation'] = PanelItem(itemPanel, '... turret rotation:', '', valueWidth=4)
         self.__item['afterShot'] = PanelItem(itemPanel, '... after shot:', '', valueWidth=4)
         self.__item['whileGunDamaged'] = PanelItem(itemPanel, '... while gun damaged:', '', valueWidth=4)
+        self.__item['damage_armor'] = PanelItem(itemPanel, 'damage armor:', '', valueWidth=4)
+        self.__item['damage_devices'] = PanelItem(itemPanel, 'damage devices:', '', valueWidth=4)
 
         self.changeVehicleFilter()
         self.changeVehicle()
@@ -113,6 +125,16 @@ class Application(tkinter.Frame):
             self.__gunSelector.setValues(self.__strage.fetchGunList(nation, vehicleId, turretTag))
         else:
             self.__gunSelector.setValues([ [ None, '' ] ])
+        self.changeGun()
+
+    def changeGun(self):
+        nation = self.__nationSelector.getSelected()
+        vehicleId = self.__vehicleSelector.getSelected()
+        if vehicleId:
+            gunTag = self.__gunSelector.getSelected()
+            self.__shellSelector.setValues(self.__strage.fetchShellList(nation, gunTag))
+        else:
+            self.__shellSelector.setValues([ [ None, '' ] ])
         self.changeModules()
 
     def changeModules(self):
@@ -124,12 +146,17 @@ class Application(tkinter.Frame):
             chassisTag = self.__chassisSelector.getSelected()
             turretTag = self.__turretSelector.getSelected()
             gunTag = self.__gunSelector.getSelected()
+            shellTag = self.__shellSelector.getSelected()
             chassis = self.__strage.fetchChassisInfo(nation, vehicleId, chassisTag)
             turret = self.__strage.fetchTurretInfo(nation, vehicleId, turretTag)
             gun = self.__strage.fetchGunInfo(nation, vehicleId, turretTag, gunTag)
+            shell = self.__strage.fetchShellInfo(nation, gunTag, shellTag)
+
             self.__item['chassis'].setValue('{} ({})'.format(chassis['name'], chassis['tag']))
             self.__item['turret'].setValue('{} ({})'.format(turret['name'], turret['tag']))
             self.__item['gun'].setValue('{} ({})'.format(gun['name'], gun['tag']))
+            self.__item['shell'].setValue('{} ({})'.format(shell['name'], shell['tag']))
+
             self.__item['reloadTime'].setValue(gun['reloadTime'])
             self.__item['aimingTime'].setValue(gun['aimingTime'])
             self.__item['shotDispersionRadius'].setValue(gun['shotDispersionRadius'])
@@ -138,42 +165,24 @@ class Application(tkinter.Frame):
             self.__item['turretRotation'].setValue(gun['turretRotation'])
             self.__item['afterShot'].setValue(gun['afterShot'])
             self.__item['whileGunDamaged'].setValue(gun['whileGunDamaged'])
+            self.__item['damage_armor'].setValue(shell['damage_armor'])
+            self.__item['damage_devices'].setValue(shell['damage_devices'])
         else:
             for panel in self.__item.values():
                 panel.setValue('')
  
     def createMessage(self):
-        import io
-        import csv
-        output = io.StringIO(newline='')
-        writer = csv.writer(output, dialect='excel', lineterminator='\n')
-        
         nation = self.__nationSelector.getSelected()
-        vehicleId = self.__vehicleSelector.getSelected()
-        chassisTag = self.__chassisSelector.getSelected()
-        turretTag = self.__turretSelector.getSelected()
-        gunTag = self.__gunSelector.getSelected()
-        vehicleInfo = self.__strage.fetchVehicleInfo(nation, vehicleId)
-        chassis = self.__strage.fetchChassisInfo(nation, vehicleId, chassisTag)
-        turret = self.__strage.fetchTurretInfo(nation, vehicleId, turretTag)
-        gun = self.__strage.fetchGunInfo(nation, vehicleId, turretTag, gunTag)
+        vehicle = self.__vehicleSelector.getSelected()
+        chassis = self.__chassisSelector.getSelected()
+        turret = self.__turretSelector.getSelected()
+        gun = self.__gunSelector.getSelected()
+        shell = self.__shellSelector.getSelected()
         
-        writer.writerow([ 'vehicle', vehicleInfo['name'], vehicleInfo['id'], vehicleInfo['shortUserString'], vehicleInfo['description'] ])
-        writer.writerow([ 'chassis', chassis['name'], chassis['tag'] ])
-        writer.writerow([ 'turret', turret['name'], turret['tag'] ])
-        writer.writerow([ 'gun', gun['name'], gun['tag'] ])
-        writer.writerow([ 'reloadTime', gun['reloadTime'], 's' ])
-        writer.writerow([ 'aimingTime', gun['aimingTime'], 's' ])
-        writer.writerow([ 'shotDispersionRadius', gun['shotDispersionRadius'], 'm' ])
-        writer.writerow([ 'vehicleMovement', chassis['vehicleMovement'], '' ])
-        writer.writerow([ 'vehicleRotation', chassis['vehicleRotation'], '' ])
-        writer.writerow([ 'turretRotation', gun['turretRotation'], '' ])
-        writer.writerow([ 'afterShot', gun['afterShot'], '' ])
-        writer.writerow([ 'whileGunDamaged', gun['whileGunDamaged'], '' ])
-
+        message = csvoutput.createMessage(self.__strage, nation, vehicle, chassis, turret, gun, shell)
         self.master.clipboard_clear()
-        self.master.clipboard_append(output.getvalue())
-        output.close()
+        self.master.clipboard_append(message)
+
 
     def cbChangeVehicleFilter(self, event):
         self.changeVehicleFilter()
@@ -184,6 +193,9 @@ class Application(tkinter.Frame):
     def cbChangeTurret(self, event):
         self.changeTurret()
 
+    def cbChangeGun(self, event):
+        self.changeGun()
+
     def cbChangeModules(self, event):
         self.changeModules()
 
@@ -192,7 +204,7 @@ class PanelItem(object):
     def __init__(self, parent, label, unit, labelWidth=20, labelAnchor='e', valueWidth=None, valueAnchor='e'):
         self.__panel = tkinter.Frame(parent)
         self.__panel['borderwidth'] = 0
-        self.__panel.pack(side='top', fill='x', pady=1)
+        self.__panel.pack(side='top', fill='x', pady=0)
         self.__label = tkinter.Label(self.__panel, width=labelWidth, anchor=labelAnchor)
         self.__label['text'] = label
         self.__label.pack(side='left')
