@@ -58,45 +58,53 @@ class Application(tkinter.Frame):
         copyButton = tkinter.Button(self.master, text='copy to clipboard', command=self.createMessage, relief='ridge', borderwidth=2)
         copyButton.pack(side='top', expand=1, fill='x')
         
-        selector = DropdownList(vehicleSelectorBar, width=10, label='Nation', name='nationSelector', valueJustify='center')
+        option = {'label':{'text':'Nation'}, 'combobox':{'width':10}}
+        selector = DropdownList(vehicleSelectorBar, name='nationSelector', option=option)
         selector.pack(side='left')
-        selector.setValues(self.__strage.fetchNationList())
+        selector.setValues(self.__stragefetchList['nation']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['nation'] = selector
 
-        selector = DropdownList(vehicleSelectorBar, width=3, label='Tier', name='tierSelector', valueJustify='center')
+        option = {'label':{'text':'Tier'}, 'combobox':{'width':3}, 'value':{'justify':'center'}}
+        selector = DropdownList(vehicleSelectorBar, name='tierSelector', option=option)
         selector.pack(side='left')
-        selector.setValues(self.__strage.fetchTierList())
+        selector.setValues(self.__stragefetchList['tier']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['tier'] = selector
 
-        selector = DropdownList(vehicleSelectorBar, width=4, label='Type', name='typeSelector', valueJustify='center')
+        option = {'label':{'text':'Type'}, 'combobox':{'width':4}, 'value':{'justify':'center'}}
+        selector = DropdownList(vehicleSelectorBar, name='typeSelector', option=option)
         selector.pack(side='left')
-        selector.setValues(self.__strage.fetchTypeList())
+        selector.setValues(self.__stragefetchList['type']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['type'] = selector
 
-        selector = DropdownList(vehicleSelectorBar, width=40, label='Vehicle')
+        option = {'label':{'text':'Vehicle'}, 'combobox':{'width':40}}
+        selector = DropdownList(vehicleSelectorBar, option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeVehicle)
         self.__selector['vehicle'] = selector
 
-        selector = DropdownList(moduleSelectorBar, width=32, label='Chassis')
+        option = {'label':{'text':'Chassis'}, 'combobox':{'width':32}}
+        selector = DropdownList(moduleSelectorBar, option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeModules)
         self.__selector['chassis'] = selector
 
-        selector = DropdownList(moduleSelectorBar, width=32, label='Turret')
+        option={'label':{'text':'Turret'}, 'combobox':{'width':32}}
+        selector = DropdownList(moduleSelectorBar, option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeTurret)
         self.__selector['turret'] = selector
 
-        selector = DropdownList(moduleSelectorBar, width=32, label='Gun')
+        option={'label':{'text':'Gun'}, 'combobox':{'width':32}}
+        selector = DropdownList(moduleSelectorBar, option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeGun)
         self.__selector['gun'] = selector
 
-        selector = DropdownList(shellSelectorBar, width=32, label='Shell')
+        option={'label':{'text':'Shell'}, 'combobox':{'width':32}}
+        selector = DropdownList(shellSelectorBar, option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeModules)
         self.__selector['shell'] = selector
@@ -117,8 +125,7 @@ class Application(tkinter.Frame):
             self.__itemValue[name] = PanelItemValue(itemPanel, name, bind=self.getItemValue, option=opts)
 
         self.changeVehicleFilter()
-        self.changeVehicle()
-        self.changeModules()
+
 
     def getTitleValue(self, target):
         category, node = target
@@ -228,8 +235,12 @@ class Application(tkinter.Frame):
 
 class PanelItemValue(tkinter.Frame):
 
-    def __init__(self, master, name, bind=None, valueWidth=4, option=None):
-        super().__init__(master, borderwidth=0)
+    def __init__(self, master, name, *args, **kwargs):
+        bind = kwargs.pop('bind', None)
+        option = kwargs.pop('option', {})
+        frameopt = { 'borderwidth':0 }
+        frameopt.update(kwargs)
+        super().__init__(master, *args, **frameopt)
         self.pack(side='top', fill='x', pady=0)
         labelopt = option['label'] if option is not None and 'label' in option else {}
         valueopt = option['value'] if option is not None and 'value' in option else {}
@@ -252,25 +263,26 @@ class PanelItemValue(tkinter.Frame):
         self.__value['text'] = text
 
 
-class DropdownList(object):
+class DropdownList(tkinter.Frame):
     __values = [ '' ]
 
-    def __init__(self, parent, width=None, label=None, labelwidth=None, valueJustify=None, name=None):
-        self.__frame = tkinter.Frame(parent, padx=4, name=name)
-        if label:
-            self.__label = tkinter.Label(self.__frame, text=label, width=labelwidth, anchor='e')
+    def __init__(self, master, *args, **kwargs):
+        option = kwargs.pop('option', {})
+        frameopt = { 'borderwidth':0, 'padx':4 }
+        frameopt.update(kwargs)
+        cboxopt = {}
+        if 'combobox' in option:
+            cboxopt.update(option['combobox'])
+        super().__init__(master, *args, **frameopt)
+        if 'label' in option:
+            self.__label = tkinter.Label(self, **option['label'])
             self.__label.pack(side='left')
-        self.__combobox = tkinter.ttk.Combobox(self.__frame, state='readonly', width=width, justify=valueJustify)
+        self.__combobox = tkinter.ttk.Combobox(self, state='readonly', **cboxopt)
         self.__combobox.pack(side='left')
-        if name and valueJustify:
-            self.__label.option_add('*' + name + '*justify', valueJustify)
+        name = str(self).split('.')[-1]
+        if 'value' in option and 'justify' in option['value']:
+            self.option_add('*' + name + '*justify', option['value']['justify'])
     
-    def pack(self, *args, **kvargs):
-        self.__frame.pack(*args,**kvargs)
-
-    def setWidth(self, value):
-        self.__combobox['width'] = value
-
     def setCallback(self, cbFunc):
         self.__combobox.bind('<<ComboboxSelected>>', cbFunc)
 
