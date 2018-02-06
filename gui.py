@@ -5,6 +5,29 @@ import tkinter.font
 import strage
 import csvoutput
 
+itemGroup = [
+    {
+        'title': None,
+        'items': [
+            'shell:damage_armor', 'shell:piercingPower',
+            'gun:reloadTime', 'gun:aimingTime', 'gun:shotDispersionRadius'
+        ]
+    },
+    {
+        'title': 'DispersionFactor',
+        'items': [
+            'chassis:vehicleMovement', 'chassis:vehicleRotation', 'gun:turretRotation',
+            'gun:afterShot', 'gun:whileGunDamaged'
+        ]
+    },
+    {
+        'title': None,
+        'items': [
+            'shell:damage_devices', 'shell:caliber', 'shell:speed', 'shell:maxDistance'
+        ]
+    }
+]
+
 class Application(tkinter.Frame):
 
     def __init__(self, master=None, strage=strage):
@@ -36,6 +59,7 @@ class Application(tkinter.Frame):
         self.option_add('*relief', 'flat')
         self.master.title('Vehicle Selector')
         self.master.config(background='white', relief='flat')
+        self.master.resizable(width=False, height=False)
         self.createWidgets()
 
         
@@ -110,20 +134,16 @@ class Application(tkinter.Frame):
         self.__selector['shell'] = selector
         
         self.__itemValue = {}
-        opts = { 'label':{'width':8}, 'value':{'width':100, 'anchor':'w'} }
+        opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
         for name in [ 'title:vehicle', 'title:chassis', 'title:turret', 'title:gun', 'title:shell' ]:
             self.__itemValue[name] = PanelItemValue(modulePanel, name, bind=self.getTitleValue, option=opts)
 
         opts = { 'label':{'width':20, 'anchor':'e'}, 'value':{'width':4, 'anchor':'e'}, 'unit':{'width':5, 'anchor':'w'} }
-        for name in [ 'gun:reloadTime', 'gun:aimingTime', 'gun:shotDispersionRadius' ]:
-            self.__itemValue[name] = PanelItemValue(itemPanel, name, bind=self.getItemValue, option=opts)
-
-        PanelItemValue(itemPanel, None, option={'label':{'text':'DispersionFactor', 'width':20, 'anchor':'w'}})
-
-        for name in [ 'chassis:vehicleMovement', 'chassis:vehicleRotation', 'gun:turretRotation',
-                'gun:afterShot', 'gun:whileGunDamaged', 'shell:damage_armor', 'shell:damage_devices' ]:
-            self.__itemValue[name] = PanelItemValue(itemPanel, name, bind=self.getItemValue, option=opts)
-
+        for group in itemGroup:
+            if group['title'] is not None:
+                PanelItemValue(itemPanel, None, option={'label':{'text':group['title'], 'width':20, 'anchor':'w'}})
+            for item in group['items']:
+                self.__itemValue[item] = PanelItemValue(itemPanel, item, bind=self.getItemValue, option=opts)
         self.changeVehicleFilter()
 
 
@@ -304,8 +324,6 @@ if __name__ == '__main__':
 
     strage.parseArgument()
 
-    root = tkinter.Tk()
-    root.resizable(width=False, height=False)
-    app = Application(root, strage=strage.Strage())
+    app = Application(strage=strage.Strage())
     app.mainloop()
     

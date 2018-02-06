@@ -63,13 +63,29 @@
         }
     },
     "shell": {
+        "caliber": {
+            "label":    "caliber:",
+            "unit":     "mm"
+        },
         "damage_armor": {
             "label":    "damage armor:",
-            "unit": ""
+            "unit":     ""
         },
         "damage_devices": {
             "label":    "damage devices:",
-            "unit": ""
+            "unit":     ""
+        },
+        "speed": {
+            "label":    "speed:",
+            "unit":     "m/s"
+        },
+        "maxDistance": {
+            "label":    "max distance:",
+            "unit":     "m"
+        },
+        "piercingPower": {
+            "label":    "piercing power:",
+            "unit":     "mm"
         }
     }
 }

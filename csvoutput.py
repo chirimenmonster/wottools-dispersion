@@ -11,11 +11,11 @@ labeldesc = {
     'shell':    [ 'name', 'tag' ],
 }
 
-dataorder = [ 'gun:reloadTime', 'gun:aimingTime', 'gun:shotDispersionRadius',
-    'chassis:vehicleMovement', 'chassis:vehicleRotation',
-    'gun:turretRotation', 'gun:afterShot', 'gun:whileGunDamaged',
-    'shell:damage_armor', 'shell:damage_devices'
-]
+import gui
+dataorder = []
+for group in gui.itemGroup:
+    dataorder += group['items']
+
 
 def fetchItemdef():
     with open('itemdef.json', 'r') as fp:

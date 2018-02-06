@@ -274,7 +274,8 @@ class StrageSharedGuns(object):
         entry = {}
         entry['tag'] = shot
         entry['speed'] = tree.find('speed').text
-        entry['piercingPower'] = tree.find('piercingPower').text
+        entry['piercingPower'] = tree.find('piercingPower').text.split(' ')[0]
+        entry['maxDistance'] = tree.find('maxDistance').text
         return entry
         
     def getEntry(self, gun):
