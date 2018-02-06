@@ -304,6 +304,8 @@ if __name__ == '__main__':
 
     strage.parseArgument()
 
-    app = Application(strage=strage.Strage())
+    root = tkinter.Tk()
+    root.resizable(width=False, height=False)
+    app = Application(root, strage=strage.Strage())
     app.mainloop()
     
