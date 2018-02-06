@@ -9,6 +9,26 @@ class Application(tkinter.Frame):
 
     def __init__(self, master=None, strage=strage):
         self.__strage = strage
+
+        self.__stragefetchInfo = {}
+        self.__stragefetchInfo['vehicle'] = strage.fetchVehicleInfo
+        self.__stragefetchInfo['chassis'] = strage.fetchChassisInfo
+        self.__stragefetchInfo['turret'] = strage.fetchTurretInfo
+        self.__stragefetchInfo['gun'] = strage.fetchGunInfo
+        self.__stragefetchInfo['shell'] = strage.fetchShellInfo
+
+        self.__stragefetchList = {}
+        self.__stragefetchList['nation'] = strage.fetchNationList
+        self.__stragefetchList['tier'] = strage.fetchTierList
+        self.__stragefetchList['type'] = strage.fetchTypeList
+        self.__stragefetchList['vehicle'] = strage.fetchVehicleList
+        self.__stragefetchList['chassis'] = strage.fetchChassisList
+        self.__stragefetchList['turret'] = strage.fetchTurretList
+        self.__stragefetchList['gun'] = strage.fetchGunList
+        self.__stragefetchList['shell'] = strage.fetchShellList
+
+        self.__selector = {}
+
         tkinter.Frame.__init__(self, master)
         self.font = tkinter.font.Font(family='Arial', size=11, weight='normal')
         self.option_add('*font', self.font)
@@ -18,6 +38,7 @@ class Application(tkinter.Frame):
         self.master.config(background='white', relief='flat')
         self.createWidgets()
 
+        
     def createWidgets(self):
         vehicleSelectorBar = tkinter.Frame(self.master)
         vehicleSelectorBar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
@@ -37,149 +58,154 @@ class Application(tkinter.Frame):
         copyButton = tkinter.Button(self.master, text='copy to clipboard', command=self.createMessage, relief='ridge', borderwidth=2)
         copyButton.pack(side='top', expand=1, fill='x')
         
-        self.__nationSelector = DropdownList(vehicleSelectorBar, width=10, label='Nation', name='nationSelector', valueJustify='center')
-        self.__nationSelector.pack(side='left')
-        self.__nationSelector.setValues(self.__strage.fetchNationList())
-        self.__nationSelector.setCallback(self.cbChangeVehicleFilter)
+        selector = DropdownList(vehicleSelectorBar, width=10, label='Nation', name='nationSelector', valueJustify='center')
+        selector.pack(side='left')
+        selector.setValues(self.__strage.fetchNationList())
+        selector.setCallback(self.cbChangeVehicleFilter)
+        self.__selector['nation'] = selector
 
-        self.__tierSelector = DropdownList(vehicleSelectorBar, width=3, label='Tier', name='tierSelector', valueJustify='center')
-        self.__tierSelector.pack(side='left')
-        self.__tierSelector.setValues(self.__strage.fetchTierList())
-        self.__tierSelector.setCallback(self.cbChangeVehicleFilter)
+        selector = DropdownList(vehicleSelectorBar, width=3, label='Tier', name='tierSelector', valueJustify='center')
+        selector.pack(side='left')
+        selector.setValues(self.__strage.fetchTierList())
+        selector.setCallback(self.cbChangeVehicleFilter)
+        self.__selector['tier'] = selector
 
-        self.__typeSelector = DropdownList(vehicleSelectorBar, width=4, label='Type', name='typeSelector', valueJustify='center')
-        self.__typeSelector.pack(side='left')
-        self.__typeSelector.setValues(self.__strage.fetchTypeList())
-        self.__typeSelector.setCallback(self.cbChangeVehicleFilter)
+        selector = DropdownList(vehicleSelectorBar, width=4, label='Type', name='typeSelector', valueJustify='center')
+        selector.pack(side='left')
+        selector.setValues(self.__strage.fetchTypeList())
+        selector.setCallback(self.cbChangeVehicleFilter)
+        self.__selector['type'] = selector
 
-        self.__vehicleSelector = DropdownList(vehicleSelectorBar, width=40, label='Vehicle')
-        self.__vehicleSelector.pack(side='left')
-        self.__vehicleSelector.setCallback(self.cbChangeVehicle)
+        selector = DropdownList(vehicleSelectorBar, width=40, label='Vehicle')
+        selector.pack(side='left')
+        selector.setCallback(self.cbChangeVehicle)
+        self.__selector['vehicle'] = selector
 
-        self.__chassisSelector = DropdownList(moduleSelectorBar, width=32, label='Chassis')
-        self.__chassisSelector.pack(side='left')
-        self.__chassisSelector.setCallback(self.cbChangeModules)
+        selector = DropdownList(moduleSelectorBar, width=32, label='Chassis')
+        selector.pack(side='left')
+        selector.setCallback(self.cbChangeModules)
+        self.__selector['chassis'] = selector
 
-        self.__turretSelector = DropdownList(moduleSelectorBar, width=32, label='Turret')
-        self.__turretSelector.pack(side='left')
-        self.__turretSelector.setCallback(self.cbChangeTurret)
+        selector = DropdownList(moduleSelectorBar, width=32, label='Turret')
+        selector.pack(side='left')
+        selector.setCallback(self.cbChangeTurret)
+        self.__selector['turret'] = selector
 
-        self.__gunSelector = DropdownList(moduleSelectorBar, width=32, label='Gun')
-        self.__gunSelector.pack(side='left')
-        self.__gunSelector.setCallback(self.cbChangeGun)
+        selector = DropdownList(moduleSelectorBar, width=32, label='Gun')
+        selector.pack(side='left')
+        selector.setCallback(self.cbChangeGun)
+        self.__selector['gun'] = selector
 
-        self.__shellSelector = DropdownList(shellSelectorBar, width=32, label='Shell')
-        self.__shellSelector.pack(side='left')
-        self.__shellSelector.setCallback(self.cbChangeModules)
+        selector = DropdownList(shellSelectorBar, width=32, label='Shell')
+        selector.pack(side='left')
+        selector.setCallback(self.cbChangeModules)
+        self.__selector['shell'] = selector
+        
+        self.__itemValue = {}
+        opts = { 'label':{'width':8}, 'value':{'width':100, 'anchor':'w'} }
+        for name in [ 'title:vehicle', 'title:chassis', 'title:turret', 'title:gun', 'title:shell' ]:
+            self.__itemValue[name] = PanelItemValue(modulePanel, name, bind=self.getTitleValue, option=opts)
 
-        self.__item = {}
-        self.__item['vehicle'] = PanelItem(modulePanel, 'Vehicle:', '', labelWidth=8, valueWidth=100, valueAnchor='w')
-        self.__item['chassis'] = PanelItem(modulePanel, 'Chassis:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
-        self.__item['turret'] = PanelItem(modulePanel, 'Turret:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
-        self.__item['gun'] = PanelItem(modulePanel, 'Gun:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
-        self.__item['shell'] = PanelItem(modulePanel, 'Shell:', '', labelWidth=8, valueWidth=60, valueAnchor='w')
+        opts = { 'label':{'width':20, 'anchor':'e'}, 'value':{'width':4, 'anchor':'e'}, 'unit':{'width':5, 'anchor':'w'} }
+        for name in [ 'gun:reloadTime', 'gun:aimingTime', 'gun:shotDispersionRadius' ]:
+            self.__itemValue[name] = PanelItemValue(itemPanel, name, bind=self.getItemValue, option=opts)
 
-        self.__item['reloadTime'] = PanelItem(itemPanel, 'reload time:', 's', valueWidth=4)
-        self.__item['aimingTime'] = PanelItem(itemPanel, 'aiming time:', 's', valueWidth=4)
-        self.__item['shotDispersionRadius'] = PanelItem(itemPanel, 'shot dispersion radius:', 'm', valueWidth=4)
-        PanelItem(itemPanel, 'DispersionFactor', '', labelAnchor='w')
-        self.__item['vehicleMovement'] = PanelItem(itemPanel, '... vehicle movement:', '', valueWidth=4)
-        self.__item['vehicleRotation'] = PanelItem(itemPanel, '... vehicle rotation:', '', valueWidth=4)
-        self.__item['turretRotation'] = PanelItem(itemPanel, '... turret rotation:', '', valueWidth=4)
-        self.__item['afterShot'] = PanelItem(itemPanel, '... after shot:', '', valueWidth=4)
-        self.__item['whileGunDamaged'] = PanelItem(itemPanel, '... while gun damaged:', '', valueWidth=4)
-        self.__item['damage_armor'] = PanelItem(itemPanel, 'damage armor:', '', valueWidth=4)
-        self.__item['damage_devices'] = PanelItem(itemPanel, 'damage devices:', '', valueWidth=4)
+        PanelItemValue(itemPanel, None, option={'label':{'text':'DispersionFactor', 'width':20, 'anchor':'w'}})
+
+        for name in [ 'chassis:vehicleMovement', 'chassis:vehicleRotation', 'gun:turretRotation',
+                'gun:afterShot', 'gun:whileGunDamaged', 'shell:damage_armor', 'shell:damage_devices' ]:
+            self.__itemValue[name] = PanelItemValue(itemPanel, name, bind=self.getItemValue, option=opts)
 
         self.changeVehicleFilter()
         self.changeVehicle()
         self.changeModules()
 
+    def getTitleValue(self, target):
+        category, node = target
+        formatstring = csvoutput.items[category][node]['format']
+        formattags = csvoutput.items[category][node]['value']
+        tag = {}
+        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+            tag[s] = self.__selector[s].getSelected()
+        if tag['vehicle'] is None:
+            return ''
+        if node == 'vehicle':
+            args = [ tag[s] for s in [ 'nation', 'vehicle' ] ]
+        elif node == 'chassis':
+            args = [ tag[s] for s in [ 'nation', 'vehicle', 'chassis' ] ]
+        elif node == 'turret':
+            args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret' ] ]
+        elif node == 'gun':
+            args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret', 'gun' ] ]
+        elif node == 'shell':
+            args = [ tag[s] for s in [ 'nation', 'gun', 'shell' ] ]
+        values = self.__stragefetchInfo[node](*args)
+        vlist = [ values[s] for s in formattags ]
+        text = formatstring.format(*vlist)
+        return text
+
+    def getItemValue(self, target):
+        category, node = target
+        tag = {}
+        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+            tag[s] = self.__selector[s].getSelected()
+        if tag['vehicle'] is None:
+            return ''
+        if category == 'chassis':
+            args = [ tag[s] for s in [ 'nation', 'vehicle', 'chassis' ] ]
+        elif category == 'turret':
+            args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret' ] ]
+        elif category == 'gun':
+            args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret', 'gun' ] ]
+        elif category == 'shell':
+            args = [ tag[s] for s in [ 'nation', 'gun', 'shell' ] ]
+        text = self.__stragefetchInfo[category](*args)[node]
+        return text
+
     def changeVehicleFilter(self):
-        nation = self.__nationSelector.getSelected()
-        tier = self.__tierSelector.getSelected()
-        type = self.__typeSelector.getSelected()
-        vehicles = self.__strage.fetchVehicleList(nation, tier, type)
+        nation, tier, type = [ self.__selector[s].getSelected() for s in [ 'nation', 'tier', 'type' ] ]
+        vehicles = self.__stragefetchList['vehicle'](nation, tier, type)
         if not vehicles or not vehicles[0]:
             vehicles = [ [ None, '' ] ]
-        self.__vehicleSelector.setValues(vehicles)
+        self.__selector['vehicle'].setValues(vehicles)
         self.changeVehicle()
 
     def changeVehicle(self):
-        nation = self.__nationSelector.getSelected()
-        vehicleId = self.__vehicleSelector.getSelected()
-        if vehicleId:
-            vehicleInfo = self.__strage.fetchVehicleInfo(nation, vehicleId)
-            self.__chassisSelector.setValues(self.__strage.fetchChassisList(nation, vehicleId))
-            self.__turretSelector.setValues(self.__strage.fetchTurretList(nation, vehicleId))
+        nation, vehicle = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle' ] ]
+        if vehicle:
+            for s in [ 'chassis', 'turret' ]:
+                self.__selector[s].setValues(self.__stragefetchList[s](nation, vehicle))
         else:
-            self.__chassisSelector.setValues([ [ None, '' ] ])
-            self.__turretSelector.setValues([ [ None, '' ] ])
+            for s in [ 'chassis', 'turret' ]:
+                self.__selector[s].setValues([ [ None, '' ] ])
         self.changeTurret()
 
     def changeTurret(self):
-        nation = self.__nationSelector.getSelected()
-        vehicleId = self.__vehicleSelector.getSelected()
-        if vehicleId:
-            turretTag = self.__turretSelector.getSelected()
-            self.__gunSelector.setValues(self.__strage.fetchGunList(nation, vehicleId, turretTag))
+        nation, vehicle = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle' ] ]
+        if vehicle:
+            turret = self.__selector['turret'].getSelected()
+            self.__selector['gun'].setValues(self.__stragefetchList['gun'](nation, vehicle, turret))
         else:
-            self.__gunSelector.setValues([ [ None, '' ] ])
+            self.__selector['gun'].setValues([ [ None, '' ] ])
         self.changeGun()
 
     def changeGun(self):
-        nation = self.__nationSelector.getSelected()
-        vehicleId = self.__vehicleSelector.getSelected()
-        if vehicleId:
-            gunTag = self.__gunSelector.getSelected()
-            self.__shellSelector.setValues(self.__strage.fetchShellList(nation, gunTag))
+        nation, vehicle = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle' ] ]
+        if vehicle:
+            gun = self.__selector['gun'].getSelected()
+            self.__selector['shell'].setValues(self.__stragefetchList['shell'](nation, gun))
         else:
-            self.__shellSelector.setValues([ [ None, '' ] ])
+            self.__selector['shell'].setValues([ [ None, '' ] ])
         self.changeModules()
 
     def changeModules(self):
-        nation = self.__nationSelector.getSelected()
-        vehicleId = self.__vehicleSelector.getSelected()
-        if vehicleId:
-            vehicleInfo = self.__strage.fetchVehicleInfo(nation, vehicleId)
-            self.__item['vehicle'].setValue('{} ({}), {}: {}'.format(vehicleInfo['name'], vehicleInfo['id'], vehicleInfo['shortUserString'], vehicleInfo['description']))
-            chassisTag = self.__chassisSelector.getSelected()
-            turretTag = self.__turretSelector.getSelected()
-            gunTag = self.__gunSelector.getSelected()
-            shellTag = self.__shellSelector.getSelected()
-            chassis = self.__strage.fetchChassisInfo(nation, vehicleId, chassisTag)
-            turret = self.__strage.fetchTurretInfo(nation, vehicleId, turretTag)
-            gun = self.__strage.fetchGunInfo(nation, vehicleId, turretTag, gunTag)
-            shell = self.__strage.fetchShellInfo(nation, gunTag, shellTag)
-
-            self.__item['chassis'].setValue('{} ({})'.format(chassis['name'], chassis['tag']))
-            self.__item['turret'].setValue('{} ({})'.format(turret['name'], turret['tag']))
-            self.__item['gun'].setValue('{} ({})'.format(gun['name'], gun['tag']))
-            self.__item['shell'].setValue('{} ({})'.format(shell['name'], shell['tag']))
-
-            self.__item['reloadTime'].setValue(gun['reloadTime'])
-            self.__item['aimingTime'].setValue(gun['aimingTime'])
-            self.__item['shotDispersionRadius'].setValue(gun['shotDispersionRadius'])
-            self.__item['vehicleMovement'].setValue(chassis['vehicleMovement'])
-            self.__item['vehicleRotation'].setValue(chassis['vehicleRotation'])
-            self.__item['turretRotation'].setValue(gun['turretRotation'])
-            self.__item['afterShot'].setValue(gun['afterShot'])
-            self.__item['whileGunDamaged'].setValue(gun['whileGunDamaged'])
-            self.__item['damage_armor'].setValue(shell['damage_armor'])
-            self.__item['damage_devices'].setValue(shell['damage_devices'])
-        else:
-            for panel in self.__item.values():
-                panel.setValue('')
+        for panel in self.__itemValue.values():
+            panel.update()
+ 
  
     def createMessage(self):
-        nation = self.__nationSelector.getSelected()
-        vehicle = self.__vehicleSelector.getSelected()
-        chassis = self.__chassisSelector.getSelected()
-        turret = self.__turretSelector.getSelected()
-        gun = self.__gunSelector.getSelected()
-        shell = self.__shellSelector.getSelected()
-        
-        message = csvoutput.createMessage(self.__strage, nation, vehicle, chassis, turret, gun, shell)
+        args = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ] ]       
+        message = csvoutput.createMessage(self.__strage, *args)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
 
@@ -200,23 +226,31 @@ class Application(tkinter.Frame):
         self.changeModules()
 
 
-class PanelItem(object):
-    def __init__(self, parent, label, unit, labelWidth=20, labelAnchor='e', valueWidth=None, valueAnchor='e'):
-        self.__panel = tkinter.Frame(parent)
-        self.__panel['borderwidth'] = 0
-        self.__panel.pack(side='top', fill='x', pady=0)
-        self.__label = tkinter.Label(self.__panel, width=labelWidth, anchor=labelAnchor)
-        self.__label['text'] = label
-        self.__label.pack(side='left')
-        self.__value = tkinter.Label(self.__panel, width=valueWidth, anchor=valueAnchor)
-        self.__value.pack(side='left')
-        if unit:
-            self.__unit = tkinter.Label(self.__panel, width=5, anchor='w')
-            self.__unit['text'] = unit
-            self.__unit.pack(side='left')
+class PanelItemValue(tkinter.Frame):
 
-    def setValue(self, value):
-        self.__value['text'] = value
+    def __init__(self, master, name, bind=None, valueWidth=4, option=None):
+        super().__init__(master, borderwidth=0)
+        self.pack(side='top', fill='x', pady=0)
+        labelopt = option['label'] if option is not None and 'label' in option else {}
+        valueopt = option['value'] if option is not None and 'value' in option else {}
+        unitopt = option['unit'] if option is not None and 'unit' in option else {}
+        self.__label = tkinter.Label(self, **labelopt)
+        self.__label.pack(side='left')
+        if name is not None:
+            category, node = name.split(':')
+            self.__bind = { 'category':category, 'node':node, 'target':[category, node], 'func':bind }
+            self.__label['text'] = csvoutput.items[category][node]['label']
+            self.__value = tkinter.Label(self, **valueopt)
+            self.__value.pack(side='left')
+            if 'unit' in csvoutput.items[category][node]:
+                self.__unit = tkinter.Label(self, **unitopt)
+                self.__unit['text'] = csvoutput.items[category][node]['unit']
+                self.__unit.pack(side='left')
+
+    def update(self):
+        text = self.__bind['func'](self.__bind['target'])
+        self.__value['text'] = text
+
 
 class DropdownList(object):
     __values = [ '' ]

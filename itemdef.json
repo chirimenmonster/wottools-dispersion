@@ -1,0 +1,75 @@
+{
+    "title": {
+        "vehicle": {
+            "label":    "Vehicle:",
+            "format":   "{} ({}), {}: {}",
+            "value":    [ "name", "id", "shortUserString", "description" ]
+        },
+        "chassis": {
+            "label":    "Chassis:",
+            "format":   "{} ({})",
+            "value":    [ "name", "tag" ]
+        },
+        "turret": {
+            "label":    "Turret:",
+            "format":   "{} ({})",
+            "value":    [ "name", "tag" ]
+        },
+        "gun": {
+            "label":    "Gun:",
+            "format":   "{} ({})",
+            "value":    [ "name", "tag" ]
+        },
+        "shell": {
+            "label":    "Shell:",
+            "format":   "{} ({})",
+            "value":    [ "name", "tag" ]
+        }
+    },
+    "chassis": {
+        "vehicleMovement": {
+            "label":    "... vehicle movement:",
+            "unit":     ""
+        },
+        "vehicleRotation": {
+            "label":    "... vehicle rotation:",
+            "unit": ""
+        }
+    },
+    "gun": {
+        "reloadTime": {
+            "label":    "reload time:",
+            "unit":     "s"
+        },
+        "aimingTime": {
+            "label":    "aiming time:",
+            "unit":     "s"
+        },
+        "shotDispersionRadius": {
+            "label":    "shot dispersion radius:",
+            "unit":     "m"
+        },
+        "turretRotation": {
+            "label":    "... turret rotation:",
+            "unit":     ""
+        },
+        "afterShot": {
+            "label":    "... after shot:",
+            "unit":     ""
+        },
+        "whileGunDamaged": {
+            "label":    "... while gun damaged:",
+            "unit":     ""
+        }
+    },
+    "shell": {
+        "damage_armor": {
+            "label":    "damage armor:",
+            "unit": ""
+        },
+        "damage_devices": {
+            "label":    "damage devices:",
+            "unit": ""
+        }
+    }
+}

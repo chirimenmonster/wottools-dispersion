@@ -477,15 +477,17 @@ class Command:
             print('{0:>32}: {1}'.format(k, v))
 
     @staticmethod
-    def infoVehicleFull(strage, vehicle, chassis, turret, gun):
-        nation, v = strage.searchVehicle(vehicle)
-        for k,v in strage.fetchVehicleMergedInfo(nation, vehicle, chassis, turret, gun).items():
-            print('{0:>32}: {1}'.format(k, v))
-
-    @staticmethod
     def infoShell(strage, nation, gun, shell):
         for k,v in strage.fetchShellInfo(nation, gun, shell).items():
             print('{0:>32}: {1}'.format(k, v))
+
+    @staticmethod
+    def infoVehicleFull(strage, vehicle, chassis, turret, gun, shell):
+        nation, v = strage.searchVehicle(vehicle)
+        for k,v in strage.fetchVehicleMergedInfo(nation, vehicle, chassis, turret, gun).items():
+            print('{0:>32}: {1}'.format(k, v))
+        import csvoutput
+        print(csvoutput.createMessage(strage, nation, vehicle, chassis, turret, gun, shell))
 
 
 def parseArgument():
@@ -508,8 +510,9 @@ def parseArgument():
         parser.add_argument('--info-chassis', dest='info_chassis', help='view chassis info for vehicle.  ex. "R80_KV1:Chassis_KV1_2"')
         parser.add_argument('--info-turret', dest='info_turret', help='view turret info for vehicle.  ex. "R80_KV1:Turret_2_KV1"')
         parser.add_argument('--info-gun', dest='info_gun', help='view gun info for vehicle.  ex. "R80_KV1:Turret_2_KV1:_85mm_F-30"')
-        parser.add_argument('--info-full', dest='info_full', help='full view for vehicle.  ex. "R80_KV1:Chassis_KV1_2:Turret_2_KV1:_85mm_F-30"')
         parser.add_argument('--info-shell', dest='info_shell', help='view for shell.  ex. "ussr:_85mm_F-30:_85mm_UBR-365K"')
+
+        parser.add_argument('--info-full', dest='info_full', help='full view for vehicle.  ex. "R80_KV1:Chassis_KV1_2:Turret_2_KV1:_85mm_F-30:_85mm_UBR-365K"')
 
     parser.parse_args(namespace=config)
 
@@ -548,7 +551,8 @@ if __name__ == '__main__':
         Command.infoTurret(strage, *config.info_turret.split(':'))
     if config.info_gun:
         Command.infoGun(strage, *config.info_gun.split(':'))
-    if config.info_full:
-        Command.infoVehicleFull(strage, *config.info_full.split(':'))
     if config.info_shell:
         Command.infoShell(strage, *config.info_shell.split(':'))
+
+    if config.info_full:
+        Command.infoVehicleFull(strage, *config.info_full.split(':'))
