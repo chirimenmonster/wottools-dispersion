@@ -6,26 +6,34 @@ import strage
 import csvoutput
 
 itemGroup = [
-    {
-        'title': None,
-        'items': [
-            'shell:damage_armor', 'shell:piercingPower',
-            'gun:reloadTime', 'gun:aimingTime', 'gun:shotDispersionRadius'
-        ]
-    },
-    {
-        'title': 'DispersionFactor',
-        'items': [
-            'chassis:vehicleMovement', 'chassis:vehicleRotation', 'gun:turretRotation',
-            'gun:afterShot', 'gun:whileGunDamaged'
-        ]
-    },
-    {
-        'title': None,
-        'items': [
-            'shell:damage_devices', 'shell:caliber', 'shell:speed', 'shell:maxDistance'
-        ]
-    }
+    [
+        {
+            'title': None,
+            'items': [
+                'shell:damage_armor', 'shell:piercingPower',
+                'gun:reloadTime', 'gun:aimingTime', 'gun:shotDispersionRadius'
+            ]
+        },
+        {
+            'title': 'DispersionFactor',
+            'items': [
+                'chassis:vehicleMovement', 'chassis:vehicleRotation', 'gun:turretRotation',
+                'gun:afterShot', 'gun:whileGunDamaged'
+            ]
+        },
+        {
+            'title': None,
+            'items': [
+                'shell:damage_devices', 'shell:caliber', 'shell:speed', 'shell:maxDistance'
+            ]
+        }
+    ],
+    [
+        {
+            'title': 'dummy',
+            'items': []
+        }
+    ]
 ]
 
 class Application(tkinter.Frame):
@@ -72,14 +80,25 @@ class Application(tkinter.Frame):
         modulePanel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
         modulePanel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
 
-        panelGroup = []
-        for i in range(3):
-            panel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
-            panel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
-            panelGroup.append(panel)
+        panelZone = tkinter.Frame(self.master)
+        panelZone.pack(side='top', expand=1, fill='x')
 
         copyButton = tkinter.Button(self.master, text='copy to clipboard', command=self.createMessage, relief='ridge', borderwidth=2)
-        copyButton.pack(side='top', expand=1, fill='x')
+        copyButton.pack(side='top', expand=1, fill='x', padx=7, pady=4)
+        
+        panelColumn = []
+        for i in range(3):
+            panel = tkinter.Frame(panelZone)
+            panel.pack(side='left', anchor='n')
+            panelColumn.append(panel)
+
+        panelGroup = []
+        for i, column in enumerate(itemGroup):
+            panelGroup.append([])
+            for j, row in enumerate(column):
+                panel = tkinter.Frame(panelColumn[i], highlightthickness=1, highlightbackground='gray')
+                panel.pack(side='top', expand=1, padx=8, pady=4, anchor='w')
+                panelGroup[i].append(panel)
         
         option = {'label':{'text':'Nation'}, 'combobox':{'width':10}}
         selector = DropdownList(bar['vehicle'], name='nationSelector', option=option)
@@ -138,11 +157,12 @@ class Application(tkinter.Frame):
             self.__itemValue[name] = PanelItemValue(modulePanel, name, bind=self.getTitleValue, option=opts)
 
         opts = { 'label':{'width':20, 'anchor':'e'}, 'value':{'width':4, 'anchor':'e'}, 'unit':{'width':5, 'anchor':'w'} }
-        for i, group in enumerate(itemGroup):
-            if group['title'] is not None:
-                PanelItemValue(panelGroup[i], None, option={'label':{'text':group['title'], 'width':20, 'anchor':'w'}})
-            for item in group['items']:
-                self.__itemValue[item] = PanelItemValue(panelGroup[i], item, bind=self.getItemValue, option=opts)
+        for i, column in enumerate(itemGroup):
+            for j, row in enumerate(column):
+                if row['title'] is not None:
+                    PanelItemValue(panelGroup[i][j], None, option={'label':{'text':row['title'], 'width':20, 'anchor':'w'}})
+                for item in row['items']:
+                    self.__itemValue[item] = PanelItemValue(panelGroup[i][j], item, bind=self.getItemValue, option=opts)
         self.changeVehicleFilter()
 
 

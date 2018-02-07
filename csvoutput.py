@@ -13,8 +13,9 @@ labeldesc = {
 
 import gui
 dataorder = []
-for group in gui.itemGroup:
-    dataorder += group['items']
+for column in gui.itemGroup:
+    for row in column:
+        dataorder += row['items']
 
 
 def fetchItemdef():
