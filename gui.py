@@ -64,71 +64,70 @@ class Application(tkinter.Frame):
 
         
     def createWidgets(self):
-        vehicleSelectorBar = tkinter.Frame(self.master)
-        vehicleSelectorBar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
-
-        moduleSelectorBar = tkinter.Frame(self.master)
-        moduleSelectorBar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
-
-        shellSelectorBar = tkinter.Frame(self.master)
-        shellSelectorBar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
+        bar = {}
+        for group in [ 'vehicle', 'module', 'shell' ]:
+            bar[group] = tkinter.Frame(self.master)
+            bar[group].pack(side='top', expand=1, fill='x', padx=4, pady=1)
 
         modulePanel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
         modulePanel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
 
-        itemPanel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
-        itemPanel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
+        panelGroup = []
+        for i in range(3):
+            panel = tkinter.Frame(self.master, highlightthickness=1, highlightbackground='gray')
+            panel.pack(side='top', expand=1, fill='x', padx=8, pady=4)
+            panelGroup.append(panel)
 
         copyButton = tkinter.Button(self.master, text='copy to clipboard', command=self.createMessage, relief='ridge', borderwidth=2)
         copyButton.pack(side='top', expand=1, fill='x')
         
         option = {'label':{'text':'Nation'}, 'combobox':{'width':10}}
-        selector = DropdownList(vehicleSelectorBar, name='nationSelector', option=option)
+        selector = DropdownList(bar['vehicle'], name='nationSelector', option=option)
         selector.pack(side='left')
         selector.setValues(self.__stragefetchList['nation']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['nation'] = selector
 
         option = {'label':{'text':'Tier'}, 'combobox':{'width':3}, 'value':{'justify':'center'}}
-        selector = DropdownList(vehicleSelectorBar, name='tierSelector', option=option)
+        selector = DropdownList(bar['vehicle'], name='tierSelector', option=option)
         selector.pack(side='left')
         selector.setValues(self.__stragefetchList['tier']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['tier'] = selector
 
         option = {'label':{'text':'Type'}, 'combobox':{'width':4}, 'value':{'justify':'center'}}
-        selector = DropdownList(vehicleSelectorBar, name='typeSelector', option=option)
+        selector = DropdownList(bar['vehicle'], name='typeSelector', option=option)
         selector.pack(side='left')
         selector.setValues(self.__stragefetchList['type']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['type'] = selector
 
         option = {'label':{'text':'Vehicle'}, 'combobox':{'width':40}}
-        selector = DropdownList(vehicleSelectorBar, option=option)
+        selector = DropdownList(bar['vehicle'], option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeVehicle)
         self.__selector['vehicle'] = selector
 
         option = {'label':{'text':'Chassis'}, 'combobox':{'width':32}}
-        selector = DropdownList(moduleSelectorBar, option=option)
+        selector = DropdownList(bar['module'], option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeModules)
         self.__selector['chassis'] = selector
 
         option={'label':{'text':'Turret'}, 'combobox':{'width':32}}
-        selector = DropdownList(moduleSelectorBar, option=option)
+        selector = DropdownList(bar['module'], option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeTurret)
         self.__selector['turret'] = selector
 
         option={'label':{'text':'Gun'}, 'combobox':{'width':32}}
-        selector = DropdownList(moduleSelectorBar, option=option)
+        selector = DropdownList(bar['module'], option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeGun)
         self.__selector['gun'] = selector
 
         option={'label':{'text':'Shell'}, 'combobox':{'width':32}}
-        selector = DropdownList(shellSelectorBar, option=option)
+        selector = DropdownList(bar['shell'], option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeModules)
         self.__selector['shell'] = selector
@@ -139,11 +138,11 @@ class Application(tkinter.Frame):
             self.__itemValue[name] = PanelItemValue(modulePanel, name, bind=self.getTitleValue, option=opts)
 
         opts = { 'label':{'width':20, 'anchor':'e'}, 'value':{'width':4, 'anchor':'e'}, 'unit':{'width':5, 'anchor':'w'} }
-        for group in itemGroup:
+        for i, group in enumerate(itemGroup):
             if group['title'] is not None:
-                PanelItemValue(itemPanel, None, option={'label':{'text':group['title'], 'width':20, 'anchor':'w'}})
+                PanelItemValue(panelGroup[i], None, option={'label':{'text':group['title'], 'width':20, 'anchor':'w'}})
             for item in group['items']:
-                self.__itemValue[item] = PanelItemValue(itemPanel, item, bind=self.getItemValue, option=opts)
+                self.__itemValue[item] = PanelItemValue(panelGroup[i], item, bind=self.getItemValue, option=opts)
         self.changeVehicleFilter()
 
 

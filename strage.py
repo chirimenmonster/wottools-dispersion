@@ -375,7 +375,7 @@ class StrageVehicle(object):
         entry['name'] = translate(entry['userString'])
         entry['reloadTime'] = tree.findtext('reloadTime') or shared['reloadTime']
         entry['aimingTime'] = tree.findtext('aimingTime') or shared['aimingTime']
-        entry['shotDispersionRadius'] = tree.find('shotDispersionRadius') or shared['shotDispersionRadius']
+        entry['shotDispersionRadius'] = tree.findtext('shotDispersionRadius') or shared['shotDispersionRadius']
         entry['turretRotation'] = tree.findtext('shotDispersionFactors/turretRotation') or shared['turretRotation']
         entry['afterShot'] = tree.findtext('shotDispersionFactors/afterShot') or shared['afterShot']
         entry['whileGunDamaged'] = tree.findtext('shotDispersionFactors/whileGunDamaged') or shared['whileGunDamaged']
