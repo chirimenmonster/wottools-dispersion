@@ -2,11 +2,21 @@
 class Config:
     BASE_DIR = 'C:/Games/World_of_Tanks'
     PKG_RELPATH = 'res/packages'
-    PKG_SCRIPTS = 'scripts.pkg'
-    PKG_GUI = 'gui.pkg'
     LOCALE_RELPATH = 'res'
-    DEFS_VEHICLES_VPATH = 'scripts/item_defs/vehicles'
-    GUISETTINGS_VPATH = 'gui/gui_settings.xml'
+    VEHICLES = 'vehicles'
+    GUI_SETTINGS = 'gui_settings'
+    DATA = {
+        VEHICLES: {
+            'vpath':        'scripts/item_defs/vehicles',
+            'packed':       'scripts.pkg',
+            'extracted':    None
+        },
+        GUI_SETTINGS: {
+            'vpath':        'gui/gui_settings.xml',
+            'packed':       'gui.pkg',
+            'extracted':    None
+        }
+    }
 
 config = Config()
 
@@ -33,7 +43,7 @@ class Translate(object):
             return text
         domain, name = text[1:-1].split(':')
         if domain not in self.__gettext:
-            localedir = config.BASE_DIR + '/' + config.LOCALE_RELPATH
+            localedir = '/'.join([ config.BASE_DIR, config.LOCALE_RELPATH ])
             self.__gettext[domain] = gettext.translation(domain, languages=['text'], localedir=localedir, fallback=True)
         if isinstance(self.__gettext[domain], gettext.GNUTranslations):
             return self.__gettext[domain].gettext(name)
@@ -42,38 +52,30 @@ class Translate(object):
 translate = Translate().translate
 
 
-def readPackedXml(relpath, package=None, basedir=None):
+def readXmlData(domain, target=None):
     import io
     import zipfile
     from XmlUnpacker import XmlUnpacker
     
     xmlunpacker = XmlUnpacker()
-    root = None
-    if not package:
-        pkgpath = config.BASE_DIR + '/' + config.PKG_RELPATH
+    vpath = config.DATA[domain]['vpath'] + ('/' + target if target else '')
+
+    if config.DATA[domain]['extracted']:
+        path = '/'.join([ config.DATA[domain]['extracted'], vpath.split('/', 1)[1] ])
+        try:
+            with open(path, 'rb') as file:
+                root = xmlunpacker.read(file)
+        except:
+            root = None
     else:
-        pkgpath = config.BASE_DIR + '/' + config.PKG_RELPATH + '/' + package
-    if basedir:
-        with open(config.SCRIPTS_DIR + '/' + relpath, 'rb') as file:
-            root = xmlunpacker.read(file)
-    else:
-        with zipfile.ZipFile(pkgpath, 'r') as zip:
-            with zip.open(relpath, 'r') as data:
-                root = xmlunpacker.read(io.BytesIO(data.read()))
+        pkgpath = '/'.join([ config.BASE_DIR, config.PKG_RELPATH, config.DATA[domain]['packed'] ])
+        try:
+            with zipfile.ZipFile(pkgpath, 'r') as zip:
+                with zip.open(vpath, 'r') as data:
+                    root = xmlunpacker.read(io.BytesIO(data.read()))
+        except:
+            root = None
     return root
-
-
-def readVehicleData(nation, target):
-    if config.SCRIPTS_DIR:
-        vpath = config.DEFS_VEHICLES_VPATH.replace('scripts/', '', 1)
-        package = None
-        scriptsdir = config.SCRIPTS_DIR
-    else:
-        vpath = config.DEFS_VEHICLES_VPATH
-        package = config.PKG_SCRIPTS
-        scriptsdir = None
-    relpath = '{}/{}/{}'.format(vpath, nation, target)
-    return readPackedXml(relpath, package=package, basedir=scriptsdir)
 
 
 class Strage(object):
@@ -93,13 +95,12 @@ class Strage(object):
                 self.__dictVehicle[k] = v
 
     def __fetchNationOrder(self):
-        try:
-            root = readPackedXml(config.GUISETTINGS_VPATH, package=config.PKG_GUI)
-            for child in root:
-                if child.tag == 'setting' and child.findtext('name') == 'nations_order':
-                    return [ i.text for i in child.find('value') ]
-        except:
+        root = readXmlData(config.GUI_SETTINGS)
+        if root is None:
             return NATIONS
+        for child in root:
+            if child.tag == 'setting' and child.findtext('name') == 'nations_order':
+                return [ i.text for i in child.find('value') ]
 
     def getSharedGunsStrage(self, nation):
         return self.__strageSharedGuns[nation]
@@ -201,7 +202,7 @@ class Strage(object):
 class StrageVehicleList(object):
 
     def __init__(self, nation):
-        root = readVehicleData(nation, 'list.xml')
+        root = readXmlData(config.VEHICLES, '/'.join([ nation, 'list.xml' ]))
         self.__strage = {}
         for vehicle in root:
             entry = {}
@@ -232,7 +233,7 @@ class StrageVehicleList(object):
 class StrageSharedGuns(object):
 
     def __init__(self, nation):
-        root = readVehicleData(nation, 'components/guns.xml')
+        root = readXmlData(config.VEHICLES, '/'.join([ nation, 'components/guns.xml' ]))
         self.__gun = {}
         for gun in root.find('ids'):
             entry = {}
@@ -288,7 +289,7 @@ class StrageSharedGuns(object):
 class StrageSharedShells(object):
 
     def __init__(self, nation):
-        root = readVehicleData(nation, 'components/shells.xml')
+        root = readXmlData(config.VEHICLES, '/'.join([ nation, 'components/shells.xml' ]))
         self.__shell = {}
         for shell in root:
             if shell.find('id') is None:
@@ -313,7 +314,7 @@ class StrageVehicle(object):
     def __init__(self, nation, vehicle, common):
         self.__common = common
         self.__currentNation = nation
-        root = readVehicleData(nation, vehicle + '.xml')
+        root = readXmlData(config.VEHICLES, '/'.join([ nation, vehicle + '.xml' ]))
         
         entry = self.__fetchVehicleEntry(root, vehicle)
         self.__vehicle = entry
@@ -510,6 +511,8 @@ def parseArgument():
         parser.add_argument('--info-full', dest='info_full', help='full view for vehicle.  ex. "R80_KV1:Chassis_KV1_2:Turret_2_KV1:_85mm_F-30:_85mm_UBR-365K"')
 
     parser.parse_args(namespace=config)
+    if config.SCRIPTS_DIR:
+        config.DATA[config.VEHICLES]['extracted'] = config.SCRIPTS_DIR
 
 
 if __name__ == '__main__':
