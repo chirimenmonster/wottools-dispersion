@@ -41,7 +41,7 @@ class Translate(object):
             return ''
         if not text[0] == '#':
             return text
-        domain, name = text[1:-1].split(':')
+        domain, name = text[1:].split(':')
         if domain not in self.__gettext:
             localedir = '/'.join([ config.BASE_DIR, config.LOCALE_RELPATH ])
             self.__gettext[domain] = gettext.translation(domain, languages=['text'], localedir=localedir, fallback=True)
