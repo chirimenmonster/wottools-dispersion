@@ -20,25 +20,27 @@ TYPES = [ 'lightTank', 'mediumTank', 'heavyTank', 'AT-SPG', 'SPG' ]
 TYPES_LABEL = { 'lightTank':'LT', 'mediumTank':'MT', 'heavyTank':'HT', 'AT-SPG':'TD', 'SPG':'SPG' }
 TYPES_LIST = [ TYPES_LABEL[t] for t in TYPES ]
 
-_currentDomain = None
-_translation = None
 
-
-def translate(text):
-    import gettext
+class Translate(object):
+    __gettext = {}
     
-    global _currentDomain
-    global _translation
-    if not text[0] == '#':
+    def translate(self, text):   
+        import gettext
+        
+        if text is None:
+            return ''
+        if not text[0] == '#':
+            return text
+        domain, name = text[1:-1].split(':')
+        if domain not in self.__gettext:
+            localedir = config.BASE_DIR + '/' + config.LOCALE_RELPATH
+            self.__gettext[domain] = gettext.translation(domain, languages=['text'], localedir=localedir, fallback=True)
+        if isinstance(self.__gettext[domain], gettext.GNUTranslations):
+            return self.__gettext[domain].gettext(name)
         return text
-    prefix, name = text.split(':')
-    if not _currentDomain == prefix.replace('#', ''):
-        _currentDomain = prefix.replace('#', '')
-        localedir = config.BASE_DIR + '/' + config.LOCALE_RELPATH
-        _translation = gettext.translation(_currentDomain, languages=['text'], localedir=localedir, fallback=True)
-    if isinstance(_translation, gettext.GNUTranslations):
-        return _translation.gettext(name)
-    return text
+
+translate = Translate().translate
+
 
 def readPackedXml(relpath, package=None, basedir=None):
     import io
@@ -74,12 +76,6 @@ def readVehicleData(nation, target):
     return readPackedXml(relpath, package=package, basedir=scriptsdir)
 
 
-def getEntityTextSafe(entity, default):
-    if entity is not None:
-        return entity.text
-    return default
-
-
 class Strage(object):
 
     def __init__(self):
@@ -100,9 +96,8 @@ class Strage(object):
         try:
             root = readPackedXml(config.GUISETTINGS_VPATH, package=config.PKG_GUI)
             for child in root:
-                if child.tag == 'setting' and child.find('name') is not None:
-                    if child.find('name').text == 'nations_order':
-                        return [ i.text for i in child.find('value') ]
+                if child.tag == 'setting' and child.findtext('name') == 'nations_order':
+                    return [ i.text for i in child.find('value') ]
         except:
             return NATIONS
 
@@ -165,15 +160,15 @@ class Strage(object):
         types = TYPES_LIST if type == '*' else [ type ]
         nation_order = { v:i for i,v in enumerate(nations) }
         type_order = { v:i for i,v in enumerate(types) }
-        result = []
+        vehicles = []
         for nation in nations:
-            vehicles = self.__strageVehicleList[nation].getStrage().values()
-            for tier in tiers:
-                for type in types:
-                    list = [ v for v in vehicles if v['tier'] == tier and v['type'] == type ]
-                    result.extend(list)
-        result = sorted(result, key=lambda v: (int(v['tier']), type_order[v['type']], nation_order[v['nation']], v['id']))
-        return [ [ v['tag'], v['shortUserString'] or v['name'], v['nation'], v['tier'], v['type'] ] for v in result ]
+            vehicles.extend(self.__strageVehicleList[nation].getStrage().values())
+        vehicles = [ v for v in vehicles if v['tier'] in tiers and v['type'] in types ]
+        if not config.secret:
+            vehicles = [ v for v in vehicles if not v['secret'] ]
+        vehicles = sorted(vehicles, key=lambda v: (int(v['tier']), type_order[v['type']], nation_order[v['nation']], v['id']))
+        result = [ [ v['tag'], v['shortUserString'] or v['name'], v['nation'], v['tier'], v['type'] ] for v in vehicles ]
+        return result
 
     def fetchNationList(self):
         return [ [ s, s.upper() ] for s in self.__nationOrder ]
@@ -210,19 +205,21 @@ class StrageVehicleList(object):
         self.__strage = {}
         for vehicle in root:
             entry = {}
-            entry['id'] = int(vehicle.find('id').text)
+            entry['id'] = int(vehicle.findtext('id'))
             entry['tag'] = vehicle.tag
             entry['nation'] = nation
-            entry['tier'] = vehicle.find('level').text
-            entry['type'] = [ TYPES_LABEL[t] for t in vehicle.find('tags').text.split(' ') if t in TYPES ][0]
-            entry['userString'] = vehicle.find('userString').text
+            entry['tier'] = vehicle.findtext('level')
+            entry['userString'] = vehicle.findtext('userString')
             entry['name'] = translate(entry['userString'])
-            shortUserString = vehicle.find('shortUserString')
-            if shortUserString is not None:
-                entry['shortUserString'] = translate(shortUserString.text)
-            else:
-                entry['shortUserString'] = ''
-            entry['description'] = translate(vehicle.find('description').text)
+            entry['shortUserString'] = translate(vehicle.findtext('shortUserString'))
+            entry['description'] = translate(vehicle.findtext('description'))
+            entry['attr'] = vehicle.findtext('tags').split()
+            entry['secret'] = False
+            for attr in entry['attr']:
+                if attr in TYPES:
+                    entry['type'] = TYPES_LABEL[attr]
+                elif attr in 'secret':
+                    entry['secret'] = True
             self.__strage[vehicle.tag] = entry
 
     def getEntry(self, tag):
@@ -259,23 +256,23 @@ class StrageSharedGuns(object):
 
     def __fetchGunEntry(self, gun):
         entry = {}
-        entry['userString'] = gun.find('userString').text
+        entry['userString'] = gun.findtext('userString')
         entry['name'] = translate(entry['userString'])
-        entry['reloadTime'] = gun.find('reloadTime').text
-        entry['aimingTime'] = gun.find('aimingTime').text
-        entry['shotDispersionRadius'] = gun.find('shotDispersionRadius').text
+        entry['reloadTime'] = gun.findtext('reloadTime')
+        entry['aimingTime'] = gun.findtext('aimingTime')
+        entry['shotDispersionRadius'] = gun.findtext('shotDispersionRadius')
         factors = gun.find('shotDispersionFactors')
-        entry['turretRotation'] = factors.find('turretRotation').text
-        entry['afterShot'] = factors.find('afterShot').text
-        entry['whileGunDamaged'] = factors.find('whileGunDamaged').text
+        entry['turretRotation'] = factors.findtext('turretRotation')
+        entry['afterShot'] = factors.findtext('afterShot')
+        entry['whileGunDamaged'] = factors.findtext('whileGunDamaged')
         return entry
 
     def __fetchShotEntry(self, tree, gun, shot):
         entry = {}
         entry['tag'] = shot
-        entry['speed'] = tree.find('speed').text
-        entry['piercingPower'] = tree.find('piercingPower').text.split(' ')[0]
-        entry['maxDistance'] = tree.find('maxDistance').text
+        entry['speed'] = tree.findtext('speed')
+        entry['piercingPower'] = tree.findtext('piercingPower').split()[0]
+        entry['maxDistance'] = tree.findtext('maxDistance')
         return entry
         
     def getEntry(self, gun):
@@ -294,18 +291,17 @@ class StrageSharedShells(object):
         root = readVehicleData(nation, 'components/shells.xml')
         self.__shell = {}
         for shell in root:
-            entry = {}
-            try:
-                entry['id'] = shell.find('id').text
-            except:
+            if shell.find('id') is None:
                 continue
+            entry = {}
+            entry['id'] = shell.findtext('id')
             entry['tag'] = shell.tag
-            entry['userString'] = shell.find('userString').text
+            entry['userString'] = shell.findtext('userString')
             entry['name'] = translate(entry['userString'])
-            entry['kind'] = shell.find('kind').text
-            entry['caliber'] = shell.find('caliber').text
-            entry['damage_armor'] = shell.find('damage').find('armor').text
-            entry['damage_devices'] = shell.find('damage').find('devices').text
+            entry['kind'] = shell.findtext('kind')
+            entry['caliber'] = shell.findtext('caliber')
+            entry['damage_armor'] = shell.findtext('damage/armor')
+            entry['damage_devices'] = shell.findtext('damage/devices')
             self.__shell[shell.tag] = entry
     
     def getEntry(self, shell):
@@ -354,37 +350,34 @@ class StrageVehicle(object):
     def __fetchChassisEntry(self, tree, chassis):
         entry = {}
         entry['tag'] = chassis
-        entry['userString'] = tree.find('userString').text
+        entry['userString'] = tree.findtext('userString')
         entry['name'] = translate(entry['userString'])
+        entry['attr'] = tree.findtext('tags').split()
         factors = tree.find('shotDispersionFactors')
-        entry['vehicleMovement'] = factors.find('vehicleMovement').text
-        entry['vehicleRotation'] = factors.find('vehicleRotation').text
+        entry['vehicleMovement'] = factors.findtext('vehicleMovement')
+        entry['vehicleRotation'] = factors.findtext('vehicleRotation')
         return entry
 
     def __fetchTurretEntry(self, tree, turret):
         entry = {}
         entry['tag'] = turret
-        entry['userString'] = tree.find('userString').text
+        entry['userString'] = tree.findtext('userString')
         entry['name'] = translate(entry['userString'])
+        entry['attr'] = tree.findtext('tags').split()
         return entry
 
     def __fetchGunEntry(self, tree, gun):
         shared = self.__common.getSharedGunEntry(self.__currentNation, gun)
         entry = {}
         entry['tag'] = gun
-        entry['userString'] = getEntityTextSafe(tree.find('userString'), shared['userString'])
+        entry['userString'] = tree.findtext('userString') or shared['userString']
         entry['name'] = translate(entry['userString'])
-        entry['reloadTime'] = getEntityTextSafe(tree.find('reloadTime'), shared['reloadTime'])
-        entry['aimingTime'] = getEntityTextSafe(tree.find('aimingTime'), shared['aimingTime'])
-        entry['shotDispersionRadius'] = getEntityTextSafe(tree.find('shotDispersionRadius'), shared['shotDispersionRadius'])
-        factors = tree.find('shotDispersionFactors')
-        if factors is not None:
-            entry['turretRotation'] = getEntityTextSafe(factors.find('turretRotation'), shared['turretRotation'])
-            entry['afterShot'] = getEntityTextSafe(factors.find('afterShot'), shared['afterShot'])
-            entry['whileGunDamaged'] = getEntityTextSafe(factors.find('whileGunDamaged'), shared['whileGunDamaged'])
-        else:
-            for k in [ 'turretRotation', 'afterShot', 'whileGunDamaged' ]:
-                entry[k] = shared[k]
+        entry['reloadTime'] = tree.findtext('reloadTime') or shared['reloadTime']
+        entry['aimingTime'] = tree.findtext('aimingTime') or shared['aimingTime']
+        entry['shotDispersionRadius'] = tree.find('shotDispersionRadius') or shared['shotDispersionRadius']
+        entry['turretRotation'] = tree.findtext('shotDispersionFactors/turretRotation') or shared['turretRotation']
+        entry['afterShot'] = tree.findtext('shotDispersionFactors/afterShot') or shared['afterShot']
+        entry['whileGunDamaged'] = tree.findtext('shotDispersionFactors/whileGunDamaged') or shared['whileGunDamaged']
         entry['shots'] = ' '.join(self.__common.getSharedGunsStrage(self.__currentNation).getShotList(gun))
         return entry
  
@@ -496,6 +489,7 @@ def parseArgument():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', dest='BASE_DIR', help='specify <WoT_game_folder>')
     parser.add_argument('-s', dest='SCRIPTS_DIR', help='scripts folder extracted.  ex. "C:\git\wot.scripts\scripts"')
+    parser.add_argument('--secret', action='store_true', help='include secret tanks')
     
     if __name__ == '__main__':
         parser.add_argument('--list', dest='pattern', help='show vehicle list for NATION:TIER:TYPE.  ex. "germany:9:HT"')
