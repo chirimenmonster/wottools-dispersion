@@ -56,11 +56,17 @@
     ],
     [
         {
-            "title": "dummy",
+            "title": null,
             "titleoption": {
                 "label": { "width": 20, "anchor": "w" }
             },
-            "items": [],
+            "items": [
+                "vehicle:speedLimits_forward",
+                "vehicle:speedLimits_backward",
+                "vehicle:tags",
+                "vehicle:secret",
+                "vehicle:type"
+            ],
             "option": {
                 "label":    { "width": 20,  "anchor": "e" },
                 "value":    { "width": 4,   "anchor": "e" },

@@ -1,3 +1,4 @@
+import json
 
 class Config:
     BASE_DIR = 'C:/Games/World_of_Tanks'
@@ -81,18 +82,72 @@ def readXmlData(domain, target=None):
 class Strage(object):
 
     def __init__(self):
+        with open('itemdef.json', 'r') as fp:
+            self.__itemdef = json.load(fp)
         self.__strageVehicleList = {}
         self.__strageSharedGuns = {}
         self.__strageSharedShells = {}
         self.__dictVehicle = {}
         self.__cacheVehicleInfo = {}
+        self.__xmltree = {}
         self.__nationOrder = self.__fetchNationOrder()
         for nation in self.__nationOrder:
-            self.__strageVehicleList[nation] = StrageVehicleList(nation)
-            self.__strageSharedGuns[nation] = StrageSharedGuns(nation)
-            self.__strageSharedShells[nation] = StrageSharedShells(nation)
+            vehicleList = StrageVehicleList(nation)
+            sharedGuns = StrageSharedGuns(nation)
+            sharedShells = StrageSharedShells(nation)
+
+            self.__strageVehicleList[nation] = vehicleList
+            self.__strageSharedGuns[nation] = sharedGuns
+            self.__strageSharedShells[nation] = sharedShells
+            
             for k,v in self.__strageVehicleList[nation].getStrage().items():
                 self.__dictVehicle[k] = v
+
+    def __findtext(self, resource, param):
+        print('*', resource, param, flush=True)
+        file = resource['file'].format(**param)
+        xpath = resource['xpath'].format(**param)
+        print('*', file, xpath, flush=True)
+        if file not in self.__xmltree:
+            domain, target = file.split('/', 1)
+            self.__xmltree[file] = readXmlData(domain, target)
+        root = self.__xmltree[file]
+        print('*', file, xpath, param, flush=True)
+        value = root.findtext(xpath)
+        if 'type' in resource and resource['type'] == 'array':
+            values = value.split()
+            if 'index' in resource:
+                value = values[resource['index']]
+            elif 'match' in resource:
+                result = [ resource['match'][v] for v in values if v in resource['match'] ]
+                value = result.pop(0) if result else None
+                print(value, flush=True)
+        return value
+
+    def findtext(self, category, node, param):
+        for r in self.__itemdef[category][node]['resources']:
+            print(r, flush=True)
+            result = self.__findtext(r, param)
+            if result is not None:
+                return result
+        return None
+
+    def __find(self, resource, param):
+        file = resource['file'].format(**param)
+        xpath = resource['xpath'].format(**param)
+        if file not in self.__xmltree:
+            domain, target = file.split('/', 1)
+            self.__xmltree[file] = readXmlData(domain, target)
+        root = self.__xmltree[file]
+        value = root.find(xpath)
+        return value
+
+    def find(self, category, node, param):
+        for r in self.__itemdef[category][node]['resources']:
+            result = self.__find(r, param)
+            if result is not None:
+                return result
+        return None
 
     def __fetchNationOrder(self):
         root = readXmlData(config.GUI_SETTINGS)
@@ -101,9 +156,6 @@ class Strage(object):
         for child in root:
             if child.tag == 'setting' and child.findtext('name') == 'nations_order':
                 return [ i.text for i in child.find('value') ]
-
-    def getSharedGunsStrage(self, nation):
-        return self.__strageSharedGuns[nation]
 
     def getVehicleEntry(self, nation, vehicle):
         return self.__strageVehicleList[nation].getEntry(vehicle)
@@ -117,7 +169,9 @@ class Strage(object):
 
     def __fetchVehicleInfo(self, nation, vehicle):
         if vehicle not in self.__cacheVehicleInfo:
-            self.__cacheVehicleInfo[vehicle] = StrageVehicle(nation, vehicle, self)
+            strage = StrageVehicle(nation, vehicle, self)
+            self.__cacheVehicleInfo[vehicle] = strage
+            self.__xmltree[strage.filename] = strage.root
         return self.__cacheVehicleInfo[vehicle]
 
     def fetchVehicleInfo(self, nation, vehicle):
@@ -185,26 +239,48 @@ class Strage(object):
         return vehicleInfo.fetchChassisList()
 
     def fetchTurretList(self, nation, vehicle):
-        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
-        return vehicleInfo.fetchTurretList()
+        param = { 'nation': nation, 'vehicle': vehicle }
+        result = self.find('vehicle', 'turrets', param)
+        turrets = [ node.tag for node in result ]
+        result = []
+        for turret in turrets:
+            param['turret'] = turret
+            print(param, flush=True)
+            result.append([ turret, self.findtext('turret', 'userString', param) ])
+        print(result, flush=True)
+        return result
 
     def fetchGunList(self, nation, vehicle, turret):
-        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
-        gunList = vehicleInfo.fetchGunList(turret)
-        return gunList
+        param = { 'nation': nation, 'vehicle': vehicle, 'turret': turret }
+        result = self.find('turret', 'guns', param)
+        guns = [ node.tag for node in result ]
+        result = []
+        for gun in guns:
+            param['gun'] = gun
+            print(param, flush=True)
+            result.append([ gun, self.findtext('gun', 'userString', param) ])
+        print(result, flush=True)
+        return result
 
     def fetchShellList(self, nation, gun):
-        shells = self.__strageSharedGuns[nation].getShotList(gun)
-        strage = self.__strageSharedShells[nation]
-        return [ [ shell, strage.getEntry(shell)['name'] ] for shell in shells ]
+        param = { 'nation': nation, 'gun': gun }
+        result = self.find('gun', 'shots', param)
+        shells = [ node.tag for node in result ]
+        result = []
+        for shell in shells:
+            param['shell'] = shell
+            result.append([ shell, self.findtext('shell', 'userString', param) ])
+        print(result, flush=True)
+        return result
 
 
 class StrageVehicleList(object):
 
     def __init__(self, nation):
-        root = readXmlData(config.VEHICLES, '/'.join([ nation, 'list.xml' ]))
+        self.filename = '/'.join([ config.VEHICLES, nation, 'list.xml' ])
+        self.root = readXmlData(config.VEHICLES, '/'.join([ nation, 'list.xml' ]))
         self.__strage = {}
-        for vehicle in root:
+        for vehicle in self.root:
             entry = {}
             entry['id'] = int(vehicle.findtext('id'))
             entry['tag'] = vehicle.tag
@@ -233,21 +309,22 @@ class StrageVehicleList(object):
 class StrageSharedGuns(object):
 
     def __init__(self, nation):
-        root = readXmlData(config.VEHICLES, '/'.join([ nation, 'components/guns.xml' ]))
+        self.filename = '/'.join([ config.VEHICLES, nation, 'components/guns.xml' ])
+        self.root = readXmlData(config.VEHICLES, '/'.join([ nation, 'components/guns.xml' ]))
         self.__gun = {}
-        for gun in root.find('ids'):
+        for gun in self.root.find('ids'):
             entry = {}
             entry['id'] = int(gun.text)
             entry['tag'] = gun.tag
             entry['nation'] = nation
             self.__gun[gun.tag] = entry
-        for gun in root.find('shared'):
+        for gun in self.root.find('shared'):
             entry = self.__fetchGunEntry(gun)
             for k,v in entry.items():
                 self.__gun[gun.tag][k] = v
         self.__shot = {}
         self.__shotList = {}
-        for gun in root.find('shared'):
+        for gun in self.root.find('shared'):
             self.__shot[gun.tag] = {}
             self.__shotList[gun.tag] = []
             for shot in gun.find('shots'):
@@ -259,28 +336,15 @@ class StrageSharedGuns(object):
         entry = {}
         entry['userString'] = gun.findtext('userString')
         entry['name'] = translate(entry['userString'])
-        entry['reloadTime'] = gun.findtext('reloadTime')
-        entry['aimingTime'] = gun.findtext('aimingTime')
-        entry['shotDispersionRadius'] = gun.findtext('shotDispersionRadius')
-        factors = gun.find('shotDispersionFactors')
-        entry['turretRotation'] = factors.findtext('turretRotation')
-        entry['afterShot'] = factors.findtext('afterShot')
-        entry['whileGunDamaged'] = factors.findtext('whileGunDamaged')
         return entry
 
     def __fetchShotEntry(self, tree, gun, shot):
         entry = {}
         entry['tag'] = shot
-        entry['speed'] = tree.findtext('speed')
-        entry['piercingPower'] = tree.findtext('piercingPower').split()[0]
-        entry['maxDistance'] = tree.findtext('maxDistance')
         return entry
         
     def getEntry(self, gun):
         return self.__gun[gun]
-
-    def getShotList(self, gun):
-        return self.__shotList[gun]
 
     def getShotEntry(self, gun, shell):
         return self.__shot[gun][shell]
@@ -289,9 +353,10 @@ class StrageSharedGuns(object):
 class StrageSharedShells(object):
 
     def __init__(self, nation):
-        root = readXmlData(config.VEHICLES, '/'.join([ nation, 'components/shells.xml' ]))
+        self.filename = '/'.join([ config.VEHICLES, nation, 'components/shells.xml' ])
+        self.root = readXmlData(config.VEHICLES, '/'.join([ nation, 'components/shells.xml' ]))
         self.__shell = {}
-        for shell in root:
+        for shell in self.root:
             if shell.find('id') is None:
                 continue
             entry = {}
@@ -299,12 +364,8 @@ class StrageSharedShells(object):
             entry['tag'] = shell.tag
             entry['userString'] = shell.findtext('userString')
             entry['name'] = translate(entry['userString'])
-            entry['kind'] = shell.findtext('kind')
-            entry['caliber'] = shell.findtext('caliber')
-            entry['damage_armor'] = shell.findtext('damage/armor')
-            entry['damage_devices'] = shell.findtext('damage/devices')
             self.__shell[shell.tag] = entry
-    
+
     def getEntry(self, shell):
         return self.__shell[shell]
 
@@ -314,28 +375,29 @@ class StrageVehicle(object):
     def __init__(self, nation, vehicle, common):
         self.__common = common
         self.__currentNation = nation
-        root = readXmlData(config.VEHICLES, '/'.join([ nation, vehicle + '.xml' ]))
-        
-        entry = self.__fetchVehicleEntry(root, vehicle)
+        self.filename = '/'.join([ config.VEHICLES, nation, vehicle + '.xml' ])
+        self.root = readXmlData(config.VEHICLES, '/'.join([ nation, vehicle + '.xml' ]))
+
+        entry = self.__fetchVehicleEntry(self.root, vehicle)
         self.__vehicle = entry
         
         self.__chassis = {}
         self.__chassisList = []
-        for chassis in root.find('chassis'):
+        for chassis in self.root.find('chassis'):
             entry = self.__fetchChassisEntry(chassis, chassis.tag)
             self.__chassis[chassis.tag] = entry
             self.__chassisList.append(chassis.tag)
         
         self.__turret = {}
         self.__turretList = []
-        for turret in root.find('turrets0'):
+        for turret in self.root.find('turrets0'):
             entry = self.__fetchTurretEntry(turret, turret.tag)
             self.__turret[turret.tag] = entry
             self.__turretList.append(turret.tag)
 
         self.__gun = {}
         self.__gunList = {}
-        for turret in root.find('turrets0'):
+        for turret in self.root.find('turrets0'):
             self.__gun[turret.tag] = {}
             self.__gunList[turret.tag] = []
             for gun in turret.find('guns'):
@@ -354,9 +416,6 @@ class StrageVehicle(object):
         entry['userString'] = tree.findtext('userString')
         entry['name'] = translate(entry['userString'])
         entry['attr'] = tree.findtext('tags').split()
-        factors = tree.find('shotDispersionFactors')
-        entry['vehicleMovement'] = factors.findtext('vehicleMovement')
-        entry['vehicleRotation'] = factors.findtext('vehicleRotation')
         return entry
 
     def __fetchTurretEntry(self, tree, turret):
@@ -373,13 +432,6 @@ class StrageVehicle(object):
         entry['tag'] = gun
         entry['userString'] = tree.findtext('userString') or shared['userString']
         entry['name'] = translate(entry['userString'])
-        entry['reloadTime'] = tree.findtext('reloadTime') or shared['reloadTime']
-        entry['aimingTime'] = tree.findtext('aimingTime') or shared['aimingTime']
-        entry['shotDispersionRadius'] = tree.findtext('shotDispersionRadius') or shared['shotDispersionRadius']
-        entry['turretRotation'] = tree.findtext('shotDispersionFactors/turretRotation') or shared['turretRotation']
-        entry['afterShot'] = tree.findtext('shotDispersionFactors/afterShot') or shared['afterShot']
-        entry['whileGunDamaged'] = tree.findtext('shotDispersionFactors/whileGunDamaged') or shared['whileGunDamaged']
-        entry['shots'] = ' '.join(self.__common.getSharedGunsStrage(self.__currentNation).getShotList(gun))
         return entry
  
     def fetchVehicleInfo(self):
@@ -397,11 +449,6 @@ class StrageVehicle(object):
     def fetchChassisList(self):
         return [ [ tag, self.__chassis[tag]['name'] ] for tag in self.__chassisList ]
 
-    def fetchTurretList(self):
-        return [ [ tag, self.__turret[tag]['name'] ] for tag in self.__turretList ]
-   
-    def fetchGunList(self, turret):
-        return [ [ tag, self.__gun[turret][tag]['name'] ] for tag in self.__gunList[turret] ]
 
 
 class Command:

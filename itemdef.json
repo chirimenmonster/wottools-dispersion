@@ -26,66 +26,383 @@
             "value":    [ "name", "tag" ]
         }
     },
+    "vehicle": {
+        "id": {
+            "label":    "id",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}/id"
+                }
+            ]
+        },
+        "userString": {
+            "label":    "userString",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}/userString"
+                }
+            ]
+        },
+        "shortUserString": {
+            "label":    "shortUserString",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}/shortUserString"
+                }
+            ]
+        },
+        "description": {
+            "label":    "description",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}/description"
+                }
+            ]
+        },
+        "tags": {
+            "label":    "tags",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}/tags"
+                }
+            ]
+        },
+        "secret": {
+            "label":    "secret",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}/tags",
+                    "type":     "array",
+                    "match":     { "secret": "secret" }
+                }
+            ]
+        },
+        "type": {
+            "label":    "type",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}/tags",
+                    "type":     "array",
+                    "match": {
+                        "lightTank": "LT", "mediumTank": "MT", "heavyTank": "HT",
+                        "AT-SPG": "TD", "SPG": "SPG"
+                    }
+                }
+            ]
+        },
+        "tier": {
+            "label":    "tier",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}/level"
+                }
+            ]
+        },
+        "speedLimits_forward": {
+            "label":    "max speed forward:",
+            "unit":     "km/h",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "speedLimits/forward"
+                }
+            ]
+        },
+        "speedLimits_backward": {
+            "label":    "max speed backward:",
+            "unit":     "km/h",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "speedLimits/backward"
+                }
+            ]
+        },
+        "chassis": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis"
+                }
+            ]
+        },
+        "turrets": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0"
+                }
+            ]
+        }
+    },
     "chassis": {
+        "userString": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/userString"
+                }
+            ]
+        },
         "vehicleMovement": {
             "label":    "... factor movement:",
-            "unit":     ""
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/vehicleMovement"
+                }
+            ]
         },
         "vehicleRotation": {
             "label":    "... factor rotation:",
-            "unit": ""
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/vehicleRotation"
+                }
+            ]
+        }
+    },
+    "turret": {
+        "userString": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/userString"
+                }
+            ]
+        },
+        "guns": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns"
+                }
+            ]
         }
     },
     "gun": {
+        "userString": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/userString"
+                }
+            ]
+        },
         "reloadTime": {
             "label":    "reload time:",
-            "unit":     "s"
+            "unit":     "s",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns/{gun}/reloadTime"
+                },
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/reloadTime"
+                }
+            ]
         },
         "aimingTime": {
             "label":    "aiming time:",
-            "unit":     "s"
+            "unit":     "s",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns/{gun}/aimingTime"
+                },
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/aimingTime"
+                }
+            ]
         },
         "shotDispersionRadius": {
             "label":    "shot dispersion radius:",
-            "unit":     "m"
+            "unit":     "m",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns/{gun}/shotDispersionRadius"
+                },
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shotDispersionRadius"
+                }
+            ]
         },
         "turretRotation": {
             "label":    "... factor turret rotation:",
-            "unit":     ""
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns/{gun}/shotDispersionFactors/turretRotation"
+                },
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shotDispersionFactors/turretRotation"
+                }
+            ]
         },
         "afterShot": {
             "label":    "... factor after shot:",
-            "unit":     ""
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns/{gun}/shotDispersionFactors/afterShot"
+                },
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shotDispersionFactors/afterShot"
+                }
+            ]
         },
         "whileGunDamaged": {
             "label":    "... factor gun damaged:",
-            "unit":     ""
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns/{gun}/shotDispersionFactors/whileGunDamaged"
+                },
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shotDispersionFactors/whileGunDamaged"
+                }
+            ]
+        },
+        "shots": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shots"
+                }
+            ]
         }
     },
     "shell": {
+        "id": {
+            "label":    "id",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}/id"
+                }
+            ]
+        },
+        "userString": {
+            "label":    "userString",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}/userString"
+                }
+            ]
+        },
+        "kind": {
+            "label":    "kind",
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}/kind"
+                }
+            ]
+        },
         "caliber": {
             "label":    "caliber:",
-            "unit":     "mm"
+            "unit":     "mm",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}/caliber"
+                }
+            ]
         },
         "damage_armor": {
             "label":    "damage armor:",
-            "unit":     ""
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}/damage/armor"
+                }
+            ]
         },
         "damage_devices": {
             "label":    "damage devices:",
-            "unit":     ""
+            "unit":     "",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}/damage/devices"
+                }
+            ]
         },
         "speed": {
             "label":    "speed:",
-            "unit":     "m/s"
+            "unit":     "m/s",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shots/{shell}/speed"
+                }
+            ]
+        },
+        "gravity": {
+            "label":    "gravity:",
+            "unit":     "m/s^2",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shots/{shell}/gravity"
+                }
+            ]
         },
         "maxDistance": {
             "label":    "max distance:",
-            "unit":     "m"
+            "unit":     "m",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shots/{shell}/maxDistance"
+                }
+            ]
         },
         "piercingPower": {
             "label":    "piercing power:",
-            "unit":     "mm"
+            "unit":     "mm",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/shots/{shell}/piercingPower",
+                    "type":     "array",
+                    "index":    0
+                }
+            ]
         }
     }
 }

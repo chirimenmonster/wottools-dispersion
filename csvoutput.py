@@ -11,13 +11,6 @@ labeldesc = {
     'shell':    [ 'name', 'tag' ],
 }
 
-#import gui
-#dataorder = []
-#for column in gui.itemGroup:
-#    for row in column:
-#        dataorder += row['items']
-
-
 def fetchItemdef():
     with open('itemdef.json', 'r') as fp:
         data = json.load(fp)

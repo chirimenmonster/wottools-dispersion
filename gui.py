@@ -174,7 +174,9 @@ class Application(tkinter.Frame):
             tag[s] = self.__selector[s].getSelected()
         if tag['vehicle'] is None:
             return ''
-        if category == 'chassis':
+        if category == 'vehicle':
+            args = [ tag[s] for s in [ 'nation', 'vehicle' ] ]
+        elif category == 'chassis':
             args = [ tag[s] for s in [ 'nation', 'vehicle', 'chassis' ] ]
         elif category == 'turret':
             args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret' ] ]
@@ -182,7 +184,11 @@ class Application(tkinter.Frame):
             args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret', 'gun' ] ]
         elif category == 'shell':
             args = [ tag[s] for s in [ 'nation', 'gun', 'shell' ] ]
-        text = self.__stragefetchInfo[category](*args)[node]
+        if 'resources' in self.__itemdef[category][node]:
+            text = self.__strage.findtext(category, node, tag)
+        else:
+            text = self.__stragefetchInfo[category](*args)[node]
+            text = None
         return text
 
     def changeVehicleFilter(self):
