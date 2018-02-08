@@ -104,15 +104,12 @@ class Strage(object):
                 self.__dictVehicle[k] = v
 
     def __findtext(self, resource, param):
-        print('*', resource, param, flush=True)
         file = resource['file'].format(**param)
         xpath = resource['xpath'].format(**param)
-        print('*', file, xpath, flush=True)
         if file not in self.__xmltree:
             domain, target = file.split('/', 1)
             self.__xmltree[file] = readXmlData(domain, target)
         root = self.__xmltree[file]
-        print('*', file, xpath, param, flush=True)
         value = root.findtext(xpath)
         if 'type' in resource and resource['type'] == 'array':
             values = value.split()
@@ -121,16 +118,20 @@ class Strage(object):
             elif 'match' in resource:
                 result = [ resource['match'][v] for v in values if v in resource['match'] ]
                 value = result.pop(0) if result else None
-                print(value, flush=True)
         return value
 
     def findtext(self, category, node, param):
-        for r in self.__itemdef[category][node]['resources']:
-            print(r, flush=True)
+        schema = self.__itemdef[category][node]
+        for r in schema['resources']:
             result = self.__findtext(r, param)
             if result is not None:
-                return result
-        return None
+                break
+        if 'map' in schema:
+            if  schema['map'] == 'gettext':
+                result = translate(result)
+        print(category, node, param)
+        print(schema)
+        return result
 
     def __find(self, resource, param):
         file = resource['file'].format(**param)
@@ -217,12 +218,26 @@ class Strage(object):
         type_order = { v:i for i,v in enumerate(types) }
         vehicles = []
         for nation in nations:
-            vehicles.extend(self.__strageVehicleList[nation].getStrage().values())
+            param = { 'nation': nation }
+            items = [ node.tag for node in self.find('vehicle', 'list', param) ]
+            for item in items:
+                param = { 'nation': nation, 'vehicle': item }
+                v = {}
+                v['tag'] = item
+                v['nation'] = nation
+                v['id'] = int(self.findtext('vehicle', 'id', param))
+                v['tier'] = self.findtext('vehicle', 'tier', param)
+                v['type'] = self.findtext('vehicle', 'type', param)
+                v['userString'] = self.findtext('vehicle', 'userString', param)
+                v['shortUserString'] = self.findtext('vehicle', 'shortUserString', param)
+                v['secret'] = self.findtext('vehicle', 'secret', param)
+                vehicles.append(v)
+
         vehicles = [ v for v in vehicles if v['tier'] in tiers and v['type'] in types ]
         if not config.secret:
             vehicles = [ v for v in vehicles if not v['secret'] ]
         vehicles = sorted(vehicles, key=lambda v: (int(v['tier']), type_order[v['type']], nation_order[v['nation']], v['id']))
-        result = [ [ v['tag'], v['shortUserString'] or v['name'], v['nation'], v['tier'], v['type'] ] for v in vehicles ]
+        result = [ [ v['tag'], v['shortUserString'] or v['userString'], v['nation'], v['tier'], v['type'] ] for v in vehicles ]
         return result
 
     def fetchNationList(self):
@@ -234,44 +249,32 @@ class Strage(object):
     def fetchTypeList(self):
         return [ [ type, type ] for type in TYPES_LIST ]
 
+    def _getDropdownItems(self, category, items, param):
+        result = []
+        for item in items:
+            param[category] = item
+            result.append([ item, self.findtext(category, 'userString', param) ])
+        return result
+    
     def fetchChassisList(self, nation, vehicle):
-        vehicleInfo = self.__fetchVehicleInfo(nation, vehicle)
-        return vehicleInfo.fetchChassisList()
+        param = { 'nation': nation, 'vehicle': vehicle }
+        items = [ node.tag for node in self.find('vehicle', 'chassis', param) ]
+        return self._getDropdownItems('chassis', items, param)
 
     def fetchTurretList(self, nation, vehicle):
         param = { 'nation': nation, 'vehicle': vehicle }
-        result = self.find('vehicle', 'turrets', param)
-        turrets = [ node.tag for node in result ]
-        result = []
-        for turret in turrets:
-            param['turret'] = turret
-            print(param, flush=True)
-            result.append([ turret, self.findtext('turret', 'userString', param) ])
-        print(result, flush=True)
-        return result
+        items = [ node.tag for node in self.find('vehicle', 'turrets', param) ]
+        return self._getDropdownItems('turret', items, param)
 
     def fetchGunList(self, nation, vehicle, turret):
         param = { 'nation': nation, 'vehicle': vehicle, 'turret': turret }
-        result = self.find('turret', 'guns', param)
-        guns = [ node.tag for node in result ]
-        result = []
-        for gun in guns:
-            param['gun'] = gun
-            print(param, flush=True)
-            result.append([ gun, self.findtext('gun', 'userString', param) ])
-        print(result, flush=True)
-        return result
+        items = [ node.tag for node in self.find('turret', 'guns', param) ]
+        return self._getDropdownItems('gun', items, param)
 
     def fetchShellList(self, nation, gun):
         param = { 'nation': nation, 'gun': gun }
-        result = self.find('gun', 'shots', param)
-        shells = [ node.tag for node in result ]
-        result = []
-        for shell in shells:
-            param['shell'] = shell
-            result.append([ shell, self.findtext('shell', 'userString', param) ])
-        print(result, flush=True)
-        return result
+        items = [ node.tag for node in self.find('gun', 'shots', param) ]
+        return self._getDropdownItems('shell', items, param)
 
 
 class StrageVehicleList(object):

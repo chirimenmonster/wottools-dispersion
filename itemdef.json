@@ -27,6 +27,14 @@
         }
     },
     "vehicle": {
+        "list": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "."
+                }
+            ]
+        },
         "id": {
             "label":    "id",
             "unit":     "",
@@ -39,7 +47,7 @@
         },
         "userString": {
             "label":    "userString",
-            "unit":     "",
+            "map":      "gettext",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/list.xml",
@@ -49,7 +57,7 @@
         },
         "shortUserString": {
             "label":    "shortUserString",
-            "unit":     "",
+            "map":      "gettext",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/list.xml",
@@ -59,7 +67,7 @@
         },
         "description": {
             "label":    "description",
-            "unit":     "",
+            "map":      "gettext",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/list.xml",
@@ -153,6 +161,7 @@
     },
     "chassis": {
         "userString": {
+            "map":      "gettext",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -166,7 +175,7 @@
             "resources": [
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
-                    "xpath":    "chassis/{chassis}/vehicleMovement"
+                    "xpath":    "chassis/{chassis}/shotDispersionFactors/vehicleMovement"
                 }
             ]
         },
@@ -176,13 +185,14 @@
             "resources": [
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
-                    "xpath":    "chassis/{chassis}/vehicleRotation"
+                    "xpath":    "chassis/{chassis}/shotDispersionFactors/vehicleRotation"
                 }
             ]
         }
     },
     "turret": {
         "userString": {
+            "map":      "gettext",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -201,6 +211,7 @@
     },
     "gun": {
         "userString": {
+            "map":      "gettext",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/components/guns.xml",
@@ -314,7 +325,7 @@
         },
         "userString": {
             "label":    "userString",
-            "unit":     "",
+            "map":      "gettext",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/components/shells.xml",
