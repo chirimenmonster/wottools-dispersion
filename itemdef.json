@@ -28,11 +28,11 @@
     },
     "chassis": {
         "vehicleMovement": {
-            "label":    "... vehicle movement:",
+            "label":    "... factor movement:",
             "unit":     ""
         },
         "vehicleRotation": {
-            "label":    "... vehicle rotation:",
+            "label":    "... factor rotation:",
             "unit": ""
         }
     },
@@ -50,15 +50,15 @@
             "unit":     "m"
         },
         "turretRotation": {
-            "label":    "... turret rotation:",
+            "label":    "... factor turret rotation:",
             "unit":     ""
         },
         "afterShot": {
-            "label":    "... after shot:",
+            "label":    "... factor after shot:",
             "unit":     ""
         },
         "whileGunDamaged": {
-            "label":    "... while gun damaged:",
+            "label":    "... factor gun damaged:",
             "unit":     ""
         }
     },

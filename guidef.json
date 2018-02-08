@@ -1,0 +1,71 @@
+[
+    [
+        {
+            "title": null,
+            "titleoption": {
+                "label": { "width": 20, "anchor": "w" }
+            },
+            "items": [
+                "shell:damage_armor",
+                "shell:piercingPower",
+                "gun:reloadTime",
+                "gun:aimingTime"
+            ],
+            "option": {
+                "label":    { "width": 20,  "anchor": "e" },
+                "value":    { "width": 4,   "anchor": "e" },
+                "unit":     { "width": 5,   "anchor": "w" }
+            }
+        },
+        {
+            "title": null,
+            "titleoption": {
+                "label": { "width": 20, "anchor": "w" }
+            },
+            "items": [
+                "gun:shotDispersionRadius",
+                "chassis:vehicleMovement",
+                "chassis:vehicleRotation",
+                "gun:turretRotation",
+                "gun:afterShot",
+                "gun:whileGunDamaged"
+            ],
+            "option": {
+                "label":    { "width": 20,  "anchor": "e" },
+                "value":    { "width": 4,   "anchor": "e" },
+                "unit":     { "width": 5,   "anchor": "w" }
+            }
+        },
+        {
+            "title": null,
+            "titleoption": {
+                "label": { "width": 20, "anchor": "w" }
+            },
+            "items": [
+                "shell:damage_devices",
+                "shell:caliber",
+                "shell:speed",
+                "shell:maxDistance"
+            ],
+            "option": {
+                "label":    { "width": 20,  "anchor": "e" },
+                "value":    { "width": 4,   "anchor": "e" },
+                "unit":     { "width": 5,   "anchor": "w" }
+            }
+        }
+    ],
+    [
+        {
+            "title": "dummy",
+            "titleoption": {
+                "label": { "width": 20, "anchor": "w" }
+            },
+            "items": [],
+            "option": {
+                "label":    { "width": 20,  "anchor": "e" },
+                "value":    { "width": 4,   "anchor": "e" },
+                "unit":     { "width": 5,   "anchor": "w" }
+            }
+        }
+    ]
+]

@@ -2,43 +2,19 @@ import tkinter
 import tkinter.ttk
 import tkinter.font
 
+import json
+
 import strage
 import csvoutput
-
-itemGroup = [
-    [
-        {
-            'title': None,
-            'items': [
-                'shell:damage_armor', 'shell:piercingPower',
-                'gun:reloadTime', 'gun:aimingTime', 'gun:shotDispersionRadius'
-            ]
-        },
-        {
-            'title': 'DispersionFactor',
-            'items': [
-                'chassis:vehicleMovement', 'chassis:vehicleRotation', 'gun:turretRotation',
-                'gun:afterShot', 'gun:whileGunDamaged'
-            ]
-        },
-        {
-            'title': None,
-            'items': [
-                'shell:damage_devices', 'shell:caliber', 'shell:speed', 'shell:maxDistance'
-            ]
-        }
-    ],
-    [
-        {
-            'title': 'dummy',
-            'items': []
-        }
-    ]
-]
 
 class Application(tkinter.Frame):
 
     def __init__(self, master=None, strage=strage):
+        with open('itemdef.json', 'r') as fp:
+            self.__itemdef = json.load(fp)
+        with open('guidef.json', 'r') as fp:
+            self.__itemgroup = json.load(fp)
+
         self.__strage = strage
 
         self.__stragefetchInfo = {}
@@ -61,7 +37,7 @@ class Application(tkinter.Frame):
         self.__selector = {}
 
         tkinter.Frame.__init__(self, master)
-        self.font = tkinter.font.Font(family='Arial', size=11, weight='normal')
+        self.font = tkinter.font.Font(family='Arial', size=10, weight='normal')
         self.option_add('*font', self.font)
         self.option_add('*background', 'white')
         self.option_add('*relief', 'flat')
@@ -93,7 +69,7 @@ class Application(tkinter.Frame):
             panelColumn.append(panel)
 
         panelGroup = []
-        for i, column in enumerate(itemGroup):
+        for i, column in enumerate(self.__itemgroup):
             panelGroup.append([])
             for j, row in enumerate(column):
                 panel = tkinter.Frame(panelColumn[i], highlightthickness=1, highlightbackground='gray')
@@ -154,15 +130,16 @@ class Application(tkinter.Frame):
         self.__itemValue = {}
         opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
         for name in [ 'title:vehicle', 'title:chassis', 'title:turret', 'title:gun', 'title:shell' ]:
-            self.__itemValue[name] = PanelItemValue(modulePanel, name, bind=self.getTitleValue, option=opts)
+            self.__itemValue[name] = PanelItemValue(modulePanel, name, self.__itemdef, bind=self.getTitleValue, option=opts)
 
-        opts = { 'label':{'width':20, 'anchor':'e'}, 'value':{'width':4, 'anchor':'e'}, 'unit':{'width':5, 'anchor':'w'} }
-        for i, column in enumerate(itemGroup):
+        for i, column in enumerate(self.__itemgroup):
             for j, row in enumerate(column):
                 if row['title'] is not None:
-                    PanelItemValue(panelGroup[i][j], None, option={'label':{'text':row['title'], 'width':20, 'anchor':'w'}})
+                    opts = { k:v for k,v in row['titleoption'].items() }
+                    opts['label']['text'] = row['title']
+                    PanelItemValue(panelGroup[i][j], None, self.__itemdef, option=opts)
                 for item in row['items']:
-                    self.__itemValue[item] = PanelItemValue(panelGroup[i][j], item, bind=self.getItemValue, option=opts)
+                    self.__itemValue[item] = PanelItemValue(panelGroup[i][j], item, self.__itemdef, bind=self.getItemValue, option=row['option'])
         self.changeVehicleFilter()
 
 
@@ -250,8 +227,14 @@ class Application(tkinter.Frame):
  
  
     def createMessage(self):
-        args = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ] ]       
-        message = csvoutput.createMessage(self.__strage, *args)
+        param = {}
+        for category in  [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+            param[category] = self.__selector[category].getSelected()
+        items = []
+        for column in self.__itemgroup:
+            for row in column:
+                items += row['items']
+        message = csvoutput.createMessage(self.__strage, param, items)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
 
@@ -274,7 +257,7 @@ class Application(tkinter.Frame):
 
 class PanelItemValue(tkinter.Frame):
 
-    def __init__(self, master, name, *args, **kwargs):
+    def __init__(self, master, name, itemdef, *args, **kwargs):
         bind = kwargs.pop('bind', None)
         option = kwargs.pop('option', {})
         frameopt = { 'borderwidth':0 }
@@ -289,12 +272,12 @@ class PanelItemValue(tkinter.Frame):
         if name is not None:
             category, node = name.split(':')
             self.__bind = { 'category':category, 'node':node, 'target':[category, node], 'func':bind }
-            self.__label['text'] = csvoutput.items[category][node]['label']
+            self.__label['text'] = itemdef[category][node]['label']
             self.__value = tkinter.Label(self, **valueopt)
             self.__value.pack(side='left')
-            if 'unit' in csvoutput.items[category][node]:
+            if 'unit' in itemdef[category][node]:
                 self.__unit = tkinter.Label(self, **unitopt)
-                self.__unit['text'] = csvoutput.items[category][node]['unit']
+                self.__unit['text'] = itemdef[category][node]['unit']
                 self.__unit.pack(side='left')
 
     def update(self):

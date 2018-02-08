@@ -11,11 +11,11 @@ labeldesc = {
     'shell':    [ 'name', 'tag' ],
 }
 
-import gui
-dataorder = []
-for column in gui.itemGroup:
-    for row in column:
-        dataorder += row['items']
+#import gui
+#dataorder = []
+#for column in gui.itemGroup:
+#    for row in column:
+#        dataorder += row['items']
 
 
 def fetchItemdef():
@@ -24,13 +24,13 @@ def fetchItemdef():
     return data
 
 
-def createMessage(strage, nation, vehicle, chassis, turret, gun, shell):
+def createMessage(strage, param, items):
     info = {}
-    info['vehicle'] = strage.fetchVehicleInfo(nation, vehicle)
-    info['chassis'] = strage.fetchChassisInfo(nation, vehicle, chassis)
-    info['turret'] = strage.fetchTurretInfo(nation, vehicle, turret)
-    info['gun'] = strage.fetchGunInfo(nation, vehicle, turret, gun)
-    info['shell'] = strage.fetchShellInfo(nation, gun, shell)
+    info['vehicle'] = strage.fetchVehicleInfo(param['nation'], param['vehicle'])
+    info['chassis'] = strage.fetchChassisInfo(param['nation'], param['vehicle'], param['chassis'])
+    info['turret'] = strage.fetchTurretInfo(param['nation'], param['vehicle'], param['turret'])
+    info['gun'] = strage.fetchGunInfo(param['nation'], param['vehicle'], param['turret'], param['gun'])
+    info['shell'] = strage.fetchShellInfo(param['nation'], param['gun'], param['shell'])
 
     dataList = fetchItemdef()
     
@@ -41,7 +41,7 @@ def createMessage(strage, nation, vehicle, chassis, turret, gun, shell):
         data = [ category ] + [ info[category][name] for name in labeldesc[category] ]
         writer.writerow(data)
 
-    for target in dataorder:
+    for target in items:
         category, node = target.split(':')
         unit = dataList[category][node]['unit']
         writer.writerow([ node, info[category][node], unit ])
