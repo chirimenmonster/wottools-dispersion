@@ -15,6 +15,16 @@
             "format":   "{} ({})",
             "value":    [ "userString", "index" ]
         },
+        "engine": {
+            "label":    "Engine:",
+            "format":   "{} ({})",
+            "value":    [ "userString", "index" ]
+        },
+        "radio": {
+            "label":    "Radio:",
+            "format":   "{} ({})",
+            "value":    [ "userString", "index" ]
+        },
         "gun": {
             "label":    "Gun:",
             "format":   "{} ({})",
@@ -171,6 +181,24 @@
                     "xpath":    "turrets0"
                 }
             ]
+        },
+        "engines": {
+            "value":    "nodelist",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "engines"
+                }
+            ]
+        },
+        "radios": {
+            "value":    "nodelist",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "radios"
+                }
+            ]
         }
     },
     "chassis": {
@@ -189,6 +217,47 @@
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
                     "xpath":    "chassis/{chassis}/userString"
+                }
+            ]
+        },
+        "weight": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/weight"
+                }
+            ]
+        },
+        "terrainResistance_hard": {
+            "label":    "terrain resistance hard:",
+            "unit":     "",
+            "map":      "[0]",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/terrainResistance"
+                }
+            ]
+        },
+        "terrainResistance_medium": {
+            "label":    "terrain resistance medium:",
+            "unit":     "",
+            "map":      "[1]",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/terrainResistance"
+                }
+            ]
+        },
+        "terrainResistance_soft": {
+            "label":    "terrain resistance soft:",
+            "unit":     "",
+            "map":      "[2]",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/terrainResistance"
                 }
             ]
         },
@@ -242,6 +311,92 @@
             ]
         }
     },
+    "engine": {
+        "index": {
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/engines.xml",
+                    "xpath":    "shared/{engine}"
+                }
+            ]
+        },
+        "id": {
+            "label":    "id",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/engines.xml",
+                    "xpath":    "ids/{engine}"
+                }
+            ]
+        },
+        "userString": {
+            "map":      "gettext",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/engines.xml",
+                    "xpath":    "shared/{engine}/userString"
+                }
+            ]
+        },
+        "power": {
+            "label":    "power",
+            "unit":     "hp",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/engines.xml",
+                    "xpath":    "shared/{engine}/power"
+                }
+            ]
+        },
+        "weight": {
+            "label":    "weight",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/engines.xml",
+                    "xpath":    "shared/{engine}/weight"
+                }
+            ]
+        }
+    },
+    "radio": {
+        "index": {
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/radios.xml",
+                    "xpath":    "shared/{radio}"
+                }
+            ]
+        },
+        "id": {
+            "label":    "id",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/radios.xml",
+                    "xpath":    "ids/{radio}"
+                }
+            ]
+        },
+        "userString": {
+            "map":      "gettext",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/radios.xml",
+                    "xpath":    "shared/{radio}/userString"
+                }
+            ]
+        },
+        "weight": {
+            "label":    "weight",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/radios.xml",
+                    "xpath":    "shared/{radio}/weight"
+                }
+            ]
+        }
+    },
     "gun": {
         "index": {
             "value":    "nodename",
@@ -249,6 +404,15 @@
                 {
                     "file":     "vehicles/{nation}/components/guns.xml",
                     "xpath":    "shared/{gun}"
+                }
+            ]
+        },
+        "id": {
+            "label":    "id",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "ids/{gun}"
                 }
             ]
         },

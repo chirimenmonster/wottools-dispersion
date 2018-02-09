@@ -62,7 +62,11 @@
             },
             "items": [
                 "vehicle:speedLimits_forward",
-                "vehicle:speedLimits_backward"
+                "vehicle:speedLimits_backward",
+                "engine:power",
+                "chassis:terrainResistance_hard",
+                "chassis:terrainResistance_medium",
+                "chassis:terrainResistance_soft"
             ],
             "option": {
                 "label":    { "width": 20,  "anchor": "e" },

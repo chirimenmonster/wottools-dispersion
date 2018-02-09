@@ -100,6 +100,8 @@ class Strage(object):
             domain, target = file.split('/', 1)
             self.__xmltree[file] = readXmlData(domain, target)
         root = self.__xmltree[file]
+        if root is None:
+            print('cannot read file {}'.format(file))
         value = root.find(xpath)
         return value
 
@@ -215,6 +217,16 @@ class Strage(object):
         param = { 'nation': nation, 'vehicle': vehicle }
         items = [ node.tag for node in self.find('vehicle', 'turrets', param) ]
         return self._getDropdownItems('turret', items, param)
+
+    def fetchEngineList(self, nation, vehicle):
+        param = { 'nation': nation, 'vehicle': vehicle }
+        items = [ node.tag for node in self.find('vehicle', 'engines', param) ]
+        return self._getDropdownItems('engine', items, param)
+
+    def fetchRadioList(self, nation, vehicle):
+        param = { 'nation': nation, 'vehicle': vehicle }
+        items = [ node.tag for node in self.find('vehicle', 'radios', param) ]
+        return self._getDropdownItems('radio', items, param)
 
     def fetchGunList(self, nation, vehicle, turret):
         param = { 'nation': nation, 'vehicle': vehicle, 'turret': turret }

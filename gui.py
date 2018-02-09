@@ -24,6 +24,8 @@ class Application(tkinter.Frame):
         self.__stragefetchList['vehicle'] = strage.fetchVehicleList
         self.__stragefetchList['chassis'] = strage.fetchChassisList
         self.__stragefetchList['turret'] = strage.fetchTurretList
+        self.__stragefetchList['engine'] = strage.fetchEngineList
+        self.__stragefetchList['radio'] = strage.fetchRadioList
         self.__stragefetchList['gun'] = strage.fetchGunList
         self.__stragefetchList['shell'] = strage.fetchShellList
 
@@ -108,8 +110,20 @@ class Application(tkinter.Frame):
         selector.setCallback(self.cbChangeTurret)
         self.__selector['turret'] = selector
 
-        option={'label':{'text':'Gun'}, 'combobox':{'width':32}}
+        option={'label':{'text':'Engine'}, 'combobox':{'width':32}}
         selector = DropdownList(bar['module'], option=option)
+        selector.pack(side='left')
+        selector.setCallback(self.cbChangeModules)
+        self.__selector['engine'] = selector
+
+        option={'label':{'text':'Radio'}, 'combobox':{'width':32}}
+        selector = DropdownList(bar['shell'], option=option)
+        selector.pack(side='left')
+        selector.setCallback(self.cbChangeModules)
+        self.__selector['radio'] = selector
+
+        option={'label':{'text':'Gun'}, 'combobox':{'width':32}}
+        selector = DropdownList(bar['shell'], option=option)
         selector.pack(side='left')
         selector.setCallback(self.cbChangeGun)
         self.__selector['gun'] = selector
@@ -122,7 +136,7 @@ class Application(tkinter.Frame):
         
         self.__itemValue = {}
         opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
-        for name in [ 'title:vehicle', 'title:chassis', 'title:turret', 'title:gun', 'title:shell' ]:
+        for name in [ 'title:vehicle', 'title:chassis', 'title:turret', 'title:engine', 'title:radio', 'title:gun', 'title:shell' ]:
             self.__itemValue[name] = PanelItemValue(modulePanel, name, self.__itemdef, bind=self.getTitleValue, option=opts)
 
         for i, column in enumerate(self.__itemgroup):
@@ -139,7 +153,7 @@ class Application(tkinter.Frame):
     def getTitleValue(self, target):
         category, node = target
         param = {}
-        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
             param[s] = self.__selector[s].getSelected()
         if param['vehicle'] is None:
             return ''
@@ -151,7 +165,7 @@ class Application(tkinter.Frame):
     def getItemValue(self, target):
         category, node = target
         param = {}
-        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
             param[s] = self.__selector[s].getSelected()
         if param['vehicle'] is None:
             return ''
@@ -169,10 +183,10 @@ class Application(tkinter.Frame):
     def changeVehicle(self):
         nation, vehicle = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle' ] ]
         if vehicle:
-            for s in [ 'chassis', 'turret' ]:
+            for s in [ 'chassis', 'turret', 'engine', 'radio' ]:
                 self.__selector[s].setValues(self.__stragefetchList[s](nation, vehicle))
         else:
-            for s in [ 'chassis', 'turret' ]:
+            for s in [ 'chassis', 'turret', 'engine', 'radio' ]:
                 self.__selector[s].setValues([ [ None, '' ] ])
         self.changeTurret()
 
@@ -201,7 +215,7 @@ class Application(tkinter.Frame):
  
     def createMessage(self):
         param = {}
-        for category in  [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+        for category in  [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
             param[category] = self.__selector[category].getSelected()
         items = []
         for column in self.__itemgroup:
