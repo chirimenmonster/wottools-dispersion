@@ -17,13 +17,6 @@ class Application(tkinter.Frame):
 
         self.__strage = strage
 
-        self.__stragefetchInfo = {}
-        self.__stragefetchInfo['vehicle'] = strage.fetchVehicleInfo
-        self.__stragefetchInfo['chassis'] = strage.fetchChassisInfo
-        self.__stragefetchInfo['turret'] = strage.fetchTurretInfo
-        self.__stragefetchInfo['gun'] = strage.fetchGunInfo
-        self.__stragefetchInfo['shell'] = strage.fetchShellInfo
-
         self.__stragefetchList = {}
         self.__stragefetchList['nation'] = strage.fetchNationList
         self.__stragefetchList['tier'] = strage.fetchTierList
@@ -145,51 +138,23 @@ class Application(tkinter.Frame):
 
     def getTitleValue(self, target):
         category, node = target
-        formatstring = csvoutput.items[category][node]['format']
-        formattags = csvoutput.items[category][node]['value']
-        tag = {}
+        param = {}
         for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
-            tag[s] = self.__selector[s].getSelected()
-        if tag['vehicle'] is None:
+            param[s] = self.__selector[s].getSelected()
+        if param['vehicle'] is None:
             return ''
-        if node == 'vehicle':
-            args = [ tag[s] for s in [ 'nation', 'vehicle' ] ]
-        elif node == 'chassis':
-            args = [ tag[s] for s in [ 'nation', 'vehicle', 'chassis' ] ]
-        elif node == 'turret':
-            args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret' ] ]
-        elif node == 'gun':
-            args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret', 'gun' ] ]
-        elif node == 'shell':
-            args = [ tag[s] for s in [ 'nation', 'gun', 'shell' ] ]
-        values = self.__stragefetchInfo[node](*args)
-        vlist = [ values[s] for s in formattags ]
-        text = formatstring.format(*vlist)
+        text = self.__strage.getDescription(node, param)
         return text
 
     def getItemValue(self, target):
         category, node = target
-        tag = {}
+        param = {}
         for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
-            tag[s] = self.__selector[s].getSelected()
-        if tag['vehicle'] is None:
+            param[s] = self.__selector[s].getSelected()
+        if param['vehicle'] is None:
             return ''
-        if category == 'vehicle':
-            args = [ tag[s] for s in [ 'nation', 'vehicle' ] ]
-        elif category == 'chassis':
-            args = [ tag[s] for s in [ 'nation', 'vehicle', 'chassis' ] ]
-        elif category == 'turret':
-            args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret' ] ]
-        elif category == 'gun':
-            args = [ tag[s] for s in [ 'nation', 'vehicle', 'turret', 'gun' ] ]
-        elif category == 'shell':
-            args = [ tag[s] for s in [ 'nation', 'gun', 'shell' ] ]
-        if 'resources' in self.__itemdef[category][node]:
-            text = self.__strage.findtext(category, node, tag)
-        else:
-            text = self.__stragefetchInfo[category](*args)[node]
-            text = None
-        return text
+        text = self.__strage.find(category, node, param)
+        return text or ''
 
     def changeVehicleFilter(self):
         nation, tier, type = [ self.__selector[s].getSelected() for s in [ 'nation', 'tier', 'type' ] ]

@@ -3,35 +3,45 @@
         "vehicle": {
             "label":    "Vehicle:",
             "format":   "{} ({}), {}: {}",
-            "value":    [ "name", "id", "shortUserString", "description" ]
+            "value":    [ "userString", "index", "shortUserString", "description" ]
         },
         "chassis": {
             "label":    "Chassis:",
             "format":   "{} ({})",
-            "value":    [ "name", "tag" ]
+            "value":    [ "userString", "index" ]
         },
         "turret": {
             "label":    "Turret:",
             "format":   "{} ({})",
-            "value":    [ "name", "tag" ]
+            "value":    [ "userString", "index" ]
         },
         "gun": {
             "label":    "Gun:",
             "format":   "{} ({})",
-            "value":    [ "name", "tag" ]
+            "value":    [ "userString", "index" ]
         },
         "shell": {
             "label":    "Shell:",
             "format":   "{} ({})",
-            "value":    [ "name", "tag" ]
+            "value":    [ "userString", "index" ]
         }
     },
     "vehicle": {
         "list": {
+            "value":    "nodelist",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/list.xml",
                     "xpath":    "."
+                }
+            ]
+        },
+        "index": {
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/list.xml",
+                    "xpath":    "{vehicle}"
                 }
             ]
         },
@@ -77,7 +87,6 @@
         },
         "tags": {
             "label":    "tags",
-            "unit":     "",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/list.xml",
@@ -87,7 +96,7 @@
         },
         "secret": {
             "label":    "secret",
-            "unit":     "",
+            "map":     { "secret": "secret" },
             "resources": [
                 {
                     "file":     "vehicles/{nation}/list.xml",
@@ -99,7 +108,10 @@
         },
         "type": {
             "label":    "type",
-            "unit":     "",
+            "map": {
+                "lightTank": "LT", "mediumTank": "MT", "heavyTank": "HT",
+                "AT-SPG": "TD", "SPG": "SPG"
+            },
             "resources": [
                 {
                     "file":     "vehicles/{nation}/list.xml",
@@ -123,7 +135,7 @@
             ]
         },
         "speedLimits_forward": {
-            "label":    "max speed forward:",
+            "label":    "speed limit forward:",
             "unit":     "km/h",
             "resources": [
                 {
@@ -133,7 +145,7 @@
             ]
         },
         "speedLimits_backward": {
-            "label":    "max speed backward:",
+            "label":    "speed limit backward:",
             "unit":     "km/h",
             "resources": [
                 {
@@ -143,6 +155,7 @@
             ]
         },
         "chassis": {
+            "value":    "nodelist",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -151,6 +164,7 @@
             ]
         },
         "turrets": {
+            "value":    "nodelist",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -160,6 +174,15 @@
         }
     },
     "chassis": {
+        "index": {
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}"
+                }
+            ]
+        },
         "userString": {
             "map":      "gettext",
             "resources": [
@@ -191,6 +214,15 @@
         }
     },
     "turret": {
+        "index": {
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}"
+                }
+            ]
+        },
         "userString": {
             "map":      "gettext",
             "resources": [
@@ -201,6 +233,7 @@
             ]
         },
         "guns": {
+            "value":    "nodelist",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -210,6 +243,15 @@
         }
     },
     "gun": {
+        "index": {
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}"
+                }
+            ]
+        },
         "userString": {
             "map":      "gettext",
             "resources": [
@@ -304,6 +346,7 @@
             ]
         },
         "shots": {
+            "value":    "nodelist",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/components/guns.xml",
@@ -313,6 +356,15 @@
         }
     },
     "shell": {
+        "index": {
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}"
+                }
+            ]
+        },
         "id": {
             "label":    "id",
             "unit":     "",
@@ -406,12 +458,11 @@
         "piercingPower": {
             "label":    "piercing power:",
             "unit":     "mm",
+            "map":      "[0]",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/components/guns.xml",
-                    "xpath":    "shared/{gun}/shots/{shell}/piercingPower",
-                    "type":     "array",
-                    "index":    0
+                    "xpath":    "shared/{gun}/shots/{shell}/piercingPower"
                 }
             ]
         }

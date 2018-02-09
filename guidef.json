@@ -62,10 +62,7 @@
             },
             "items": [
                 "vehicle:speedLimits_forward",
-                "vehicle:speedLimits_backward",
-                "vehicle:tags",
-                "vehicle:secret",
-                "vehicle:type"
+                "vehicle:speedLimits_backward"
             ],
             "option": {
                 "label":    { "width": 20,  "anchor": "e" },
