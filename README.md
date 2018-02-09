@@ -7,4 +7,4 @@
 `python gui.py [-d <WoT_game_folder>]`
 
 ## screenshot
-![image](https://user-images.githubusercontent.com/11075065/35774727-f5271124-09ba-11e8-85de-710a02128749.png)
+![image](https://user-images.githubusercontent.com/11075065/36024886-82433890-0dd4-11e8-9048-f10a1c175965.png)
