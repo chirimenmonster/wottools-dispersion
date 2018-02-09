@@ -143,7 +143,9 @@ class Application(tkinter.Frame):
             param[s] = self.__selector[s].getSelected()
         if param['vehicle'] is None:
             return ''
-        text = self.__strage.getDescription(node, param)
+        schema = self.__itemdef['title'][node]
+        values = self.__strage.getDescription(node, param)
+        text = schema['format'].format(*values)
         return text
 
     def getItemValue(self, target):

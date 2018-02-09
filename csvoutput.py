@@ -18,26 +18,18 @@ def fetchItemdef():
 
 
 def createMessage(strage, param, items):
-    info = {}
-    info['vehicle'] = strage.fetchVehicleInfo(param['nation'], param['vehicle'])
-    info['chassis'] = strage.fetchChassisInfo(param['nation'], param['vehicle'], param['chassis'])
-    info['turret'] = strage.fetchTurretInfo(param['nation'], param['vehicle'], param['turret'])
-    info['gun'] = strage.fetchGunInfo(param['nation'], param['vehicle'], param['turret'], param['gun'])
-    info['shell'] = strage.fetchShellInfo(param['nation'], param['gun'], param['shell'])
-
     dataList = fetchItemdef()
     
     output = io.StringIO(newline='')
     writer = csv.writer(output, dialect='excel', lineterminator='\n')
 
-    for category in [ 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
-        data = [ category ] + [ info[category][name] for name in labeldesc[category] ]
-        writer.writerow(data)
+    for node in [ 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+        writer.writerow([ node, *strage.getDescription(node, param) ])
 
     for target in items:
         category, node = target.split(':')
         unit = dataList[category][node]['unit']
-        writer.writerow([ node, info[category][node], unit ])
+        writer.writerow([ node, strage.find(category, node, param), unit ])
 
     return output.getvalue()
 

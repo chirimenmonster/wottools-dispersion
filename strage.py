@@ -130,7 +130,6 @@ class Strage(object):
                 result = result.pop(0) if result else None
             elif match:
                 result = result.split()[int(match.group(1))]
-                print('match: ' + match.group(1))
         return result
 
     def __fetchNationOrder(self):
@@ -198,8 +197,7 @@ class Strage(object):
     def getDescription(self, category, param):
         schema = self.__itemdef['title'][category]
         values = [ self.find(category, name, param) for name in schema['value'] ]
-        result = schema['format'].format(*values)
-        return result
+        return values
 
     def _getDropdownItems(self, category, items, param):
         result = []
