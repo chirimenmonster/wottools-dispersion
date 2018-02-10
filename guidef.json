@@ -30,6 +30,7 @@
                 {
                     "label":    "clip rate",
                     "value":    "gun:clipRate",
+                    "unit":     "rpm",
                     "attr":     "phantom"
                 },
                 {
@@ -106,6 +107,18 @@
                     "unit":     "HP"
                 },
                 {
+                    "label":    "explosion radius",
+                    "value":    "shell:explosionRadius",
+                    "unit":     "m",
+                    "attr":     "phantom"
+                },
+                {
+                    "label":    "stun duration",
+                    "value":    "shell:stunDuration",
+                    "unit":     "s",
+                    "attr":     "phantom"
+                },
+                {
                     "label":    "caliber",
                     "value":    "shell:caliber",
                     "unit":     "mm"
@@ -114,6 +127,11 @@
                     "label":    "shell speed",
                     "value":    "shell:speed",
                     "unit":     "m/s"
+                },  
+                {
+                    "label":    "shell gravity",
+                    "value":    "shell:gravity",
+                    "unit":     "m/s2"
                 },  
                 {
                     "label":    "max distance",
@@ -224,6 +242,85 @@
                     "value":    "gun:weight",
                     "format":   "{:,.0f}",
                     "unit":     "kg"
+                }
+            ],
+            "option": {
+                "label":    { "width": 18,  "anchor": "e" },
+                "value":    { "width": 6,   "anchor": "e" },
+                "unit":     { "width": 5,   "anchor": "w" }
+            }
+        },
+        {
+            "title": null,
+            "titleoption": {
+                "label": { "width": 20, "anchor": "w" }
+            },
+            "items": [
+                {
+                    "label":    "total health",
+                    "value":    "vehicle:totalHealth",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... hull",
+                    "value":    "vehicle:health",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... turret",
+                    "value":    "turret:health",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "module health ammo bay",
+                    "value":    "vehicle:ammoBayHealth",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... chassis",
+                    "value":    "chassis:health",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... turret rotator",
+                    "value":    "turret:turretRotatorHealth",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... surveying device",
+                    "value":    "turret:surveyingDeviceHealth",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... engine",
+                    "value":    "engine:health",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... fueltank",
+                    "value":    "fueltank:health",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... radio",
+                    "value":    "radio:health",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "... gun",
+                    "value":    "gun:health",
+                    "format":   "{:,.0f}",
+                    "unit":     "HP"
                 }
             ],
             "option": {

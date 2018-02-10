@@ -172,6 +172,35 @@
                 }
             ]
         },
+        "totalHealth": {
+            "label":    "total health",
+            "unit":     "HP",
+            "value":    "function",
+            "resources": [
+                {
+                    "func": "sum",
+                    "args": [ "vehicle:health", "turret:health" ]
+                }
+            ]
+        },
+        "health": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "hull/maxHealth"
+                }
+            ]
+        },
+        "ammoBayHealth": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "hull/ammoBayHealth/maxHealth"
+                }
+            ]
+        },
         "speedLimits_forward": {
             "label":    "speed limit forward:",
             "unit":     "km/h",
@@ -330,6 +359,15 @@
                     "xpath":    "chassis/{chassis}/shotDispersionFactors/vehicleRotation"
                 }
             ]
+        },
+        "health": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/maxHealth"
+                }
+            ]
         }
     },
     "turret": {
@@ -359,6 +397,33 @@
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
                     "xpath":    "turrets0/{turret}/weight"
+                }
+            ]
+        },
+        "health": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/maxHealth"
+                }
+            ]
+        },
+        "turretRotatorHealth": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/turretRotatorHealth/maxHealth"
+                }
+            ]
+        },
+        "surveyingDeviceHealth": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/surveyingDeviceHealth/maxHealth"
                 }
             ]
         },
@@ -430,6 +495,15 @@
                     "xpath":    "shared/{engine}/weight"
                 }
             ]
+        },
+        "health": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/engines.xml",
+                    "xpath":    "shared/{engine}/maxHealth"
+                }
+            ]
         }
     },
     "fueltank": {
@@ -471,6 +545,15 @@
                     "xpath":    "shared/{fueltank}/weight"
                 }
             ]
+        },
+        "health": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/fuelTanks.xml",
+                    "xpath":    "shared/{fueltank}/maxHealth"
+                }
+            ]
         }
     },
     "radio": {
@@ -509,6 +592,15 @@
                 {
                     "file":     "vehicles/{nation}/components/radios.xml",
                     "xpath":    "shared/{radio}/weight"
+                }
+            ]
+        },
+        "health": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/radios.xml",
+                    "xpath":    "shared/{radio}/maxHealth"
                 }
             ]
         }
@@ -563,6 +655,15 @@
                 {
                     "file":     "vehicles/{nation}/components/guns.xml",
                     "xpath":    "shared/{gun}/weight"
+                }
+            ]
+        },
+        "health": {
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/maxHealth"
                 }
             ]
         },
@@ -717,6 +818,22 @@
                 {
                     "file":     "vehicles/{nation}/components/shells.xml",
                     "xpath":    "{shell}/caliber"
+                }
+            ]
+        },
+        "explosionRadius": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}/explosionRadius"
+                }
+            ]
+        },
+        "stunDuration": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/shells.xml",
+                    "xpath":    "{shell}/stunDuration"
                 }
             ]
         },

@@ -56,7 +56,7 @@ class Application(tkinter.Frame):
         panelZone.pack(side='top', expand=1, fill='x')
 
         copyButton = tkinter.Button(self.master, text='copy to clipboard', command=self.createMessage, relief='ridge', borderwidth=2)
-        copyButton.pack(side='top', expand=1, fill='x', padx=7, pady=4)
+        copyButton.pack(side='top', expand=1, fill='x', padx=7, pady=2)
         
         panelColumn = []
         for i in range(3):
@@ -69,7 +69,7 @@ class Application(tkinter.Frame):
             panelGroup.append([])
             for j, row in enumerate(column):
                 panel = tkinter.Frame(panelColumn[i], highlightthickness=1, highlightbackground='gray')
-                panel.pack(side='top', expand=1, padx=8, pady=4, anchor='w')
+                panel.pack(side='top', expand=1, padx=8, pady=2, anchor='w')
                 panelGroup[i].append(panel)
         
         option = {'label':{'text':'Nation'}, 'combobox':{'width':10}}
@@ -268,7 +268,6 @@ class PanelItemValue(tkinter.Frame):
         frameopt = { 'borderwidth':0 }
         frameopt.update(kwargs)
         super().__init__(master, *args, **frameopt)
-        #self.pack(side='top', fill='x', pady=0)
         labelopt = option['label'] if option is not None and 'label' in option else {}
         valueopt = option['value'] if option is not None and 'value' in option else {}
         unitopt = option['unit'] if option is not None and 'unit' in option else {}
