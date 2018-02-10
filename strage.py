@@ -86,12 +86,14 @@ class Strage(object):
     def __init__(self):
         with open('itemdef.json', 'r') as fp:
             self.__itemdef = json.load(fp)
+        with open('guidef.json', 'r') as fp:
+            self.__itemgroup = json.load(fp)
         self.__dictVehicle = {}
         self.__cacheVehicleInfo = {}
         self.__xmltree = {}
         
         self.__nationOrder = self.__fetchNationOrder()
-        self.__vehicleList = self.__fetchVehicleList()
+        self.__vehicleList, self.__vehicleNation = self.__fetchVehicleList()
 
     def __find(self, resource, param):
         file = resource['file'].format(**param)
@@ -105,11 +107,27 @@ class Strage(object):
         value = root.find(xpath)
         return value
 
+    def findfunc_sum(self, args, param):
+        result = 0
+        for arg in args:
+            category, node = arg.split(':', 1)
+            value = float(self.find(category, node, param))
+            result += value
+        return result
+            
     def find(self, category, node, param):
         result = None
         schema = self.__itemdef[category][node]
         for r in schema['resources']:
-            result = self.__find(r, param)
+            if 'file' in r:
+                result = self.__find(r, param)
+            elif 'func' in r:
+                if r['func'] == 'sum':
+                    result = self.findfunc_sum(r['args'], param)
+                else:
+                    raise ValueError('unknown resource function: {}'.format(r['func']))
+            else:
+                raise ValueError('missing valid resources: {}'.format(r))
             if result is not None:
                 break
         if result is None:
@@ -120,6 +138,12 @@ class Strage(object):
                 result = result.tag
             elif schema['value'] == 'nodelist':
                 pass
+            elif schema['value'] == 'function':
+                pass
+            elif schema['value'] == 'float':
+                result = float(result.text)
+            else:
+                raise ValueError('unknown value keyword: {}'.schema['value'])
         else:
             result = result.text
         if 'map' in schema:
@@ -141,10 +165,6 @@ class Strage(object):
         for child in root:
             if child.tag == 'setting' and child.findtext('name') == 'nations_order':
                 return [ i.text for i in child.find('value') ]
-
-    def searchVehicle(self, vehicle):
-        v = self.__dictVehicle[vehicle]
-        return v['nation'], v['tag']
 
     def __fetchVehicleList(self):
         nations = self.__nationOrder
@@ -168,10 +188,34 @@ class Strage(object):
                 secret = self.find('vehicle', 'secret', param)
                 if not secret == 'secret' or config.secret:
                     vehicles[nation][tier][type].append({ 'id':id, 'vehicle':item })
+        rev = {}
         for nation, tier, type in product(nations, tiers, types):
             list = sorted(vehicles[nation][tier][type], key=lambda v: v['id'])
             vehicles[nation][tier][type] = [ v['vehicle'] for v in list ]
-        return vehicles
+            for v in list:
+                rev[v['vehicle']] = nation
+        return vehicles, rev
+
+    def getVehicleNation(self, vehicle):
+        return self.__vehicleNation[vehicle]
+
+    def getVehicleDescription(self, param):
+        result = []
+        for node in [ 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
+            value = self.getDescription(node, param)
+            result.append([ node, self.__itemdef['title'][node]['format'].format(*value) ])
+        return result
+
+    def getVehicleInfo(self, param):
+        items = []
+        for column in self.__itemgroup:
+            for row in column:
+                items += row['items']
+        result = []
+        for target in items:
+            category, node = target.split(':')
+            result.append([ node, strage.find(category, node, param) ])
+        return result
 
     def fetchVehicleList(self, nation, tier, type):
         nations = [ n[0] for n in self.__nationOrder ] if nation == '*' else [ nation ]
@@ -223,6 +267,11 @@ class Strage(object):
         items = [ node.tag for node in self.find('vehicle', 'engines', param) ]
         return self._getDropdownItems('engine', items, param)
 
+    def fetchFueltankList(self, nation, vehicle):
+        param = { 'nation': nation, 'vehicle': vehicle }
+        items = [ node.tag for node in self.find('vehicle', 'fueltanks', param) ]
+        return self._getDropdownItems('fueltank', items, param)
+
     def fetchRadioList(self, nation, vehicle):
         param = { 'nation': nation, 'vehicle': vehicle }
         items = [ node.tag for node in self.find('vehicle', 'radios', param) ]
@@ -245,7 +294,7 @@ class Command:
     def listVehicle(strage, pattern):
         nation, tier, type = pattern.split(':')
         for r in strage.fetchVehicleList(nation.lower(), tier, type.upper()):
-            print('{0[2]:<10}:{0[3]:<3}:{0[4]:<4}: {0[0]:<32}: {0[1]}'.format(r))
+            print('{0[0]:<32} : {0[1]}'.format(r))
 
     @staticmethod
     def listNation(strage):
@@ -261,19 +310,31 @@ class Command:
 
     @staticmethod
     def listChassis(strage, vehicle):
-        nation, v = strage.searchVehicle(vehicle)
+        nation = strage.getVehicleNation(vehicle)
         for r in strage.fetchChassisList(nation, vehicle):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
     def listTurret(strage, vehicle):
-        nation, v = strage.searchVehicle(vehicle)
+        nation = strage.getVehicleNation(vehicle)
         for r in strage.fetchTurretList(nation, vehicle):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
+    def listEngine(strage, vehicle):
+        nation = strage.getVehicleNation(vehicle)
+        for r in strage.fetchEngineList(nation, vehicle):
+            print('{0[0]:<32}: {0[1]}'.format(r))
+
+    @staticmethod
+    def listRadio(strage, vehicle):
+        nation = strage.getVehicleNation(vehicle)
+        for r in strage.fetchRadioList(nation, vehicle):
+            print('{0[0]:<32}: {0[1]}'.format(r))
+
+    @staticmethod
     def listGun(strage, vehicle, turret):
-        nation, v = strage.searchVehicle(vehicle)
+        nation = strage.getVehicleNation(vehicle)
         for r in strage.fetchGunList(nation, vehicle, turret):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
@@ -282,42 +343,28 @@ class Command:
         for r in strage.fetchShellList(nation, gun):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
-    @staticmethod
-    def infoVehicle(strage, vehicle):
-        nation, v = strage.searchVehicle(vehicle)
-        for k,v in strage.fetchVehicleInfo(nation, vehicle).items():
-            print('{0:>32}: {1}'.format(k, v))
 
     @staticmethod
-    def infoChassis(strage, vehicle, chassis):
-        nation, v = strage.searchVehicle(vehicle)
-        for k,v in strage.fetchChassisInfo(nation, vehicle, chassis).items():
-            print('{0:>32}: {1}'.format(k, v))
-
-    @staticmethod
-    def infoTurret(strage, vehicle, turret):
-        nation, v = strage.searchVehicle(vehicle)
-        for k,v in strage.fetchTurretInfo(nation, vehicle, turret).items():
-            print('{0:>32}: {1}'.format(k, v))
-
-    @staticmethod
-    def infoGun(strage, vehicle, turret, gun):
-        nation, v = strage.searchVehicle(vehicle)
-        for k,v in strage.fetchGunInfo(nation, vehicle, turret, gun).items():
-            print('{0:>32}: {1}'.format(k, v))
-
-    @staticmethod
-    def infoShell(strage, nation, gun, shell):
-        for k,v in strage.fetchShellInfo(nation, gun, shell).items():
-            print('{0:>32}: {1}'.format(k, v))
-
-    @staticmethod
-    def infoVehicleFull(strage, vehicle, chassis, turret, gun, shell):
-        nation, v = strage.searchVehicle(vehicle)
-        for k,v in strage.fetchVehicleMergedInfo(nation, vehicle, chassis, turret, gun).items():
-            print('{0:>32}: {1}'.format(k, v))
-        import csvoutput
-        print(csvoutput.createMessage(strage, nation, vehicle, chassis, turret, gun, shell))
+    def infoVehicle(strage, arg):
+        p = arg.split(':')
+        nation = strage.getVehicleNation(p[0])
+        if len(p) == 7:
+            param = { 'nation': nation, 'vehicle': p[0], 'chassis': p[1], 'turret': p[2],
+                'engine': p[3], 'radio': p[4], 'gun': p[5], 'shell': p[6] }
+        else:
+            vehicle = p[0]
+            param = { 'nation':nation, 'vehicle':vehicle }
+            param['chassis'] = strage.fetchChassisList(nation, vehicle)[-1][0]
+            param['turret'] = strage.fetchTurretList(nation, vehicle)[-1][0]
+            param['engine'] = strage.fetchEngineList(nation, vehicle)[-1][0]
+            param['radio'] = strage.fetchRadioList(nation, vehicle)[-1][0]
+            param['gun'] = strage.fetchGunList(nation, vehicle, param['turret'])[-1][0]
+            param['shell'] = strage.fetchShellList(nation, param['gun'])[0][0]
+        result = []
+        result.extend(strage.getVehicleDescription(param))
+        result.extend(strage.getVehicleInfo(param))
+        for r in result:
+            print('{0[0]:>32}: {0[1]}'.format(r))
 
 
 def parseArgument():
@@ -334,16 +381,12 @@ def parseArgument():
         parser.add_argument('--list-type', action='store_true', help='show vehicle types')
         parser.add_argument('--list-chassis', dest='vehicle_chassis', help='list chassis for vehicle.  ex. "R80_KV1"')
         parser.add_argument('--list-turret', dest='vehicle_turret', help='list turret for vehicle.  ex. "R80_KV1"')
+        parser.add_argument('--list-engine', dest='vehicle_engine', help='list engine for vehicle.  ex. "R80_KV1"')
+        parser.add_argument('--list-radio', dest='vehicle_radio', help='list radio for vehicle.  ex. "R80_KV1"')
         parser.add_argument('--list-gun', dest='vehicle_gun', help='list gun for vehicle and turret.  ex. "R80_KV1:Turret_2_KV1"')
         parser.add_argument('--list-shell', dest='gun_shell', help='list shell for gun and turret.  ex. "ussr:_85mm_F-30"')
 
-        parser.add_argument('--info', dest='vehicle', help='view vehicle info')
-        parser.add_argument('--info-chassis', dest='info_chassis', help='view chassis info for vehicle.  ex. "R80_KV1:Chassis_KV1_2"')
-        parser.add_argument('--info-turret', dest='info_turret', help='view turret info for vehicle.  ex. "R80_KV1:Turret_2_KV1"')
-        parser.add_argument('--info-gun', dest='info_gun', help='view gun info for vehicle.  ex. "R80_KV1:Turret_2_KV1:_85mm_F-30"')
-        parser.add_argument('--info-shell', dest='info_shell', help='view for shell.  ex. "ussr:_85mm_F-30:_85mm_UBR-365K"')
-
-        parser.add_argument('--info-full', dest='info_full', help='full view for vehicle.  ex. "R80_KV1:Chassis_KV1_2:Turret_2_KV1:_85mm_F-30:_85mm_UBR-365K"')
+        parser.add_argument('--info', dest='vehicle', help='view info for vehicle.  ex. "R80_KV1:Chassis_KV1_2:Turret_2_KV1:V-2K:_10RK:_85mm_F-30:_85mm_UBR-365K"')
 
     parser.parse_args(namespace=config)
     if config.SCRIPTS_DIR:
@@ -367,25 +410,19 @@ if __name__ == '__main__':
         Command.listType(strage)
     if config.pattern:
         Command.listVehicle(strage, config.pattern)
-    if config.vehicle:
-        Command.infoVehicle(strage, config.vehicle)
+
     if config.vehicle_chassis:
         Command.listChassis(strage, config.vehicle_chassis)
     if config.vehicle_turret:
         Command.listTurret(strage, config.vehicle_turret)
+    if config.vehicle_engine:
+        Command.listEngine(strage, config.vehicle_engine)
+    if config.vehicle_radio:
+        Command.listRadio(strage, config.vehicle_radio)
     if config.vehicle_gun:
         Command.listGun(strage, *config.vehicle_gun.split(':'))
     if config.gun_shell:
         Command.listShell(strage, *config.gun_shell.split(':'))
 
-    if config.info_chassis:
-        Command.infoChassis(strage, *config.info_chassis.split(':'))
-    if config.info_turret:
-        Command.infoTurret(strage, *config.info_turret.split(':'))
-    if config.info_gun:
-        Command.infoGun(strage, *config.info_gun.split(':'))
-    if config.info_shell:
-        Command.infoShell(strage, *config.info_shell.split(':'))
-
-    if config.info_full:
-        Command.infoVehicleFull(strage, *config.info_full.split(':'))
+    if config.vehicle:
+        Command.infoVehicle(strage, config.vehicle)

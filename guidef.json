@@ -6,10 +6,37 @@
                 "label": { "width": 20, "anchor": "w" }
             },
             "items": [
-                "shell:damage_armor",
-                "shell:piercingPower",
-                "gun:reloadTime",
-                "gun:aimingTime"
+                {
+                    "label":    "damage armor",
+                    "value":    "shell:damage_armor",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "piercing power",
+                    "value":    "shell:piercingPower",
+                    "unit":     "mm"
+                },
+                {
+                    "label":    "reload time",
+                    "value":    "gun:reloadTime",
+                    "unit":     "s"
+                },
+                {
+                    "label":    "clip count",
+                    "value":    "gun:clipCount",
+                    "unit":     "pcs",
+                    "attr":     "phantom"
+                },
+                {
+                    "label":    "clip rate",
+                    "value":    "gun:clipRate",
+                    "attr":     "phantom"
+                },
+                {
+                    "label":    "aiming time",
+                    "value":    "gun:aimingTime",
+                    "unit":     "s"
+                }
             ],
             "option": {
                 "label":    { "width": 20,  "anchor": "e" },
@@ -23,12 +50,43 @@
                 "label": { "width": 20, "anchor": "w" }
             },
             "items": [
-                "gun:shotDispersionRadius",
-                "chassis:vehicleMovement",
-                "chassis:vehicleRotation",
-                "gun:turretRotation",
-                "gun:afterShot",
-                "gun:whileGunDamaged"
+                {
+                    "label":    "shot dispersion radius",
+                    "value":    "gun:shotDispersionRadius",
+                    "format":   "{:.2f}",
+                    "consider": "float",
+                    "unit":     "m"
+                },
+                {
+                    "label":    "... factor movement",
+                    "value":    "chassis:vehicleMovement",
+                    "format":   "{:.2f}",
+                    "consider": "float"                   
+                },
+                {
+                    "label":    "... factor rotation",
+                    "value":    "chassis:vehicleRotation",
+                    "format":   "{:.2f}",
+                    "consider": "float"                   
+                },
+                {
+                    "label":    "... factor turret rotation",
+                    "value":    "gun:turretRotation",
+                    "format":   "{:.2f}",
+                    "consider": "float"                   
+                },
+                {
+                    "label":    "... factor after shot",
+                    "value":    "gun:afterShot",
+                    "format":   "{:.2f}",
+                    "consider": "float"                   
+                },
+                {
+                    "label":    "...factor gun damaged",
+                    "value":    "gun:whileGunDamaged",
+                    "format":   "{:.2f}",
+                    "consider": "float"
+                }
             ],
             "option": {
                 "label":    { "width": 20,  "anchor": "e" },
@@ -42,10 +100,26 @@
                 "label": { "width": 20, "anchor": "w" }
             },
             "items": [
-                "shell:damage_devices",
-                "shell:caliber",
-                "shell:speed",
-                "shell:maxDistance"
+                {
+                    "label":    "damage devices",
+                    "value":    "shell:damage_devices",
+                    "unit":     "HP"
+                },
+                {
+                    "label":    "caliber",
+                    "value":    "shell:caliber",
+                    "unit":     "mm"
+                },
+                {
+                    "label":    "shell speed",
+                    "value":    "shell:speed",
+                    "unit":     "m/s"
+                },  
+                {
+                    "label":    "max distance",
+                    "value":    "shell:maxDistance",
+                    "unit":     "m"
+                }
             ],
             "option": {
                 "label":    { "width": 20,  "anchor": "e" },
@@ -61,12 +135,33 @@
                 "label": { "width": 20, "anchor": "w" }
             },
             "items": [
-                "vehicle:speedLimits_forward",
-                "vehicle:speedLimits_backward",
-                "engine:power",
-                "chassis:terrainResistance_hard",
-                "chassis:terrainResistance_medium",
-                "chassis:terrainResistance_soft"
+                {
+                    "label":    "speed limits forward",
+                    "value":    "vehicle:speedLimits_forward",
+                    "unit":     "km/h"
+                },
+                {
+                    "label":    "... backward",
+                    "value":    "vehicle:speedLimits_backward",
+                    "unit":     "km/h"
+                },
+                {                
+                    "label":    "engine power",
+                    "value":    "engine:power",
+                    "unit":     "hp"
+                },
+                {
+                    "label":    "terrain resistance hard",
+                    "value":    "chassis:terrainResistance_hard"
+                },
+                {
+                    "label":    "... medium",
+                    "value":    "chassis:terrainResistance_medium"
+                },
+                {
+                    "label":    "... soft",
+                    "value":    "chassis:terrainResistance_soft"
+                }
             ],
             "option": {
                 "label":    { "width": 20,  "anchor": "e" },
@@ -74,5 +169,68 @@
                 "unit":     { "width": 5,   "anchor": "w" }
             }
         }
-    ]
+    ],
+    [
+        {
+            "title": null,
+            "titleoption": {
+                "label": { "width": 20, "anchor": "w" }
+            },
+            "items": [
+                {
+                    "label":    "total weight",
+                    "value":    "vehicle:totalWeight",
+                    "format":   "{:,.0f}",
+                    "unit":     "kg"
+                },
+                {
+                    "label":    "... hull",
+                    "value":    "vehicle:weight",
+                    "format":   "{:,.0f}",
+                    "unit":     "kg"
+                },
+                {
+                    "label":    "... chassis",
+                    "value":    "chassis:weight",
+                    "format":   "{:,.0f}",
+                    "unit":     "kg"
+                },
+                {
+                    "label":    "... turret",
+                    "value":    "turret:weight",
+                    "format":   "{:,.0f}",
+                    "unit":     "kg"
+                },
+                {
+                    "label":    "... engine",
+                    "value":    "engine:weight",
+                    "format":   "{:,.0f}",
+                    "unit":     "kg"
+                },
+                {
+                    "label":    "... fueltank",
+                    "value":    "fueltank:weight",
+                    "format":   "{:,.0f}",
+                    "unit":     "kg"
+                },
+                {
+                    "label":    "... radio",
+                    "value":    "radio:weight",
+                    "format":   "{:,.0f}",
+                    "unit":     "kg"
+                },
+                {
+                    "label":    "... gun",
+                    "value":    "gun:weight",
+                    "format":   "{:,.0f}",
+                    "unit":     "kg"
+                }
+            ],
+            "option": {
+                "label":    { "width": 18,  "anchor": "e" },
+                "value":    { "width": 6,   "anchor": "e" },
+                "unit":     { "width": 5,   "anchor": "w" }
+            }
+        }
+    ]        
 ]

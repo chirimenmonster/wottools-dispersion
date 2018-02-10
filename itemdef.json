@@ -20,6 +20,11 @@
             "format":   "{} ({})",
             "value":    [ "userString", "index" ]
         },
+        "fueltank": {
+            "label":    "FuelTank:",
+            "format":   "({})",
+            "value":    [ "index" ]
+        },
         "radio": {
             "label":    "Radio:",
             "format":   "{} ({})",
@@ -144,6 +149,29 @@
                 }
             ]
         },
+        "totalWeight": {
+            "label":    "total weight:",
+            "unit":     "kg",
+            "value":    "function",
+            "resources": [
+                {
+                    "func": "sum",
+                    "args": [ "vehicle:weight", "chassis:weight", "turret:weight",
+                        "engine:weight", "fueltank:weight", "radio:weight", "gun:weight" ]
+                }
+            ]
+        },
+        "weight": {
+            "label":    "hull weight:",
+            "unit":     "kg",
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "hull/weight"
+                }
+            ]
+        },
         "speedLimits_forward": {
             "label":    "speed limit forward:",
             "unit":     "km/h",
@@ -191,6 +219,15 @@
                 }
             ]
         },
+        "fueltanks": {
+            "value":    "nodelist",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "fuelTanks"
+                }
+            ]
+        },
         "radios": {
             "value":    "nodelist",
             "resources": [
@@ -221,10 +258,23 @@
             ]
         },
         "weight": {
+            "label":    "chassis weight",
+            "unit":     "kg",
+            "value":    "float",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/{vehicle}.xml",
                     "xpath":    "chassis/{chassis}/weight"
+                }
+            ]
+        },
+        "rotationSpeed": {
+            "label":    "rotation speed:",
+            "unit":     "deg./s",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "chassis/{chassis}/rotationSpeed"
                 }
             ]
         },
@@ -301,6 +351,27 @@
                 }
             ]
         },
+        "weight": {
+            "label":    "turret weight:",
+            "unit":     "kg",
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/weight"
+                }
+            ]
+        },
+        "rotationSpeed": {
+            "label":    "rotation speed:",
+            "unit":     "deg./s",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/rotationSpeed"
+                }
+            ]
+        },
         "guns": {
             "value":    "nodelist",
             "resources": [
@@ -350,11 +421,54 @@
             ]
         },
         "weight": {
-            "label":    "weight",
+            "label":    "engine weight",
+            "unit":     "kg",
+            "value":    "float",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/components/engines.xml",
                     "xpath":    "shared/{engine}/weight"
+                }
+            ]
+        }
+    },
+    "fueltank": {
+        "index": {
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/fuelTanks.xml",
+                    "xpath":    "shared/{fueltank}"
+                }
+            ]
+        },
+        "id": {
+            "label":    "id",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/fuelTanks.xml",
+                    "xpath":    "ids/{fueltank}"
+                }
+            ]
+        },
+        "userString": {
+            "comment":  "dummy entry",
+            "value":    "nodename",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/fuelTanks.xml",
+                    "xpath":    "shared/{fueltank}"
+                }
+            ]
+        },
+        "weight": {
+            "label":    "radio weight",
+            "unit":     "kg",
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/fuelTanks.xml",
+                    "xpath":    "shared/{fueltank}/weight"
                 }
             ]
         }
@@ -388,7 +502,9 @@
             ]
         },
         "weight": {
-            "label":    "weight",
+            "label":    "radio weight",
+            "unit":     "kg",
+            "value":    "float",
             "resources": [
                 {
                     "file":     "vehicles/{nation}/components/radios.xml",
@@ -436,6 +552,41 @@
                 {
                     "file":     "vehicles/{nation}/components/guns.xml",
                     "xpath":    "shared/{gun}/reloadTime"
+                }
+            ]
+        },
+        "weight": {
+            "label":    "gun weight:",
+            "unit":     "kg",
+            "value":    "float",
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/weight"
+                }
+            ]
+        },
+        "clipCount": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns/{gun}/clip/count"
+                },
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/clip/count"
+                }
+            ]
+        },
+        "clipRate": {
+            "resources": [
+                {
+                    "file":     "vehicles/{nation}/{vehicle}.xml",
+                    "xpath":    "turrets0/{turret}/guns/{gun}/clip/rate"
+                },
+                {
+                    "file":     "vehicles/{nation}/components/guns.xml",
+                    "xpath":    "shared/{gun}/clip/rate"
                 }
             ]
         },

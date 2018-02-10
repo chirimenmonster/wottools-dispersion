@@ -25,6 +25,7 @@ class Application(tkinter.Frame):
         self.__stragefetchList['chassis'] = strage.fetchChassisList
         self.__stragefetchList['turret'] = strage.fetchTurretList
         self.__stragefetchList['engine'] = strage.fetchEngineList
+        self.__stragefetchList['fueltank'] = strage.fetchFueltankList
         self.__stragefetchList['radio'] = strage.fetchRadioList
         self.__stragefetchList['gun'] = strage.fetchGunList
         self.__stragefetchList['shell'] = strage.fetchShellList
@@ -73,70 +74,64 @@ class Application(tkinter.Frame):
         
         option = {'label':{'text':'Nation'}, 'combobox':{'width':10}}
         selector = DropdownList(bar['vehicle'], name='nationSelector', option=option)
-        selector.pack(side='left')
         selector.setValues(self.__stragefetchList['nation']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['nation'] = selector
 
         option = {'label':{'text':'Tier'}, 'combobox':{'width':3}, 'value':{'justify':'center'}}
         selector = DropdownList(bar['vehicle'], name='tierSelector', option=option)
-        selector.pack(side='left')
         selector.setValues(self.__stragefetchList['tier']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['tier'] = selector
 
         option = {'label':{'text':'Type'}, 'combobox':{'width':4}, 'value':{'justify':'center'}}
         selector = DropdownList(bar['vehicle'], name='typeSelector', option=option)
-        selector.pack(side='left')
         selector.setValues(self.__stragefetchList['type']())
         selector.setCallback(self.cbChangeVehicleFilter)
         self.__selector['type'] = selector
 
         option = {'label':{'text':'Vehicle'}, 'combobox':{'width':40}}
         selector = DropdownList(bar['vehicle'], option=option)
-        selector.pack(side='left')
         selector.setCallback(self.cbChangeVehicle)
         self.__selector['vehicle'] = selector
 
         option = {'label':{'text':'Chassis'}, 'combobox':{'width':32}}
-        selector = DropdownList(bar['module'], option=option)
-        selector.pack(side='left')
+        selector = DropdownList(bar['module'], name='module_chassis', option=option)
         selector.setCallback(self.cbChangeModules)
         self.__selector['chassis'] = selector
 
         option={'label':{'text':'Turret'}, 'combobox':{'width':32}}
-        selector = DropdownList(bar['module'], option=option)
-        selector.pack(side='left')
+        selector = DropdownList(bar['module'], name='module_turret', option=option)
         selector.setCallback(self.cbChangeTurret)
         self.__selector['turret'] = selector
 
         option={'label':{'text':'Engine'}, 'combobox':{'width':32}}
-        selector = DropdownList(bar['module'], option=option)
-        selector.pack(side='left')
+        selector = DropdownList(bar['module'], name='module_engine', option=option)
         selector.setCallback(self.cbChangeModules)
         self.__selector['engine'] = selector
 
+        option={'label':{'text':'FuelTank'}, 'combobox':{'width':32}}
+        selector = DropdownList(bar['module'], name='module_fueltank', option=option)
+        self.__selector['fueltank'] = selector
+
         option={'label':{'text':'Radio'}, 'combobox':{'width':32}}
-        selector = DropdownList(bar['shell'], option=option)
-        selector.pack(side='left')
+        selector = DropdownList(bar['shell'], name='module_radio', option=option)
         selector.setCallback(self.cbChangeModules)
         self.__selector['radio'] = selector
 
         option={'label':{'text':'Gun'}, 'combobox':{'width':32}}
-        selector = DropdownList(bar['shell'], option=option)
-        selector.pack(side='left')
+        selector = DropdownList(bar['shell'], name='module_gun', option=option)
         selector.setCallback(self.cbChangeGun)
         self.__selector['gun'] = selector
 
         option={'label':{'text':'Shell'}, 'combobox':{'width':32}}
         selector = DropdownList(bar['shell'], option=option)
-        selector.pack(side='left')
         selector.setCallback(self.cbChangeModules)
         self.__selector['shell'] = selector
-        
+
         self.__itemValue = {}
         opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
-        for name in [ 'title:vehicle', 'title:chassis', 'title:turret', 'title:engine', 'title:radio', 'title:gun', 'title:shell' ]:
+        for name in [ 'title:vehicle', 'title:chassis', 'title:turret', 'title:engine', 'title:fueltank', 'title:radio', 'title:gun', 'title:shell' ]:
             self.__itemValue[name] = PanelItemValue(modulePanel, name, self.__itemdef, bind=self.getTitleValue, option=opts)
 
         for i, column in enumerate(self.__itemgroup):
@@ -146,14 +141,35 @@ class Application(tkinter.Frame):
                     opts['label']['text'] = row['title']
                     PanelItemValue(panelGroup[i][j], None, self.__itemdef, option=opts)
                 for item in row['items']:
-                    self.__itemValue[item] = PanelItemValue(panelGroup[i][j], item, self.__itemdef, bind=self.getItemValue, option=row['option'])
+                    if isinstance(item, dict):
+                        name, schema = item['value'], item
+                    else:
+                        name, schema = item, None
+                    self.__itemValue[name] = PanelItemValue(panelGroup[i][j], name, self.__itemdef, bind=self.getItemValue, option=row['option'], schema=schema)
+
+        for name in [ 'nation', 'tier', 'type', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
+            self.__selector[name].pack(side='left')
+
+        self.packTitleDesc()
         self.changeVehicleFilter()
 
+    def packTitleDesc(self):
+        for name in [ 'title:vehicle', 'title:chassis', 'title:turret', 'title:engine', 'title:fueltank', 'title:radio', 'title:gun', 'title:shell' ]:
+            self.__itemValue[name].pack()
+
+    def packItemGroup(self):
+        for i, column in enumerate(self.__itemgroup):
+            for j, row in enumerate(column):
+                for item in row['items']:
+                    if not isinstance(item, dict):
+                        raise ValueError('item is not dict: {}'.format(item))
+                    name, schema = item['value'], item
+                    self.__itemValue[name].pack()
 
     def getTitleValue(self, target):
         category, node = target
         param = {}
-        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
+        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'fueltank', 'radio', 'gun', 'shell' ]:
             param[s] = self.__selector[s].getSelected()
         if param['vehicle'] is None:
             return ''
@@ -165,7 +181,7 @@ class Application(tkinter.Frame):
     def getItemValue(self, target):
         category, node = target
         param = {}
-        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
+        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'fueltank', 'radio', 'gun', 'shell' ]:
             param[s] = self.__selector[s].getSelected()
         if param['vehicle'] is None:
             return ''
@@ -183,10 +199,10 @@ class Application(tkinter.Frame):
     def changeVehicle(self):
         nation, vehicle = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle' ] ]
         if vehicle:
-            for s in [ 'chassis', 'turret', 'engine', 'radio' ]:
+            for s in [ 'chassis', 'turret', 'engine', 'fueltank', 'radio' ]:
                 self.__selector[s].setValues(self.__stragefetchList[s](nation, vehicle))
         else:
-            for s in [ 'chassis', 'turret', 'engine', 'radio' ]:
+            for s in [ 'chassis', 'turret', 'engine', 'fueltank', 'radio' ]:
                 self.__selector[s].setValues([ [ None, '' ] ])
         self.changeTurret()
 
@@ -211,6 +227,7 @@ class Application(tkinter.Frame):
     def changeModules(self):
         for panel in self.__itemValue.values():
             panel.update()
+        self.packItemGroup()
  
  
     def createMessage(self):
@@ -247,16 +264,29 @@ class PanelItemValue(tkinter.Frame):
     def __init__(self, master, name, itemdef, *args, **kwargs):
         bind = kwargs.pop('bind', None)
         option = kwargs.pop('option', {})
+        schema = kwargs.pop('schema', None)
         frameopt = { 'borderwidth':0 }
         frameopt.update(kwargs)
         super().__init__(master, *args, **frameopt)
-        self.pack(side='top', fill='x', pady=0)
+        #self.pack(side='top', fill='x', pady=0)
         labelopt = option['label'] if option is not None and 'label' in option else {}
         valueopt = option['value'] if option is not None and 'value' in option else {}
         unitopt = option['unit'] if option is not None and 'unit' in option else {}
         self.__label = tkinter.Label(self, **labelopt)
         self.__label.pack(side='left')
-        if name is not None:
+        self.__schema = None
+        if isinstance(schema, dict):
+            self.__schema = schema
+            category, node = schema['value'].split(':', 1)
+            self.__bind = { 'category':category, 'node':node, 'target':[category, node], 'func':bind }
+            self.__label['text'] = schema['label']
+            self.__value = tkinter.Label(self, **valueopt)
+            self.__value.pack(side='left')
+            if 'unit' in schema:
+                self.__unit = tkinter.Label(self, **unitopt)
+                self.__unit['text'] = schema['unit']
+                self.__unit.pack(side='left')
+        elif name is not None:
             category, node = name.split(':')
             self.__bind = { 'category':category, 'node':node, 'target':[category, node], 'func':bind }
             self.__label['text'] = itemdef[category][node]['label']
@@ -267,8 +297,30 @@ class PanelItemValue(tkinter.Frame):
                 self.__unit['text'] = itemdef[category][node]['unit']
                 self.__unit.pack(side='left')
 
+    def pack(self):
+        super().pack_forget()
+        if self.__schema and 'attr' in self.__schema:
+            if self.__schema['attr'] == 'phantom':
+                value = self.__value['text']
+                if value is None or value == '':
+                    return
+        super().pack(side='top', fill='x', pady=0)
+
     def update(self):
-        text = self.__bind['func'](self.__bind['target'])
+        value = self.__bind['func'](self.__bind['target'])
+        if value is None or value == '':
+            self.__value['text'] = ''
+            return
+        if self.__schema is None:
+            self.__value['text'] = value
+            return
+        if 'consider' in self.__schema:
+            if self.__schema['consider'] == 'float':
+                value = float(value)
+        if 'format' in self.__schema:
+            text = self.__schema['format'].format(value)
+        else:
+            text = value
         self.__value['text'] = text
 
 
@@ -298,8 +350,12 @@ class DropdownList(tkinter.Frame):
     def setValues(self, list):
         self.__values = [ t[0] for t in list ]
         self.__combobox['values'] = [ t[1] for t in list ]
-        self.__combobox.current(0)
-
+        name = str(self).split('.')[-1]
+        if 'module_' in name:
+            self.__combobox.current(len(list) - 1)
+        else:
+            self.__combobox.current(0)
+ 
     def getSelected(self):
         index = self.__combobox.current()
         return self.__values[index]
