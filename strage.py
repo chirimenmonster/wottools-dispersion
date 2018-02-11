@@ -84,9 +84,9 @@ def readXmlData(domain, target=None):
 class Strage(object):
 
     def __init__(self):
-        with open('itemdef.json', 'r') as fp:
-            self.__itemdef = json.load(fp)
-        with open('guidef.json', 'r') as fp:
+        with open('itemschema.json', 'r') as fp:
+            self.__itemschema = json.load(fp)
+        with open('guisettings_items.json', 'r') as fp:
             self.__itemgroup = json.load(fp)
         self.__dictVehicle = {}
         self.__cacheVehicleInfo = {}
@@ -110,14 +110,13 @@ class Strage(object):
     def findfunc_sum(self, args, param):
         result = 0
         for arg in args:
-            category, node = arg.split(':', 1)
-            value = float(self.find(category, node, param))
+            value = float(self.find(arg, param))
             result += value
         return result
             
-    def find(self, category, node, param):
+    def find(self, node, param):
         result = None
-        schema = self.__itemdef[category][node]
+        schema = self.__itemschema[node]
         for r in schema['resources']:
             if 'file' in r:
                 result = self.__find(r, param)
@@ -179,13 +178,13 @@ class Strage(object):
                     vehicles[nation][tier][type] = []
         for nation in nations:
             param = { 'nation': nation }
-            items = [ node.tag for node in self.find('vehicle', 'list', param) ]
+            items = [ node.tag for node in self.find('vehicle:list', param) ]
             for item in items:
                 param = { 'nation': nation, 'vehicle': item }
-                id = int(self.find('vehicle', 'id', param))
-                tier = self.find('vehicle', 'tier', param)
-                type = self.find('vehicle', 'type', param)
-                secret = self.find('vehicle', 'secret', param)
+                id = int(self.find('vehicle:id', param))
+                tier = self.find('vehicle:tier', param)
+                type = self.find('vehicle:type', param)
+                secret = self.find('vehicle:secret', param)
                 if not secret == 'secret' or config.secret:
                     vehicles[nation][tier][type].append({ 'id':id, 'vehicle':item })
         rev = {}
@@ -213,8 +212,7 @@ class Strage(object):
                 items += row['items']
         result = []
         for target in items:
-            category, node = target.split(':')
-            result.append([ node, strage.find(category, node, param) ])
+            result.append([ node, strage.find(target, param) ])
         return result
 
     def fetchVehicleList(self, nation, tier, type):
@@ -226,8 +224,8 @@ class Strage(object):
             for tier, type in product(tiers, types):
                 for vehicle in self.__vehicleList[nation][tier][type]:
                     param = { 'nation': nation, 'vehicle': vehicle }
-                    userString = self.find('vehicle', 'userString', param)
-                    shortUserString = self.find('vehicle', 'shortUserString', param)
+                    userString = self.find('vehicle:userString', param)
+                    shortUserString = self.find('vehicle:shortUserString', param)
                     result.append([ vehicle, shortUserString or userString ])
         return result
 
@@ -240,51 +238,51 @@ class Strage(object):
     def fetchTypeList(self):
         return [ [ type, type ] for type in TYPES_LIST ]
 
-    def getDescription(self, category, param):
-        schema = self.__itemdef['title'][category]
-        values = [ self.find(category, name, param) for name in schema['value'] ]
-        return values
+#    def getDescription(self, category, param):
+#        schema = self.__itemdef['title'][category]
+#        values = [ self.find(category, name, param) for name in schema['value'] ]
+#        return values
 
     def _getDropdownItems(self, category, items, param):
         result = []
         for item in items:
             param[category] = item
-            result.append([ item, self.find(category, 'userString', param) ])
+            result.append([ item, self.find(category + ':userString', param) ])
         return result
 
     def fetchChassisList(self, nation, vehicle):
         param = { 'nation': nation, 'vehicle': vehicle }
-        items = [ node.tag for node in self.find('vehicle', 'chassis', param) ]
+        items = [ node.tag for node in self.find('vehicle:chassis', param) ]
         return self._getDropdownItems('chassis', items, param)
 
     def fetchTurretList(self, nation, vehicle):
         param = { 'nation': nation, 'vehicle': vehicle }
-        items = [ node.tag for node in self.find('vehicle', 'turrets', param) ]
+        items = [ node.tag for node in self.find('vehicle:turrets', param) ]
         return self._getDropdownItems('turret', items, param)
 
     def fetchEngineList(self, nation, vehicle):
         param = { 'nation': nation, 'vehicle': vehicle }
-        items = [ node.tag for node in self.find('vehicle', 'engines', param) ]
+        items = [ node.tag for node in self.find('vehicle:engines', param) ]
         return self._getDropdownItems('engine', items, param)
 
     def fetchFueltankList(self, nation, vehicle):
         param = { 'nation': nation, 'vehicle': vehicle }
-        items = [ node.tag for node in self.find('vehicle', 'fueltanks', param) ]
+        items = [ node.tag for node in self.find('vehicle:fueltanks', param) ]
         return self._getDropdownItems('fueltank', items, param)
 
     def fetchRadioList(self, nation, vehicle):
         param = { 'nation': nation, 'vehicle': vehicle }
-        items = [ node.tag for node in self.find('vehicle', 'radios', param) ]
+        items = [ node.tag for node in self.find('vehicle:radios', param) ]
         return self._getDropdownItems('radio', items, param)
 
     def fetchGunList(self, nation, vehicle, turret):
         param = { 'nation': nation, 'vehicle': vehicle, 'turret': turret }
-        items = [ node.tag for node in self.find('turret', 'guns', param) ]
+        items = [ node.tag for node in self.find('turret:guns', param) ]
         return self._getDropdownItems('gun', items, param)
 
     def fetchShellList(self, nation, gun):
         param = { 'nation': nation, 'gun': gun }
-        items = [ node.tag for node in self.find('gun', 'shots', param) ]
+        items = [ node.tag for node in self.find('gun:shots', param) ]
         return self._getDropdownItems('shell', items, param)
 
 

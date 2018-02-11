@@ -11,29 +11,29 @@ labeldesc = {
     'shell':    [ 'name', 'tag' ],
 }
 
-def fetchItemdef():
-    with open('itemdef.json', 'r') as fp:
-        data = json.load(fp)
-    return data
+#def fetchItemdef():
+#    with open('itemdef.json', 'r') as fp:
+#        data = json.load(fp)
+#    return data
 
 
 def createMessage(strage, param, items):
-    dataList = fetchItemdef()
+    #dataList = fetchItemdef()
     
     output = io.StringIO(newline='')
     writer = csv.writer(output, dialect='excel', lineterminator='\n')
 
-    for node in [ 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
-        writer.writerow([ node, *strage.getDescription(node, param) ])
+    #for node in [ 'vehicle', 'chassis', 'turret', 'gun', 'shell' ]:
+    #    writer.writerow([ node, *strage.getDescription(node, param) ])
 
-    for target in items:
-        category, node = target.split(':')
-        unit = dataList[category][node]['unit']
-        writer.writerow([ node, strage.find(category, node, param), unit ])
+    for entry in items:
+        target = entry['value']
+        unit = entry['unit'] if 'unit' in entry else None
+        writer.writerow([ target, strage.find(target, param), unit ])
 
     return output.getvalue()
 
-items = fetchItemdef()
+#items = fetchItemdef()
 
 if __name__ == '__main__':
     import io, sys

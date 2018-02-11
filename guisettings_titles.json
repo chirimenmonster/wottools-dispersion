@@ -1,0 +1,42 @@
+[
+    {
+        "label":    "Vehicle:",
+        "format":   "{} ({}), {}: {}",
+        "value":    [ "vehicle:userString", "vehicle:index", "vehicle:shortUserString", "vehicle:description" ]
+    },
+    {
+        "label":    "Chassis:",
+        "format":   "{} ({})",
+        "value":    [ "chassis:userString", "chassis:index" ]
+    },
+    {
+        "label":    "Turret:",
+        "format":   "{} ({})",
+        "value":    [ "turret:userString", "turret:index" ]
+    },
+    {
+        "label":    "Engine:",
+        "format":   "{} ({})",
+        "value":    [ "engine:userString", "engine:index" ]
+    },
+    {
+        "label":    "FuelTank:",
+        "format":   "({})",
+        "value":    [ "fueltank:index" ]
+    },
+    {
+        "label":    "Radio:",
+        "format":   "{} ({})",
+        "value":    [ "radio:userString", "radio:index" ]
+    },
+    {
+        "label":    "Gun:",
+        "format":   "{} ({})",
+        "value":    [ "gun:userString", "gun:index" ]
+    },
+    {
+        "label":    "Shell:",
+        "format":   "{} ({})",
+        "value":    [ "shell:userString", "shell:index" ]
+    }
+]
