@@ -126,6 +126,8 @@
                 {
                     "label":    "shell speed",
                     "value":    "shell:speed",
+                    "format":   "{:,.0f}",
+                    "consider": "float",
                     "unit":     "m/s"
                 },  
                 {
@@ -136,6 +138,8 @@
                 {
                     "label":    "max distance",
                     "value":    "shell:maxDistance",
+                    "format":   "{:,.0f}",
+                    "consider": "float",
                     "unit":     "m"
                 }
             ],
@@ -166,6 +170,8 @@
                 {                
                     "label":    "engine power",
                     "value":    "engine:power",
+                    "format":   "{:,.0f}",
+                    "consider": "float",
                     "unit":     "hp"
                 },
                 {

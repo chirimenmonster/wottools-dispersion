@@ -444,22 +444,6 @@
             }
         ]
     },
-    "fueltank:userString": {
-        "comment":  "dummy entry",
-        "value":    "nodename",
-        "addparams": [
-            {
-                "xtag":     "fueltank",
-                "value":    "vehicle:fueltank"
-            }
-        ],
-        "resources": [
-            {
-                "file":     "vehicles/{nation}/components/fuelTanks.xml",
-                "xpath":    "shared/{fueltank}"
-            }
-        ]
-    },
     "fueltank:weight": {
         "value":    "float",
         "addparams": [

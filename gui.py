@@ -29,7 +29,6 @@ class Application(tkinter.Frame):
         self.__stragefetchList['chassis'] = strage.fetchChassisList
         self.__stragefetchList['turret'] = strage.fetchTurretList
         self.__stragefetchList['engine'] = strage.fetchEngineList
-        #self.__stragefetchList['fueltank'] = strage.fetchFueltankList
         self.__stragefetchList['radio'] = strage.fetchRadioList
         self.__stragefetchList['gun'] = strage.fetchGunList
         self.__stragefetchList['shell'] = strage.fetchShellList
@@ -189,11 +188,21 @@ class Application(tkinter.Frame):
         param = {}
         for category in  [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
             param[category] = self.__selector[category].getSelected()
-        items = []
+
+        values = []
+        for schema in self.__titlesdesc:
+            value = []
+            for item in schema['value']:
+                value.append(self.__strage.find(item, param))
+            values.append([ schema['label'], *value ])
+
         for column in self.__itemgroup:
             for row in column:
-                items += row['items']
-        message = csvoutput.createMessage(self.__strage, param, items)
+                for schema in row['items']:
+                    value = self.__strage.find(schema['value'], param)
+                    values.append([ schema['label'], value, schema.get('unit', ''), schema['value'] ])
+
+        message = csvoutput.createMessage(self.__strage, values)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
 
