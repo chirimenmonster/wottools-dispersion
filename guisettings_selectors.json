@@ -42,11 +42,6 @@
             "callback": "modules",
             "selected": "last",
             "option":   { "label": { "text": "Engine" }, "combobox": { "width": 32 } }
-        },
-        {
-            "id":       "fueltank",
-            "callback": "modules",
-            "option":   { "label": { "text": "FuelTank" }, "combobox": { "width": 32 } }
         }
     ],
     [

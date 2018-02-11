@@ -117,6 +117,11 @@ class Strage(object):
     def find(self, node, param):
         result = None
         schema = self.__itemschema[node]
+        if 'addparams' in schema:
+            param = { k:v for k,v in param.items() }
+            for p in schema['addparams']:
+                value = self.find(p['value'], param)
+                param[p['xtag']] = value
         for r in schema['resources']:
             if 'file' in r:
                 result = self.__find(r, param)

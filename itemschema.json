@@ -187,6 +187,15 @@
             }
         ]
     },
+    "vehicle:fueltank": {
+        "value":    "nodename",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "fuelTanks/*[1]"
+            }
+        ]
+    },
     "vehicle:radios": {
         "value":    "nodelist",
         "resources": [
@@ -408,6 +417,12 @@
     },
     "fueltank:index": {
         "value":    "nodename",
+        "addparams": [
+            {
+                "xtag":     "fueltank",
+                "value":    "vehicle:fueltank"
+            }
+        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
@@ -416,6 +431,12 @@
         ]
     },
     "fueltank:id": {
+        "addparams": [
+            {
+                "xtag":     "fueltank",
+                "value":    "vehicle:fueltank"
+            }
+        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
@@ -426,6 +447,12 @@
     "fueltank:userString": {
         "comment":  "dummy entry",
         "value":    "nodename",
+        "addparams": [
+            {
+                "xtag":     "fueltank",
+                "value":    "vehicle:fueltank"
+            }
+        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
@@ -435,6 +462,12 @@
     },
     "fueltank:weight": {
         "value":    "float",
+        "addparams": [
+            {
+                "xtag":     "fueltank",
+                "value":    "vehicle:fueltank"
+            }
+        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
@@ -444,6 +477,12 @@
     },
     "fueltank:health": {
         "value":    "float",
+        "addparams": [
+            {
+                "xtag":     "fueltank",
+                "value":    "vehicle:fueltank"
+            }
+        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",

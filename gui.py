@@ -29,7 +29,7 @@ class Application(tkinter.Frame):
         self.__stragefetchList['chassis'] = strage.fetchChassisList
         self.__stragefetchList['turret'] = strage.fetchTurretList
         self.__stragefetchList['engine'] = strage.fetchEngineList
-        self.__stragefetchList['fueltank'] = strage.fetchFueltankList
+        #self.__stragefetchList['fueltank'] = strage.fetchFueltankList
         self.__stragefetchList['radio'] = strage.fetchRadioList
         self.__stragefetchList['gun'] = strage.fetchGunList
         self.__stragefetchList['shell'] = strage.fetchShellList
@@ -115,7 +115,7 @@ class Application(tkinter.Frame):
 
     def getVehicleValue(self, schema):
         param = {}
-        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'fueltank', 'radio', 'gun', 'shell' ]:
+        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
             param[s] = self.__selector[s].getSelected()
         if param['vehicle'] is None:
             return ''
@@ -150,7 +150,7 @@ class Application(tkinter.Frame):
     def changeVehicle(self):
         nation, vehicle = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle' ] ]
         args = [ nation, vehicle ]
-        for s in [ 'chassis', 'turret', 'engine', 'fueltank', 'radio' ]:
+        for s in [ 'chassis', 'turret', 'engine', 'radio' ]:
             if None not in args:
                 values = self.__stragefetchList[s](*args)
             else:
@@ -187,7 +187,7 @@ class Application(tkinter.Frame):
 
     def createMessage(self):
         param = {}
-        for category in  [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'fueltank', 'radio', 'gun', 'shell' ]:
+        for category in  [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
             param[category] = self.__selector[category].getSelected()
         items = []
         for column in self.__itemgroup:
