@@ -166,21 +166,7 @@ class Application(tkinter.Frame):
 
     def createMessage(self):
         param = self.getSelectedValues()
-        values = []
-        for schema in self.__titlesdesc:
-            value = []
-            for item in schema['value']:
-                value.append(self.__strage.find(item, param))
-            values.append([ schema['label'], *value ])
-
-        values.append([ 'Siege:', param['siege'] or 'None' ])
-
-        for column in self.__itemgroup:
-            for row in column:
-                for schema in row['items']:
-                    value = self.__strage.find(schema['value'], param)
-                    values.append([ schema['label'], value, schema.get('unit', ''), schema['value'] ])
-
+        values = self.__strage.getDescription(param)
         message = csvoutput.createMessage(self.__strage, values)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
