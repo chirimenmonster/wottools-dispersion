@@ -1,23 +1,18 @@
-from functools import partial
-
 import tkinter
 import tkinter.ttk
 import tkinter.font
 
-import json
-
-import strage
-import csvoutput
+from lib.strage import Strage
+from lib import csvoutput
+from lib.resources import g_resources, NATIONS, TIERS, TYPES
+from lib.config import parseArgument, g_config as config
 
 class Application(tkinter.Frame):
 
-    def __init__(self, master=None, strage=strage):
-        with open('guisettings_items.json', 'r') as fp:
-            self.__itemgroup = json.load(fp)
-        with open('guisettings_titles.json', 'r') as fp:
-            self.__titlesdesc = json.load(fp)
-        with open('guisettings_selectors.json', 'r') as fp:
-            self.__selectorsdesc = json.load(fp)
+    def __init__(self, master=None, strage=None):
+        self.__itemgroup = g_resources.itemgroup
+        self.__titlesdesc = g_resources.titlesdesc
+        self.__selectorsdesc = g_resources.selectorsdesc
 
         self.__strage = strage
 
@@ -126,7 +121,7 @@ class Application(tkinter.Frame):
         if 'attr' not in schema or not schema['attr'] == 'const':
             for s in [ 'nation', 'tier', 'type', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell', 'siege' ]:
                 param[s] = self.__selector[s].getSelected()
-        result = self.__stragefetchList[schema['id']](schema, param)
+        result = self.__strage.getDropdownList(schema, param)
         if result is None or result == []:
             result = [ [ None, '' ] ]
         return result
@@ -286,9 +281,6 @@ class DropdownList(tkinter.Frame):
 
     def update(self):
         list = self.__method(self.__target)
-        self.setValues(list)
-
-    def setValues(self, list):
         self.__values = [ t[0] for t in list ]
         self.__combobox['values'] = [ t[1] for t in list ]
         name = str(self).split('.')[-1]
@@ -315,8 +307,8 @@ if __name__ == '__main__':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-    strage.parseArgument()
+    parseArgument()
 
-    app = Application(strage=strage.Strage())
+    app = Application(strage=Strage())
     app.mainloop()
     
