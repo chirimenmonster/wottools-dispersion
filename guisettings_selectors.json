@@ -49,7 +49,7 @@
             "id":       "radio",
             "callback": "modules",
             "selected": "last",
-            "option":   { "label": { "text": "Radio" }, "combobox": { "width": 32 } }
+            "option":   { "label": { "text": "Radio" }, "combobox": { "width": 16 } }
         },
         {
             "id":       "gun",
@@ -60,7 +60,13 @@
         {
             "id":       "shell",
             "callback": "modules",
-            "option":   { "label": { "text": "Shell" }, "combobox": { "width": 32 } }
+            "option":   { "label": { "text": "Shell" }, "combobox": { "width": 16 } }
+        },
+        {
+            "id":       "siege",
+            "callback": "modules",
+            "option":   { "label": { "text": "Siege" }, "combobox": { "width": 8 } },
+            "attr":     "phantom"
         }
     ]
 ]

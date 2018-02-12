@@ -69,6 +69,15 @@
             }
         ]
     },
+    "vehicle:siegeMode": {
+        "map":     { "siegeMode": "siegeMode" },
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/list.xml",
+                "xpath":    "{vehicle}/tags"
+            }
+        ]
+    },
     "vehicle:type": {
         "map": {
             "lightTank": "LT", "mediumTank": "MT", "heavyTank": "HT",

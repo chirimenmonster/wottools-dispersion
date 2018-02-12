@@ -32,6 +32,7 @@ class Application(tkinter.Frame):
         self.__stragefetchList['radio'] = strage.fetchRadioList
         self.__stragefetchList['gun'] = strage.fetchGunList
         self.__stragefetchList['shell'] = strage.fetchShellList
+        self.__stragefetchList['siege'] = strage.fetchSiegeList
 
         self.__selector = {}
 
@@ -61,6 +62,7 @@ class Application(tkinter.Frame):
 
     def createSelectorBars(self, master):
         self.__selector = {}
+        self.__selectorList = []
         for row in self.__selectorsdesc:
             bar = tkinter.Frame(master)
             bar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
@@ -68,12 +70,13 @@ class Application(tkinter.Frame):
                 option = entry['option']
                 name = entry['id'] + 'Selector'
                 selected = entry['selected'] if 'selected' in entry else None
-                selector = DropdownList(bar, name=name, option=option, selected=selected)
+                selector = DropdownList(bar, name=name, entry=entry, option=option, selected=selected)
                 if 'attr' in entry and entry['attr'] == 'const':
                     selector.setValues(self.__stragefetchList[entry['id']]())
                 selector.setCallback(self.__selectorCB[entry['callback']])
-                selector.pack(side='left')
+                selector.pack()
                 self.__selector[entry['id']] = selector 
+                self.__selectorList.append(selector)
 
     def createDescriptionView(self, master):
         view = tkinter.Frame(master, highlightthickness=1, highlightbackground='gray')
@@ -104,6 +107,10 @@ class Application(tkinter.Frame):
         copyButton = tkinter.Button(master, text=label, command=self.createMessage, **option)
         copyButton.pack(side='top', expand=1, fill='x', padx=7, pady=2)   
 
+    def packSelectors(self):
+        for panel in self.__selectorList:
+            panel.pack()
+
     def packTitleDesc(self):
         for panel in self.__vehicleDescs:
             panel.pack()
@@ -114,7 +121,7 @@ class Application(tkinter.Frame):
 
     def getVehicleValue(self, schema):
         param = {}
-        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
+        for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell', 'siege' ]:
             param[s] = self.__selector[s].getSelected()
         if param['vehicle'] is None:
             return ''
@@ -149,7 +156,7 @@ class Application(tkinter.Frame):
     def changeVehicle(self):
         nation, vehicle = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle' ] ]
         args = [ nation, vehicle ]
-        for s in [ 'chassis', 'turret', 'engine', 'radio' ]:
+        for s in [ 'chassis', 'turret', 'engine', 'radio', 'siege' ]:
             if None not in args:
                 values = self.__stragefetchList[s](*args)
             else:
@@ -182,11 +189,12 @@ class Application(tkinter.Frame):
             panel.update()
         for panel in self.__itemValues:
             panel.update()
+        self.packSelectors()
         self.packItemGroup()
 
     def createMessage(self):
         param = {}
-        for category in  [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
+        for category in  [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell', 'siege' ]:
             param[category] = self.__selector[category].getSelected()
 
         values = []
@@ -195,6 +203,8 @@ class Application(tkinter.Frame):
             for item in schema['value']:
                 value.append(self.__strage.find(item, param))
             values.append([ schema['label'], *value ])
+
+        values.append([ 'Siege:', param['siege'] or 'None' ])
 
         for column in self.__itemgroup:
             for row in column:
@@ -261,9 +271,10 @@ class PanelItemValue(tkinter.Frame):
 
 
 class DropdownList(tkinter.Frame):
-    __values = [ '' ]
+    __values = [ None ]
 
-    def __init__(self, master, *args, option=None, selected=None, **kwargs):
+    def __init__(self, master, *args, entry=None, option=None, selected=None, **kwargs):
+        self.__target = entry
         self.__defaultSelected = selected
         frameopt = { 'borderwidth':0, 'padx':4 }
         frameopt.update(kwargs)
@@ -295,6 +306,13 @@ class DropdownList(tkinter.Frame):
     def getSelected(self):
         index = self.__combobox.current()
         return self.__values[index]
+
+    def pack(self):
+        super().pack_forget()
+        if self.__target.get('attr', None) == 'phantom':
+            if not self.__values[-1]:
+                return
+        super().pack(side='left')
 
 
 if __name__ == '__main__':

@@ -96,7 +96,10 @@ class Strage(object):
         self.__vehicleList, self.__vehicleNation = self.__fetchVehicleList()
 
     def __find(self, resource, param):
-        file = resource['file'].format(**param)
+        fileparam = { k:v for k,v in param.items() }
+        if 'vehicle_file' in fileparam:
+            fileparam['vehicle'] = fileparam['vehicle_file']
+        file = resource['file'].format(**fileparam)
         xpath = resource['xpath'].format(**param)
         if file not in self.__xmltree:
             domain, target = file.split('/', 1)
@@ -117,8 +120,10 @@ class Strage(object):
     def find(self, node, param):
         result = None
         schema = self.__itemschema[node]
+        param = { k:v for k,v in param.items() }
+        if param.get('siege', None) == 'siege':
+            param['vehicle_file'] = param['vehicle'] + '_siege_mode'
         if 'addparams' in schema:
-            param = { k:v for k,v in param.items() }
             for p in schema['addparams']:
                 value = self.find(p['value'], param)
                 param[p['xtag']] = value
@@ -135,7 +140,6 @@ class Strage(object):
             if result is not None:
                 break
         if result is None:
-            print('not found')
             return None
         if 'value' in schema:
             if schema['value'] == 'nodename':
@@ -243,11 +247,6 @@ class Strage(object):
     def fetchTypeList(self):
         return [ [ type, type ] for type in TYPES_LIST ]
 
-#    def getDescription(self, category, param):
-#        schema = self.__itemdef['title'][category]
-#        values = [ self.find(category, name, param) for name in schema['value'] ]
-#        return values
-
     def _getDropdownItems(self, category, items, param):
         result = []
         for item in items:
@@ -290,6 +289,16 @@ class Strage(object):
         items = [ node.tag for node in self.find('gun:shots', param) ]
         return self._getDropdownItems('shell', items, param)
 
+    def fetchSiegeList(self, nation, vehicle):
+        param = { 'nation': nation, 'vehicle': vehicle }
+        if self.find('vehicle:siegeMode', param):
+            result = [
+                [ None, 'normal' ],
+                [ 'siege', 'siege' ]
+            ]
+        else:
+            result = [ [ None, '' ] ]
+        return result
 
 class Command:
 
