@@ -8,54 +8,61 @@ class Command:
     @staticmethod
     def listVehicle(strage, pattern):
         nation, tier, type = pattern.split(':')
-        for r in strage.fetchVehicleList(nation.lower(), tier, type.upper()):
+        param = { 'nation':nation.lower(), 'tier':tier, 'type':type.upper() }
+        for r in strage.fetchVehicleList(None, param):
             print('{0[0]:<32} : {0[1]}'.format(r))
 
     @staticmethod
     def listNation(strage):
-        print(', '.join([ v[0] for v in strage.fetchNationList() ]))
+        print(', '.join([ v[0] for v in strage.fetchNationList(None, None) ]))
 
     @staticmethod
     def listTier(strage):
-        print(', '.join([ v[0] for v in strage.fetchTierList() ]))
+        print(', '.join([ v[0] for v in strage.fetchTierList(None, None) ]))
 
     @staticmethod
     def listType(strage):
-        print(', '.join([ v[0] for v in strage.fetchTypeList() ]))
+        print(', '.join([ v[0] for v in strage.fetchTypeList(None, None) ]))
 
     @staticmethod
     def listChassis(strage, vehicle):
         nation = strage.getVehicleNation(vehicle)
-        for r in strage.fetchChassisList(nation, vehicle):
+        param = { 'nation':nation, 'vehicle':vehicle }
+        for r in strage.fetchChassisList(None, param):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
     def listTurret(strage, vehicle):
         nation = strage.getVehicleNation(vehicle)
-        for r in strage.fetchTurretList(nation, vehicle):
+        param = { 'nation':nation, 'vehicle':vehicle }
+        for r in strage.fetchTurretList(None, param):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
     def listEngine(strage, vehicle):
         nation = strage.getVehicleNation(vehicle)
-        for r in strage.fetchEngineList(nation, vehicle):
+        param = { 'nation':nation, 'vehicle':vehicle }
+        for r in strage.fetchEngineList(None, param):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
     def listRadio(strage, vehicle):
         nation = strage.getVehicleNation(vehicle)
-        for r in strage.fetchRadioList(nation, vehicle):
+        param = { 'nation':nation, 'vehicle':vehicle }
+        for r in strage.fetchRadioList(None, param):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
     def listGun(strage, vehicle, turret):
         nation = strage.getVehicleNation(vehicle)
-        for r in strage.fetchGunList(nation, vehicle, turret):
+        param = { 'nation':nation, 'vehicle':vehicle, 'turret':turret }
+        for r in strage.fetchGunList(None, param):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
     def listShell(strage, nation, gun):
-        for r in strage.fetchShellList(nation, gun):
+        param = { 'nation':nation, 'gun':gun }
+        for r in strage.fetchShellList(None, param):
             print('{0[0]:<32}: {0[1]}'.format(r))
 
 
@@ -69,15 +76,15 @@ class Command:
         else:
             vehicle = p[0]
             param = { 'nation':nation, 'vehicle':vehicle }
-            param['chassis'] = strage.fetchChassisList(nation, vehicle)[-1][0]
-            param['turret'] = strage.fetchTurretList(nation, vehicle)[-1][0]
-            param['engine'] = strage.fetchEngineList(nation, vehicle)[-1][0]
-            param['radio'] = strage.fetchRadioList(nation, vehicle)[-1][0]
-            param['gun'] = strage.fetchGunList(nation, vehicle, param['turret'])[-1][0]
-            param['shell'] = strage.fetchShellList(nation, param['gun'])[0][0]
-        result = []
-        result.extend(strage.getVehicleDescription(param))
-        result.extend(strage.getVehicleInfo(param))
+            param['chassis'] = strage.fetchChassisList(None, param)[-1][0]
+            param['turret'] = strage.fetchTurretList(None, param)[-1][0]
+            param['engine'] = strage.fetchEngineList(None, param)[-1][0]
+            param['radio'] = strage.fetchRadioList(None, param)[-1][0]
+            param['gun'] = strage.fetchGunList(None, param)[-1][0]
+            param['shell'] = strage.fetchShellList(None, param)[0][0]
+        if 'siege' not in param:
+            param['siege'] = None
+        result = strage.getDescription(param)
         for r in result:
             print('{0[0]:>32}: {0[1]}'.format(r))
 

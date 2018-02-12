@@ -11,6 +11,7 @@ class Strage(object):
 
     def __init__(self):
         self.__itemschema = g_resources.itemschema
+        self.__titlesdesc = g_resources.titlesdesc
         self.__itemgroup = g_resources.itemgroup
         self.__dictVehicle = {}
         self.__cacheVehicleInfo = {}
@@ -168,6 +169,21 @@ class Strage(object):
             result.append([ node, self.__itemdef['title'][node]['format'].format(*value) ])
         return result
 
+    def getDescription(self, param):
+        values = []
+        for schema in self.__titlesdesc:
+            value = []
+            for item in schema['value']:
+                value.append(self.find(item, param))
+            values.append([ schema['label'], *value ])
+        values.append([ 'Siege:', param['siege'] or 'None' ])
+        for column in self.__itemgroup:
+            for row in column:
+                for schema in row['items']:
+                    value = self.find(schema['value'], param)
+                    values.append([ schema['label'], value, schema.get('unit', ''), schema['value'] ])
+        return values
+
     def getVehicleInfo(self, param):
         items = []
         for column in self.__itemgroup:
@@ -245,7 +261,7 @@ class Strage(object):
         return self._getDropdownItems('gun', items, param, schema=schema)
 
     def fetchShellList(self, schema, param):
-        if param['vehicle'] is None:
+        if param['gun'] is None:
             return None
         items = [ node.tag for node in self.find('gun:shots', param) ]
         return self._getDropdownItems('shell', items, param, schema=schema)
