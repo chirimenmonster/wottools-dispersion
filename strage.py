@@ -1,6 +1,7 @@
 from itertools import product
 import re
 import json
+from xml.etree import ElementTree
 
 class Config:
     BASE_DIR = 'C:/Games/World_of_Tanks'
@@ -117,12 +118,21 @@ class Strage(object):
             result += value
         return result
             
+    def findfunc_or(self, args, param):
+        result = None
+        for arg in args:
+            result = self.find(arg, param)
+            if result:
+                break
+        return result
+
     def find(self, node, param):
         result = None
         schema = self.__itemschema[node]
         param = { k:v for k,v in param.items() }
         if param.get('siege', None) == 'siege':
-            param['vehicle_file'] = param['vehicle'] + '_siege_mode'
+            if not node == 'vehicle:siegeMode' and self.find('vehicle:siegeMode', param):
+                param['vehicle_file'] = param['vehicle'] + '_siege_mode'
         if 'addparams' in schema:
             for p in schema['addparams']:
                 value = self.find(p['value'], param)
@@ -133,6 +143,8 @@ class Strage(object):
             elif 'func' in r:
                 if r['func'] == 'sum':
                     result = self.findfunc_sum(r['args'], param)
+                elif r['func'] == 'or':
+                    result = self.findfunc_or(r['args'], param)
                 else:
                     raise ValueError('unknown resource function: {}'.format(r['func']))
             else:
@@ -153,17 +165,22 @@ class Strage(object):
             else:
                 raise ValueError('unknown value keyword: {}'.schema['value'])
         else:
-            result = result.text
+            if isinstance(result, ElementTree.Element):
+                result = result.text
         if 'map' in schema:
             match = re.match('\[(\d)\]', str(schema['map']))
-            if  schema['map'] == 'gettext':
-                result = translate(result)
+            if match:
+                result = result.split()[int(match.group(1))]
             elif isinstance(schema['map'], dict):
                 values = result.split()
                 result = [ schema['map'][v] for v in values if v in schema['map'] ]
                 result = result.pop(0) if result else None
-            elif match:
-                result = result.split()[int(match.group(1))]
+            elif schema['map'] == 'gettext':
+                result = translate(result)
+            elif schema['map'] == 'roman':
+                result = TIERS_LABEL[result]
+            else:
+                raise ValueError('unknown map method: {}'.schema['map'])
         return result
 
     def __fetchNationOrder(self):
@@ -224,80 +241,85 @@ class Strage(object):
             result.append([ node, strage.find(target, param) ])
         return result
 
-    def fetchVehicleList(self, nation, tier, type):
-        nations = [ n[0] for n in self.__nationOrder ] if nation == '*' else [ nation ]
-        tiers = TIERS if tier == '*' else [ tier ]
-        types = TYPES_LIST if type == '*' else [ type ]
-        result = []
-        for nation in nations:
-            for tier, type in product(tiers, types):
-                for vehicle in self.__vehicleList[nation][tier][type]:
-                    param = { 'nation': nation, 'vehicle': vehicle }
-                    userString = self.find('vehicle:userString', param)
-                    shortUserString = self.find('vehicle:shortUserString', param)
-                    result.append([ vehicle, shortUserString or userString ])
-        return result
-
-    def fetchNationList(self):
+    def fetchNationList(self, schema, param):
         return [ [ s, s.upper() ] for s in self.__nationOrder ]
 
-    def fetchTierList(self):
+    def fetchTierList(self, schema, param):
         return [ [ tier, TIERS_LABEL[tier] ] for tier in TIERS ]
 
-    def fetchTypeList(self):
+    def fetchTypeList(self, schema, param):
         return [ [ type, type ] for type in TYPES_LIST ]
 
-    def _getDropdownItems(self, category, items, param):
+
+    def _getDropdownItems(self, category, items, param, schema=None):
         result = []
+        param = param.copy()
         for item in items:
             param[category] = item
-            result.append([ item, self.find(category + ':userString', param) ])
+            if schema and schema.get('label', None):
+                format = schema['label']['format']
+                values = [ self.find(node, param) for node in schema['label']['value'] ]
+                text = format.format(*values)
+            else:
+                text = self.find(category + ':userString', param)
+            result.append([ item, text ])
         return result
 
-    def fetchChassisList(self, nation, vehicle):
-        param = { 'nation': nation, 'vehicle': vehicle }
+    def fetchVehicleList(self, schema, param):
+        nations = [ n[0] for n in self.__nationOrder ] if param['nation'] == '*' else [ param['nation'] ]
+        tiers = TIERS if param['tier'] == '*' else [ param['tier'] ]
+        types = TYPES_LIST if param['type'] == '*' else [ param['type'] ]
+        items = []
+        for nation, tier, type in product(nations, tiers, types):
+            items.extend(self.__vehicleList[nation][tier][type])
+        return self._getDropdownItems('vehicle', items, param, schema=schema)
+
+    def fetchChassisList(self, schema, param):
+        if param['vehicle'] is None:
+            return None
         items = [ node.tag for node in self.find('vehicle:chassis', param) ]
-        return self._getDropdownItems('chassis', items, param)
+        return self._getDropdownItems('chassis', items, param, schema=schema)
 
-    def fetchTurretList(self, nation, vehicle):
-        param = { 'nation': nation, 'vehicle': vehicle }
+    def fetchTurretList(self, schema, param):
+        if param['vehicle'] is None:
+            return None
         items = [ node.tag for node in self.find('vehicle:turrets', param) ]
-        return self._getDropdownItems('turret', items, param)
+        return self._getDropdownItems('turret', items, param, schema=schema)
 
-    def fetchEngineList(self, nation, vehicle):
-        param = { 'nation': nation, 'vehicle': vehicle }
+    def fetchEngineList(self, schema, param):
+        if param['vehicle'] is None:
+            return None
         items = [ node.tag for node in self.find('vehicle:engines', param) ]
-        return self._getDropdownItems('engine', items, param)
+        return self._getDropdownItems('engine', items, param, schema=schema)
 
-    def fetchFueltankList(self, nation, vehicle):
-        param = { 'nation': nation, 'vehicle': vehicle }
-        items = [ node.tag for node in self.find('vehicle:fueltanks', param) ]
-        return self._getDropdownItems('fueltank', items, param)
-
-    def fetchRadioList(self, nation, vehicle):
-        param = { 'nation': nation, 'vehicle': vehicle }
+    def fetchRadioList(self, schema, param):
+        if param['vehicle'] is None:
+            return None
         items = [ node.tag for node in self.find('vehicle:radios', param) ]
-        return self._getDropdownItems('radio', items, param)
+        return self._getDropdownItems('radio', items, param, schema=schema)
 
-    def fetchGunList(self, nation, vehicle, turret):
-        param = { 'nation': nation, 'vehicle': vehicle, 'turret': turret }
+    def fetchGunList(self, schema, param):
+        if param['vehicle'] is None:
+            return None
         items = [ node.tag for node in self.find('turret:guns', param) ]
-        return self._getDropdownItems('gun', items, param)
+        return self._getDropdownItems('gun', items, param, schema=schema)
 
-    def fetchShellList(self, nation, gun):
-        param = { 'nation': nation, 'gun': gun }
+    def fetchShellList(self, schema, param):
+        if param['vehicle'] is None:
+            return None
         items = [ node.tag for node in self.find('gun:shots', param) ]
-        return self._getDropdownItems('shell', items, param)
+        return self._getDropdownItems('shell', items, param, schema=schema)
 
-    def fetchSiegeList(self, nation, vehicle):
-        param = { 'nation': nation, 'vehicle': vehicle }
+    def fetchSiegeList(self, schema, param):
+        if param['vehicle'] is None:
+            return None
         if self.find('vehicle:siegeMode', param):
             result = [
                 [ None, 'normal' ],
                 [ 'siege', 'siege' ]
             ]
         else:
-            result = [ [ None, '' ] ]
+            result = []
         return result
 
 class Command:

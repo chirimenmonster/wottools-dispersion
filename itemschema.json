@@ -43,6 +43,15 @@
             }
         ]
     },
+    "vehicle:displayString": {
+        "map":      "gettext",
+        "resources": [
+            {
+                "func":     "or",
+                "args":     [ "vehicle:shortUserString", "vehicle:userString" ]
+            }
+        ]
+    },
     "vehicle:description": {
         "map":      "gettext",
         "resources": [
@@ -102,9 +111,9 @@
         "value":    "function",
         "resources": [
             {
-                "func": "sum",
-                "args": [ "vehicle:weight", "chassis:weight", "turret:weight",
-                    "engine:weight", "fueltank:weight", "radio:weight", "gun:weight" ]
+                "func":     "sum",
+                "args":     [ "vehicle:weight", "chassis:weight", "turret:weight",
+                                "engine:weight", "fueltank:weight", "radio:weight", "gun:weight" ]
             }
         ]
     },
@@ -121,8 +130,8 @@
         "value":    "function",
         "resources": [
             {
-                "func": "sum",
-                "args": [ "vehicle:health", "turret:health" ]
+                "func":     "sum",
+                "args":     [ "vehicle:health", "turret:health" ]
             }
         ]
     },
@@ -553,6 +562,15 @@
             }
         ]
     },
+    "gun:tier": {
+        "map":      "roman",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/guns.xml",
+                "xpath":    "shared/{gun}/level"
+            }
+        ]
+    },
     "gun:reloadTime": {
         "resources": [
             {
@@ -705,6 +723,18 @@
         ]
     },
     "shell:kind": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/shells.xml",
+                "xpath":    "{shell}/kind"
+            }
+        ]
+    },
+    "shell:kindShort": {
+        "map": {
+            "ARMOR_PIERCING": "AP", "ARMOR_PIERCING_CR": "APCR",
+            "HIGH_EXPLOSIVE": "HE", "HOLLOW_CHARGE": "HEAT"
+        },
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",

@@ -21,7 +21,11 @@
         {
             "id":       "vehicle",
             "callback": "vehicle",
-            "option":   { "label": { "text": "Vehicle" }, "combobox": { "width": 40 } }
+            "option":   { "label": { "text": "Vehicle" }, "combobox": { "width": 40 } },
+            "label":    {
+                "format":   "{}",
+                "value":    [ "vehicle:displayString" ]
+            }
         }
     ],
     [
@@ -55,12 +59,16 @@
             "id":       "gun",
             "callback": "gun",
             "selected": "last",
-            "option":   { "label": { "text": "Gun" }, "combobox": { "width": 32 } }
+            "option":   { "label": { "text": "Gun" }, "combobox": { "width": 24 } }
         },
         {
             "id":       "shell",
             "callback": "modules",
-            "option":   { "label": { "text": "Shell" }, "combobox": { "width": 16 } }
+            "option":   { "label": { "text": "Shell" }, "combobox": { "width": 24 } },
+            "label":    {
+                "format":   "{}, {}",
+                "value":    [ "shell:kindShort", "shell:userString" ]
+            }
         },
         {
             "id":       "siege",

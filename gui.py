@@ -61,6 +61,7 @@ class Application(tkinter.Frame):
         self.changeVehicleFilter()
 
     def createSelectorBars(self, master):
+        self.__selectorSchema = {}
         self.__selector = {}
         self.__selectorList = []
         for row in self.__selectorsdesc:
@@ -70,11 +71,12 @@ class Application(tkinter.Frame):
                 option = entry['option']
                 name = entry['id'] + 'Selector'
                 selected = entry['selected'] if 'selected' in entry else None
-                selector = DropdownList(bar, name=name, entry=entry, option=option, selected=selected)
+                selector = DropdownList(bar, name=name, entry=entry, method=self.getDropdownList, option=option, selected=selected)
                 if 'attr' in entry and entry['attr'] == 'const':
-                    selector.setValues(self.__stragefetchList[entry['id']]())
+                    selector.update()
                 selector.setCallback(self.__selectorCB[entry['callback']])
                 selector.pack()
+                self.__selectorSchema[entry['id']] = entry
                 self.__selector[entry['id']] = selector 
                 self.__selectorList.append(selector)
 
@@ -119,6 +121,16 @@ class Application(tkinter.Frame):
         for panel in self.__itemValues:
             panel.pack()
 
+    def getDropdownList(self, schema):
+        param = {}
+        if 'attr' not in schema or not schema['attr'] == 'const':
+            for s in [ 'nation', 'tier', 'type', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell', 'siege' ]:
+                param[s] = self.__selector[s].getSelected()
+        result = self.__stragefetchList[schema['id']](schema, param)
+        if result is None or result == []:
+            result = [ [ None, '' ] ]
+        return result
+
     def getVehicleValue(self, schema):
         param = {}
         for s in [ 'nation', 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell', 'siege' ]:
@@ -145,43 +157,20 @@ class Application(tkinter.Frame):
         return text or ''
 
     def changeVehicleFilter(self):
-        nation, tier, type = [ self.__selector[s].getSelected() for s in [ 'nation', 'tier', 'type' ] ]
-        args = [ nation, tier, type ]
-        vehicles = self.__stragefetchList['vehicle'](*args)
-        if not vehicles or not vehicles[0]:
-            vehicles = [ [ None, '' ] ]
-        self.__selector['vehicle'].setValues(vehicles)
+        self.__selector['vehicle'].update()
         self.changeVehicle()
 
     def changeVehicle(self):
-        nation, vehicle = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle' ] ]
-        args = [ nation, vehicle ]
         for s in [ 'chassis', 'turret', 'engine', 'radio', 'siege' ]:
-            if None not in args:
-                values = self.__stragefetchList[s](*args)
-            else:
-                values = [ [ None, '' ] ]
-            self.__selector[s].setValues(values)
+            self.__selector[s].update()
         self.changeTurret()
 
     def changeTurret(self):
-        nation, vehicle, turret = [ self.__selector[s].getSelected() for s in [ 'nation', 'vehicle', 'turret' ] ]
-        args = [ nation, vehicle, turret ]
-        if None not in args:
-            values = self.__stragefetchList['gun'](*args)
-        else:
-            values = [ [ None, '' ] ]
-        self.__selector['gun'].setValues(values)
+        self.__selector['gun'].update()
         self.changeGun()
 
     def changeGun(self):
-        nation, gun = [ self.__selector[s].getSelected() for s in [ 'nation', 'gun' ] ]
-        args = [ nation, gun ]
-        if None not in args:
-            values = self.__stragefetchList['shell'](*args)
-        else:
-            values = [ [ None, '' ] ]
-        self.__selector['shell'].setValues(values)
+        self.__selector['shell'].update()
         self.changeModules()
 
     def changeModules(self):
@@ -273,8 +262,9 @@ class PanelItemValue(tkinter.Frame):
 class DropdownList(tkinter.Frame):
     __values = [ None ]
 
-    def __init__(self, master, *args, entry=None, option=None, selected=None, **kwargs):
+    def __init__(self, master, *args, entry=None, method=None, option=None, selected=None, **kwargs):
         self.__target = entry
+        self.__method = method
         self.__defaultSelected = selected
         frameopt = { 'borderwidth':0, 'padx':4 }
         frameopt.update(kwargs)
@@ -293,6 +283,10 @@ class DropdownList(tkinter.Frame):
     
     def setCallback(self, cbFunc):
         self.__combobox.bind('<<ComboboxSelected>>', cbFunc)
+
+    def update(self):
+        list = self.__method(self.__target)
+        self.setValues(list)
 
     def setValues(self, list):
         self.__values = [ t[0] for t in list ]
