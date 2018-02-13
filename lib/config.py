@@ -43,5 +43,5 @@ def parseArgument(mode=None):
 
     parser.parse_args(namespace=g_config)
     if g_config.SCRIPTS_DIR:
-        g_config.DATA[config.VEHICLES]['extracted'] = g_config.SCRIPTS_DIR
+        g_config.DATA[g_config.VEHICLES]['extracted'] = g_config.SCRIPTS_DIR
 

@@ -49,14 +49,14 @@ class Strage(object):
         value = root.find(xpath)
         return value
 
-    def findfunc_sum(self, args, param):
+    def __findfunc_sum(self, args, param):
         result = 0
         for arg in args:
             value = float(self.find(arg, param))
             result += value
         return result
             
-    def findfunc_or(self, args, param):
+    def __findfunc_or(self, args, param):
         result = None
         for arg in args:
             result = self.find(arg, param)
@@ -64,10 +64,9 @@ class Strage(object):
                 break
         return result
 
-    def find(self, node, param):
-        result = None
+    def __find_getModifiedParam(self, node, param):
         schema = self.__itemschema[node]
-        param = { k:v for k,v in param.items() }
+        param = param.copy()
         if param.get('siege', None) == 'siege':
             if not node == 'vehicle:siegeMode' and self.find('vehicle:siegeMode', param):
                 param['vehicle_file'] = param['vehicle'] + '_siege_mode'
@@ -75,50 +74,74 @@ class Strage(object):
             for p in schema['addparams']:
                 value = self.find(p['value'], param)
                 param[p['xtag']] = value
-        for r in schema['resources']:
-            if 'file' in r:
-                result = self.__find(r, param)
-            elif 'func' in r:
-                if r['func'] == 'sum':
-                    result = self.findfunc_sum(r['args'], param)
-                elif r['func'] == 'or':
-                    result = self.findfunc_or(r['args'], param)
-                else:
-                    raise ValueError('unknown resource function: {}'.format(r['func']))
+        return param
+
+    def __find_getRawData(self, resource, param):
+        functions = {
+            'sum':  self.__findfunc_sum,
+            'or':   self.__findfunc_or
+        }
+        result = None
+        if 'file' in resource:
+            result = self.__find(resource, param)
+        elif 'func' in resource:
+            if resource['func'] in functions:
+                result = functions[resource['func']](resource['args'], param)
             else:
-                raise ValueError('missing valid resources: {}'.format(r))
+                raise ValueError('unknown resource function: {}'.format(resource['func']))
+        else:
+            raise ValueError('missing valid resource: {}'.format(resource))
+        return result
+
+    def __find_convertType(self, schema, data):
+        result = None
+        if 'value' in schema:
+            if schema['value'] == 'nodename':
+                result = data.tag
+            elif schema['value'] == 'nodelist':
+                result = data
+            elif schema['value'] == 'float':
+                result = float(data.text)
+            else:
+                print('unknown value keyword: {}'.format(schema['value']))
+                raise ValueError
+        else:
+            if isinstance(data, ElementTree.Element):
+                result = data.text
+            else:
+                result = data
+        return result
+
+    def __find_getMappedData(self, map, data):
+        if map == 'gettext':
+            data = translate(data)
+        elif map == 'roman':
+            data = TIERS_LABEL[data]
+        elif isinstance(map, dict):
+            data = [ map[v] for v in data.split() if v in map ]
+            data = data.pop(0) if data else None
+        else:
+            match = re.match('\[(\d)\]', str(map))
+            if match:
+                data = data.split()[int(match.group(1))]
+            else:
+                raise ValueError('unknown map method: {}'.map)
+        return data
+        
+    def find(self, node, param):
+        result = None
+        schema = self.__itemschema[node]
+        param = self.__find_getModifiedParam(node, param)
+        result = None
+        for r in schema['resources']:
+            result = self.__find_getRawData(r, param)
             if result is not None:
                 break
         if result is None:
             return None
-        if 'value' in schema:
-            if schema['value'] == 'nodename':
-                result = result.tag
-            elif schema['value'] == 'nodelist':
-                pass
-            elif schema['value'] == 'function':
-                pass
-            elif schema['value'] == 'float':
-                result = float(result.text)
-            else:
-                raise ValueError('unknown value keyword: {}'.schema['value'])
-        else:
-            if isinstance(result, ElementTree.Element):
-                result = result.text
+        result = self.__find_convertType(schema, result)
         if 'map' in schema:
-            match = re.match('\[(\d)\]', str(schema['map']))
-            if match:
-                result = result.split()[int(match.group(1))]
-            elif isinstance(schema['map'], dict):
-                values = result.split()
-                result = [ schema['map'][v] for v in values if v in schema['map'] ]
-                result = result.pop(0) if result else None
-            elif schema['map'] == 'gettext':
-                result = translate(result)
-            elif schema['map'] == 'roman':
-                result = TIERS_LABEL[result]
-            else:
-                raise ValueError('unknown map method: {}'.schema['map'])
+            result = self.__find_getMappedData(schema['map'], result)
         return result
 
     def __fetchNationOrder(self):
