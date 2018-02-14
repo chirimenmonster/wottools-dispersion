@@ -149,40 +149,33 @@ class Strage(object):
         return self.__getDropdownItems('chassis', items, param, schema=schema)
 
     def fetchTurretList(self, schema, param):
-        if param['vehicle'] is None:
-            return None
-        items = [ node.tag for node in self.find('vehicle:turrets', param) ]
+        nodes = self.find('vehicle:turrets', param)
+        items = [ node.tag for node in nodes ] if nodes else []
         return self.__getDropdownItems('turret', items, param, schema=schema)
 
     def fetchEngineList(self, schema, param):
-        if param['vehicle'] is None:
-            return None
-        items = [ node.tag for node in self.find('vehicle:engines', param) ]
+        nodes = self.find('vehicle:engines', param)
+        items = [ node.tag for node in nodes ] if nodes else []
         return self.__getDropdownItems('engine', items, param, schema=schema)
 
     def fetchRadioList(self, schema, param):
-        if param['vehicle'] is None:
-            return None
-        items = [ node.tag for node in self.find('vehicle:radios', param) ]
+        nodes = self.find('vehicle:radios', param)
+        items = [ node.tag for node in nodes ] if nodes else []
         return self.__getDropdownItems('radio', items, param, schema=schema)
 
     def fetchGunList(self, schema, param):
-        if param['turret'] is None:
-            return None
-        items = [ node.tag for node in self.find('turret:guns', param) ]
+        nodes = self.find('turret:guns', param)
+        items = [ node.tag for node in nodes ] if nodes else []
         return self.__getDropdownItems('gun', items, param, schema=schema)
 
     def fetchShellList(self, schema, param):
-        if param['gun'] is None:
-            return None
-        items = [ node.tag for node in self.find('gun:shots', param) ]
+        nodes = self.find('gun:shots', param)
+        items = [ node.tag for node in nodes ] if nodes else []
         return self.__getDropdownItems('shell', items, param, schema=schema)
 
     def fetchSiegeList(self, schema, param):
-        if self.find('vehicle:siegeMode', param):
-            result = [ [ None, 'normal' ], [ 'siege', 'siege' ] ]
-        else:
-            result = []
+        value = self.find('vehicle:siegeMode', param)
+        result = [ [ None, 'normal' ], [ 'siege', 'siege' ] ] if value else []
         return result
 
 
@@ -216,8 +209,10 @@ class FindEntry(object):
         fileparam = param.copy()
         if 'vehicle_file' in fileparam:
             fileparam['vehicle'] = fileparam['vehicle_file']
-        file = resource['file'].format(**fileparam)
-        xpath = resource['xpath'].format(**param)
+        file = self.__substitute(resource['file'], fileparam)
+        xpath = self.__substitute(resource['xpath'], param)
+        if not file or not xpath:
+            return None
         if file not in self.__xmltree:
             domain, target = file.split('/', 1)
             self.__xmltree[file] = readXmlData(domain, target)
@@ -226,6 +221,13 @@ class FindEntry(object):
             print('cannot read file {}'.format(file))
         value = root.find(xpath)
         return value
+
+    def __substitute(self, format, param):
+        for match in re.finditer('\{[^}]+\}', format):
+            key = match.group()[1:-1]
+            if param.get(key, None) is None:
+                return None
+        return format.format(**param)
 
     def __getModifiedParam(self, node, param):
         schema = self.__itemschema[node]
