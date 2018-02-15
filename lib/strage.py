@@ -17,7 +17,6 @@ class Strage(object):
         self.findText = self.__findEntry.getText
         
         self.__nationOrder = self.find('settings:nationsOrder', {})
-        print(self.__nationOrder)
         self.__vehicleList, self.__vehicleNation = self.__fetchVehicleList()
 
         self.__getDropdownList = {

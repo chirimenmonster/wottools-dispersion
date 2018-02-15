@@ -136,9 +136,9 @@ class FindEntry(object):
         return nodes
 
     def __getNodesCustomGetNationsOrder(self, root):
-        for child in root.findall('settings'):
+        for child in root.findall('setting'):
             if child.findtext('name') == 'nations_order':
-                return [ i.text for i in child.findall('value') ]
+                return [ i.text for i in child.findall('value/item') ]
         return None
 
     def __functionSum(self, args, param):
