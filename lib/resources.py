@@ -1,11 +1,12 @@
 import json
 
 class Resources(object):
+    guisettings_items = 'res/guisettings_items.json'
 
-    def __init__(self):
+    def load(self):
         with open('res/itemschema.json', 'r') as fp:
             self.itemschema = json.load(fp)
-        with open('res/guisettings_items.json', 'r') as fp:
+        with open(self.guisettings_items, 'r') as fp:
             self.itemgroup = json.load(fp)
         with open('res/guisettings_titles.json', 'r') as fp:
             self.titlesdesc = json.load(fp)

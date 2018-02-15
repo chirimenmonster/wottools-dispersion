@@ -1,5 +1,8 @@
 import argparse
 
+from lib.resources import g_resources
+
+
 class Config:
     BASE_DIR = 'C:/Games/World_of_Tanks'
     PKG_RELPATH = 'res/packages'
@@ -27,6 +30,7 @@ def parseArgument(mode=None):
     parser.add_argument('-s', dest='SCRIPTS_DIR', help='scripts folder extracted.  ex. "C:\git\wot.scripts\scripts"')
     parser.add_argument('-g', dest='GUI_DIR', help='gui folder extracted.  ex. ".\test\gui"')
     parser.add_argument('--secret', action='store_true', help='include secret tanks')
+    parser.add_argument('--gui-items', dest='gui_items', help='change guisettings_items.json')
     
     if mode == 'test':
         parser.add_argument('--list', dest='pattern', help='show vehicle list for NATION:TIER:TYPE.  ex. "germany:9:HT"')
@@ -47,4 +51,8 @@ def parseArgument(mode=None):
         g_config.DATA[g_config.VEHICLES]['extracted'] = g_config.SCRIPTS_DIR
     if g_config.GUI_DIR:
         g_config.DATA[g_config.GUI_SETTINGS]['extracted'] = g_config.GUI_DIR
+
+    if g_config.gui_items:
+        g_resources.guisettings_items = g_config.gui_items
+    g_resources.load()
 

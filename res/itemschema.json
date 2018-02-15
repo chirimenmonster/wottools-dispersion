@@ -121,6 +121,46 @@
             }
         ]
     },
+    "vehicle:invisibilityMoving": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "invisibility/moving"
+            }
+        ]
+    },
+    "vehicle:invisibilityStill": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "invisibility/still"
+            }
+        ]
+    },
+    "vehicle:invisibilityCamouflageBonus": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "invisibility/camouflageBonus"
+            }
+        ]
+    },
+    "vehicle:invisibilityCamouflageNetBonus": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "invisibility/camouflageNetBonus"
+            }
+        ]
+    },
+    "vehicle:invisibilityFirePenalty": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "invisibility/firePenalty"
+            }
+        ]
+    },
     "vehicle:totalWeight": {
         "resources": [
             {
@@ -646,6 +686,18 @@
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
                 "xpath":    "shared/{gun}/aimingTime"
+            }
+        ]
+    },
+    "gun:invisibilityFactorAtShot": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "turrets0/{turret}/guns/{gun}/invisibilityFactorAtShot"
+            },
+            {
+                "file":     "vehicles/{nation}/components/guns.xml",
+                "xpath":    "shared/{gun}/invisibilityFactorAtShot"
             }
         ]
     },
