@@ -21,5 +21,6 @@ def readXmlData(domain, target=None):
                 with zip.open(vpath, 'r') as data:
                     root = xmlunpacker.read(io.BytesIO(data.read()))
         except:
+            print('cannot open file: {}, {}'.format(pkgpath, vpath))
             root = None
     return root

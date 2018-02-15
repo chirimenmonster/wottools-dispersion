@@ -118,26 +118,8 @@ class Application(tkinter.Frame):
 
     def getVehicleValue(self, schema):
         param = self.getSelectedValues()
-        if param['vehicle'] is None:
-            return ''
-        if isinstance(schema['value'], list):
-            values = []
-            for item in schema['value']:
-                values.append(self.__strage.find(item, param))
-            text = schema['format'].format(*values)
-        elif isinstance(schema['value'], str):
-            value = self.__strage.find(schema['value'], param)
-            if 'consider' in schema:
-                if schema['consider'] == 'float':
-                    value = float(value)
-            if 'format' in schema:
-                text = schema['format'].format(value)
-            else:
-                text = value
-        else:
-            print('not implements')
-            raise ValueError
-        return text or ''
+        text = self.__strage.findText(schema, param)
+        return text
 
     def changeVehicleFilter(self):
         self.__selector['vehicle'].update()

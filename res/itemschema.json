@@ -1,4 +1,18 @@
 {
+    "settings:nationsOrder": {
+        "domain":   "gui_settings",
+        "value":    "nodelist",
+        "resources": [
+            {
+                "file":     "gui/gui_settings.xml",
+                "custom":   "getNationsOrder()"
+            },
+            {
+                "immediate": [ "germany", "ussr", "usa", "uk", "france", "china", "japan",
+                                "czech", "sweden", "poland" ]
+            }
+        ]
+    },
     "vehicle:list": {
         "value":    "nodelist",
         "resources": [

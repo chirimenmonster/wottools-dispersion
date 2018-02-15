@@ -5,7 +5,7 @@ class Config:
     PKG_RELPATH = 'res/packages'
     LOCALE_RELPATH = 'res'
     VEHICLES = 'vehicles'
-    GUI_SETTINGS = 'gui_settings'
+    GUI_SETTINGS = 'gui'
     DATA = {
         VEHICLES: {
             'vpath':        'scripts/item_defs/vehicles',
@@ -13,7 +13,7 @@ class Config:
             'extracted':    None
         },
         GUI_SETTINGS: {
-            'vpath':        'gui/gui_settings.xml',
+            'vpath':        'gui',
             'packed':       'gui.pkg',
             'extracted':    None
         }
@@ -25,6 +25,7 @@ def parseArgument(mode=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', dest='BASE_DIR', help='specify <WoT_game_folder>')
     parser.add_argument('-s', dest='SCRIPTS_DIR', help='scripts folder extracted.  ex. "C:\git\wot.scripts\scripts"')
+    parser.add_argument('-g', dest='GUI_DIR', help='gui folder extracted.  ex. ".\test\gui"')
     parser.add_argument('--secret', action='store_true', help='include secret tanks')
     
     if mode == 'test':
@@ -44,4 +45,6 @@ def parseArgument(mode=None):
     parser.parse_args(namespace=g_config)
     if g_config.SCRIPTS_DIR:
         g_config.DATA[g_config.VEHICLES]['extracted'] = g_config.SCRIPTS_DIR
+    if g_config.GUI_DIR:
+        g_config.DATA[g_config.GUI_SETTINGS]['extracted'] = g_config.GUI_DIR
 

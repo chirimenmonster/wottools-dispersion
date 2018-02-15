@@ -1,11 +1,9 @@
-import re
 from itertools import product
-from xml.etree import ElementTree
 
 from lib.config import g_config as config
 from lib.resources import g_resources, NATIONS, TIERS, TIERS_LABEL, TYPES
 from lib.translate import g_translate as translate
-from lib.utils import readXmlData
+from lib.item import FindFormattedEntry
 
 class Strage(object):
 
@@ -14,9 +12,12 @@ class Strage(object):
         self.__titlesdesc = g_resources.titlesdesc
         self.__itemgroup = g_resources.itemgroup
         
-        self.find = FindEntry().find
+        self.__findEntry = FindFormattedEntry()
+        self.find = self.__findEntry.find
+        self.findText = self.__findEntry.getText
         
-        self.__nationOrder = self.__fetchNationOrder()
+        self.__nationOrder = self.find('settings:nationsOrder', {})
+        print(self.__nationOrder)
         self.__vehicleList, self.__vehicleNation = self.__fetchVehicleList()
 
         self.__getDropdownList = {
@@ -32,14 +33,6 @@ class Strage(object):
             'shell':    self.fetchShellList,
             'siege':    self.fetchSiegeList
         }
-
-    def __fetchNationOrder(self):
-        root = readXmlData(config.GUI_SETTINGS)
-        if root is None:
-            return NATIONS
-        for child in root:
-            if child.tag == 'setting' and child.findtext('name') == 'nations_order':
-                return [ i.text for i in child.find('value') ]
 
     def __fetchVehicleList(self):
         nations = self.__nationOrder
@@ -107,7 +100,7 @@ class Strage(object):
         return result
 
     def getDropdownList(self, schema, param):
-        return self.__getDropdownList[schema['id']](schema, param)
+        return self.__getDropdownList[schema['id']](schema.get('label', None), param)
  
     def fetchNationList(self, schema, param):
         return [ [ s, s.upper() ] for s in self.__nationOrder ]
@@ -119,17 +112,14 @@ class Strage(object):
         return [ [ type, type ] for type in TYPES ]
 
 
-    def __getDropdownItems(self, category, items, param, schema=None):
-        result = []
+    def __getDropdownItems(self, category, items, param, schema):
         param = param.copy()
+        if schema is None:
+            schema = { 'value': category + ':userString' }
+        result = []
         for item in items:
             param[category] = item
-            if schema and schema.get('label', None):
-                format = schema['label']['format']
-                values = [ self.find(node, param) for node in schema['label']['value'] ]
-                text = format.format(*values)
-            else:
-                text = self.find(category + ':userString', param)
+            text = self.findText(schema, param)
             result.append([ item, text ])
         return result
 
@@ -140,167 +130,39 @@ class Strage(object):
         items = []
         for nation, tier, type in product(nations, tiers, types):
             items.extend(self.__vehicleList[nation][tier][type])
-        return self.__getDropdownItems('vehicle', items, param, schema=schema)
+        return self.__getDropdownItems('vehicle', items, param, schema)
 
     def fetchChassisList(self, schema, param):
-        if param['vehicle'] is None:
-            return None
-        items = [ node.tag for node in self.find('vehicle:chassis', param) ]
-        return self.__getDropdownItems('chassis', items, param, schema=schema)
+        nodes = self.find('vehicle:chassis', param)
+        items = [ node.tag for node in nodes ] if nodes else []
+        return self.__getDropdownItems('chassis', items, param, schema)
 
     def fetchTurretList(self, schema, param):
         nodes = self.find('vehicle:turrets', param)
         items = [ node.tag for node in nodes ] if nodes else []
-        return self.__getDropdownItems('turret', items, param, schema=schema)
+        return self.__getDropdownItems('turret', items, param, schema)
 
     def fetchEngineList(self, schema, param):
         nodes = self.find('vehicle:engines', param)
         items = [ node.tag for node in nodes ] if nodes else []
-        return self.__getDropdownItems('engine', items, param, schema=schema)
+        return self.__getDropdownItems('engine', items, param, schema)
 
     def fetchRadioList(self, schema, param):
         nodes = self.find('vehicle:radios', param)
         items = [ node.tag for node in nodes ] if nodes else []
-        return self.__getDropdownItems('radio', items, param, schema=schema)
+        return self.__getDropdownItems('radio', items, param, schema)
 
     def fetchGunList(self, schema, param):
         nodes = self.find('turret:guns', param)
         items = [ node.tag for node in nodes ] if nodes else []
-        return self.__getDropdownItems('gun', items, param, schema=schema)
+        return self.__getDropdownItems('gun', items, param, schema)
 
     def fetchShellList(self, schema, param):
         nodes = self.find('gun:shots', param)
         items = [ node.tag for node in nodes ] if nodes else []
-        return self.__getDropdownItems('shell', items, param, schema=schema)
+        return self.__getDropdownItems('shell', items, param, schema)
 
     def fetchSiegeList(self, schema, param):
         value = self.find('vehicle:siegeMode', param)
         result = [ [ None, 'normal' ], [ 'siege', 'siege' ] ] if value else []
         return result
-
-
-class FindEntry(object):
-
-    def __init__(self):
-        self.__itemschema = g_resources.itemschema
-        self.__xmltree = {}
-        self.__functions = {
-            'sum':  self.__functionSum,
-            'or':   self.__functionOr
-        }
-
-    def find(self, node, param):
-        result = None
-        schema = self.__itemschema[node]
-        param = self.__getModifiedParam(node, param)
-        result = None
-        for r in schema['resources']:
-            result = self.__getRawData(r, param)
-            if result is not None:
-                break
-        if result is None:
-            return None
-        result = self.__convertType(schema, result)
-        if 'map' in schema:
-            result = self.__getMappedData(schema['map'], result)
-        return result
-
-    def __findNode(self, resource, param):
-        fileparam = param.copy()
-        if 'vehicle_file' in fileparam:
-            fileparam['vehicle'] = fileparam['vehicle_file']
-        file = self.__substitute(resource['file'], fileparam)
-        xpath = self.__substitute(resource['xpath'], param)
-        if not file or not xpath:
-            return None
-        if file not in self.__xmltree:
-            domain, target = file.split('/', 1)
-            self.__xmltree[file] = readXmlData(domain, target)
-        root = self.__xmltree[file]
-        if root is None:
-            print('cannot read file {}'.format(file))
-        value = root.find(xpath)
-        return value
-
-    def __substitute(self, format, param):
-        for match in re.finditer('\{[^}]+\}', format):
-            key = match.group()[1:-1]
-            if param.get(key, None) is None:
-                return None
-        return format.format(**param)
-
-    def __getModifiedParam(self, node, param):
-        schema = self.__itemschema[node]
-        param = param.copy()
-        if param.get('siege', None) == 'siege':
-            if not node == 'vehicle:siegeMode' and self.find('vehicle:siegeMode', param):
-                param['vehicle_file'] = param['vehicle'] + '_siege_mode'
-        if 'addparams' in schema:
-            for p in schema['addparams']:
-                value = self.find(p['value'], param)
-                param[p['xtag']] = value
-        return param
-
-    def __getRawData(self, resource, param):
-        result = None
-        if 'file' in resource:
-            result = self.__findNode(resource, param)
-        elif 'func' in resource:
-            if resource['func'] in self.__functions:
-                result = self.__functions[resource['func']](resource['args'], param)
-            else:
-                raise ValueError('unknown resource function: {}'.format(resource['func']))
-        else:
-            raise ValueError('missing valid resource: {}'.format(resource))
-        return result
-
-    def __convertType(self, schema, data):
-        result = None
-        if 'value' in schema:
-            if schema['value'] == 'nodename':
-                result = data.tag
-            elif schema['value'] == 'nodelist':
-                result = data
-            elif schema['value'] == 'float':
-                result = float(data.text)
-            else:
-                print('unknown value keyword: {}'.format(schema['value']))
-                raise ValueError
-        else:
-            if isinstance(data, ElementTree.Element):
-                result = data.text
-            else:
-                result = data
-        return result
-
-    def __getMappedData(self, map, data):
-        if map == 'gettext':
-            data = translate(data)
-        elif map == 'roman':
-            data = TIERS_LABEL[data]
-        elif isinstance(map, dict):
-            data = [ map[v] for v in data.split() if v in map ]
-            data = data.pop(0) if data else None
-        else:
-            match = re.match('\[(\d)\]', str(map))
-            if match:
-                data = data.split()[int(match.group(1))]
-            else:
-                raise ValueError('unknown map method: {}'.map)
-        return data
-        
-    def __functionSum(self, args, param):
-        result = 0
-        for arg in args:
-            value = float(self.find(arg, param))
-            result += value
-        return result
-            
-    def __functionOr(self, args, param):
-        result = None
-        for arg in args:
-            result = self.find(arg, param)
-            if result:
-                break
-        return result
-
