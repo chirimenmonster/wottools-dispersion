@@ -5,7 +5,7 @@ import tkinter.ttk
 import tkinter.font
 
 from lib import csvoutput
-from lib.resources import g_resources, NATIONS, TIERS, TYPES
+from lib.resources import g_resources
 from lib.config import parseArgument, g_config as config
 
 class Application(tkinter.Frame):

@@ -15,9 +15,6 @@ class Resources(object):
 
 g_resources = Resources()
 
-
-NATIONS = [ 'germany', 'ussr', 'usa', 'uk', 'france', 'china', 'japan', 'czech', 'sweden', 'poland' ]
-
 TIERS = [ str(tier) for tier in range(1, 10 + 1) ]
 TIERS_LABEL = { '1':'I', '2':'II', '3':'III', '4':'IV', '5':'V', '6':'VI', '7':'VII', '8':'VIII', '9':'IX', '10':'X'}
 TIERS_LIST = [ TIERS_LABEL[t] for t in TIERS ]

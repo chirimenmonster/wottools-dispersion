@@ -1,7 +1,7 @@
 from itertools import product
 
 from lib.config import g_config as config
-from lib.resources import g_resources, NATIONS, TIERS, TIERS_LABEL, TYPES
+from lib.resources import g_resources, TIERS, TIERS_LABEL, TYPES
 from lib.translate import g_translate as translate
 from lib.item import FindFormattedEntry
 
@@ -85,7 +85,8 @@ class Strage(object):
             for row in column:
                 for schema in row['items']:
                     value = self.find(schema['value'], param)
-                    values.append([ schema['label'], value, schema.get('unit', ''), schema['value'] ])
+                    header = [ schema['value'], schema['label'], schema.get('unit', '') ]
+                    values.append(header + (value if isinstance(value, list) else [ value ]) )
         return values
 
     def getVehicleInfo(self, param):

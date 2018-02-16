@@ -1,8 +1,12 @@
+from logging import getLogger
 import re
 from xml.etree import ElementTree
+
 from lib.resources import g_resources
 from lib.translate import g_translate as translate
 from lib.utils import readXmlData
+
+logger = getLogger(__name__)
 
 class FindEntry(object):
 
@@ -11,7 +15,8 @@ class FindEntry(object):
         self.__xmltree = {}
         self.__functions = {
             'sum':  self.__functionSum,
-            'or':   self.__functionOr
+            'or':   self.__functionOr,
+            'join': self.__functionJoin
         }
 
     def find(self, node, param):
@@ -52,10 +57,10 @@ class FindEntry(object):
             if resource['custom'] == 'getNationsOrder()':
                 value = self.__getNodesCustomGetNationsOrder(root)
             else:
-                print('__findNode: not implement func: {}'.format(resource['custom']))
+                logger.error('__findNode: not implement func: {}'.format(resource['custom']))
                 raise ValueError
         else:
-            print('__findNode: missing method: {}'.format(resource))
+            logger.error('__findNode: missing method: {}'.format(resource))
             raise ValueError
         return value
 
@@ -103,7 +108,7 @@ class FindEntry(object):
             elif schema['value'] == 'float':
                 result = float(data.text)
             else:
-                print('unknown value keyword: {}'.format(schema['value']))
+                logger.error('unknown value keyword: {}'.format(schema['value']))
                 raise ValueError
         else:
             if isinstance(data, ElementTree.Element):
@@ -117,13 +122,22 @@ class FindEntry(object):
             data = translate(data)
         elif map == 'roman':
             data = TIERS_LABEL[data]
+        elif map == 'split':
+            data = data.split()
         elif isinstance(map, dict):
             data = [ map[v] for v in data.split() if v in map ]
             data = data.pop(0) if data else None
         else:
             match = re.match('\[(\d)\]', str(map))
             if match:
-                data = data.split()[int(match.group(1))]
+                index = int(match.group(1))
+                if isinstance(data, list):
+                    if index >= len(data):
+                        data = None
+                    else:
+                        data = data[index]
+                else:
+                    data = data.split()[index]
             else:
                 raise ValueError('unknown map method: {}'.map)
         return data
@@ -159,20 +173,29 @@ class FindEntry(object):
                 break
         return result
 
+    def __functionJoin(self, args, param):
+        result = []
+        for arg in args:
+            value = self.find(arg, param)
+            if isinstance(value, list):
+                result.extend(value)
+            else:
+                result.append(value)
+        return result
+
+
 class FindFormattedEntry(FindEntry):
 
     def getText(self, schema, param):
         node = schema['value']
         if isinstance(node, list):
-            nodes = node
+            value = [ self.find(n, param) for n in node ]
         else:
-            nodes = [ node ]
-        values = []
-        for node in nodes:
             value = self.find(node, param)
-            value = self.__consider(value, schema.get('consider', None))
-            values.append(value)
-        text = self.__format(values, schema.get('format', None))
+        if not isinstance(value, list):
+            value = [ value ]
+        value = [ self.__consider(v, schema.get('consider', None)) for v in value ]
+        text = self.__format(value, schema.get('format', None))
         if text is None:
             text = ''
         return text
@@ -185,7 +208,7 @@ class FindFormattedEntry(FindEntry):
         elif consider == 'float':
             node = float(node)
         else:
-            print('consider type not implement: {}'.format(consider))
+            logger.error('consider type not implement: {}'.format(consider))
             raise ValueError
         return node
 

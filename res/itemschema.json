@@ -310,12 +310,21 @@
             }
         ]
     },
-    "chassis:terrainResistance_hard": {
-        "map":      "[0]",
+    "chassis:terrainResistance": {
+        "map":      "split",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
                 "xpath":    "chassis/{chassis}/terrainResistance"
+            }
+        ]
+    },
+    "chassis:terrainResistance_hard": {
+        "map":      "[0]",
+        "resources": [
+            {
+                "func":     "join",
+                "args":     [ "chassis:terrainResistance" ]
             }
         ]
     },
@@ -323,8 +332,8 @@
         "map":      "[1]",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "chassis/{chassis}/terrainResistance"
+                "func":     "join",
+                "args":     [ "chassis:terrainResistance" ]
             }
         ]
     },
@@ -332,8 +341,8 @@
         "map":      "[2]",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "chassis/{chassis}/terrainResistance"
+                "func":     "join",
+                "args":     [ "chassis:terrainResistance" ]
             }
         ]
     },

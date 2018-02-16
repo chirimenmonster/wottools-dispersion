@@ -1,8 +1,12 @@
+from logging import getLogger
 import io
 import zipfile
 from lib.XmlUnpacker import XmlUnpacker
+
 from lib.config import g_config as config
-    
+
+logger = getLogger(__name__)
+
 def readXmlData(domain, target=None):
     xmlunpacker = XmlUnpacker()
     vpath = config.DATA[domain]['vpath'] + ('/' + target if target else '')
@@ -21,6 +25,6 @@ def readXmlData(domain, target=None):
                 with zip.open(vpath, 'r') as data:
                     root = xmlunpacker.read(io.BytesIO(data.read()))
         except:
-            print('cannot open file: {}, {}'.format(pkgpath, vpath))
+            logger.warning('cannot open file: {}, {}'.format(pkgpath, vpath))
             root = None
     return root

@@ -32,6 +32,19 @@
                 "value":    { "width": 8,   "anchor": "e" },
                 "unit":     { "width": 5,   "anchor": "w" }
             }
+        },
+        {
+            "items": [
+                {
+                    "label":    "terrain resistance",
+                    "value":    "chassis:terrainResistance",
+                    "format":   "{} / {} / {}"
+                }
+            ],
+            "option": {
+                "label":    { "width": 16,  "anchor": "e" },
+                "value":    { "width": 12,   "anchor": "e" }
+            }
         }
     ]
 ]

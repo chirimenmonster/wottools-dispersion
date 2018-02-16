@@ -33,6 +33,7 @@ def parseArgument(mode=None):
     parser.add_argument('--gui-items', dest='gui_items', help='change guisettings_items.json')
     
     if mode == 'test':
+        parser.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
         parser.add_argument('--list', dest='pattern', help='show vehicle list for NATION:TIER:TYPE.  ex. "germany:9:HT"')
         parser.add_argument('--list-nation', action='store_true', help='show nations')
         parser.add_argument('--list-tier', action='store_true', help='show tiers')
