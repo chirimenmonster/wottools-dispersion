@@ -81,8 +81,8 @@ class Strage(object):
                 value.append(self.find(item, param))
             values.append([ schema['label'], *value ])
         values.append([ 'Siege:', param['siege'] or 'None' ])
-        for column in self.__itemgroup:
-            for row in column:
+        for column in self.__itemgroup['columns']:
+            for row in column['rows']:
                 for schema in row['items']:
                     value = self.find(schema['value'], param)
                     header = [ schema['value'], schema['label'], schema.get('unit', '') ]

@@ -36,7 +36,7 @@ class Application(tkinter.Frame):
 
         self.createSelectorBars(self.master)
         self.createDescriptionView(self.master)
-        self.createSpecView(self.master)
+        self.createSpecView(self.master, self.__itemgroup, None)
         self.createCommandView(self.master)
 
         self.packTitleDesc()
@@ -71,19 +71,32 @@ class Application(tkinter.Frame):
             panel = PanelItemValue(view, entry, self.getVehicleValue, option=opts)
             self.__vehicleDescs.append(panel)
 
-    def createSpecView(self, master):
-        view = tkinter.Frame(master)
-        view.pack(side='top', expand=1, fill='x')
+    def createSpecView(self, master, target, option):
         self.__itemValues = []
-        for itemsColumn in self.__itemgroup:
-            viewColumn = tkinter.Frame(view)
-            viewColumn.pack(side='left', anchor='n')
-            for itemsRow in itemsColumn:
-                viewRow = tkinter.Frame(viewColumn, highlightthickness=1, highlightbackground='gray')
-                viewRow.pack(side='top', expand=1, padx=8, pady=2, anchor='w')
-                for entry in itemsRow['items']:
-                    panel = PanelItemValue(viewRow, entry, self.getVehicleValue, option=itemsRow['option'])
-                    self.__itemValues.append(panel)
+        panel = tkinter.Frame(master)
+        panel.pack(side='top', expand=1, fill='x')
+        option = target.get('guioption', option)
+        for column in target.get('columns', []):
+            self.createSpecViewColumn(panel, column, option)
+
+    def createSpecViewColumn(self, master, target, option):
+        panel = tkinter.Frame(master)
+        panel.pack(side='left', anchor='n')
+        option = target.get('guioption', option)
+        for row in target.get('rows', []):
+            self.createSpecViewRow(panel, row, option)
+
+    def createSpecViewRow(self, master, target, option):
+        panel = tkinter.Frame(master, highlightthickness=1, highlightbackground='gray')
+        panel.pack(side='top', expand=1, padx=8, pady=2, anchor='w')
+        option = target.get('guioption', option)
+        for item in target.get('items', []):
+            self.createSpecViewItem(panel, item, option)
+        
+    def createSpecViewItem(self, master, target, option):
+        option = target.get('guioption', option)
+        panel = PanelItemValue(master, target, self.getVehicleValue, option=option)
+        self.__itemValues.append(panel)
 
     def createCommandView(self, master):
         label = 'copy to clipboard'

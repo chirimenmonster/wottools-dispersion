@@ -1,50 +1,54 @@
-[
-    [
+{
+    "guioption": {
+        "label":    { "width": 20,  "anchor": "e" },
+        "value":    { "width": 8,   "anchor": "e" },
+        "unit":     { "width": 5,   "anchor": "w" }
+    },
+    "columns": [
         {
-            "items": [
+            "rows": [
                 {
-                    "label":    "invisibility moving",
-                    "value":    "vehicle:invisibilityMoving"
+                    "items": [
+                        {
+                            "label":    "invisibility moving",
+                            "value":    "vehicle:invisibilityMoving"
+                        },
+                        {
+                            "label":    "... still",
+                            "value":    "vehicle:invisibilityStill"
+                        },
+                        {
+                            "label":    "... camo bonus",
+                            "value":    "vehicle:invisibilityCamouflageBonus"
+                        },
+                        {
+                            "label":    "... camo net bonus",
+                            "value":    "vehicle:invisibilityCamouflageNetBonus"
+                        },
+                        {
+                            "label":    "... fire penalty",
+                            "value":    "vehicle:invisibilityFirePenalty"
+                        },
+                        {
+                            "label":    "... factor at shot",
+                            "value":    "gun:invisibilityFactorAtShot"
+                        }
+                    ]
                 },
                 {
-                    "label":    "... still",
-                    "value":    "vehicle:invisibilityStill"
-                },
-                {
-                    "label":    "... camo bonus",
-                    "value":    "vehicle:invisibilityCamouflageBonus"
-                },
-                {
-                    "label":    "... camo net bonus",
-                    "value":    "vehicle:invisibilityCamouflageNetBonus"
-                },
-                {
-                    "label":    "... fire penalty",
-                    "value":    "vehicle:invisibilityFirePenalty"
-                },
-                {
-                    "label":    "... factor at shot",
-                    "value":    "gun:invisibilityFactorAtShot"
+                    "guioption": {
+                        "label":    { "width": 16,  "anchor": "e" },
+                        "value":    { "width": 12,  "anchor": "e" }
+                    },
+                    "items": [
+                        {
+                            "label":    "terrain resistance",
+                            "value":    "chassis:terrainResistance",
+                            "format":   "{} / {} / {}"
+                        }
+                    ]
                 }
-            ],
-            "option": {
-                "label":    { "width": 20,  "anchor": "e" },
-                "value":    { "width": 8,   "anchor": "e" },
-                "unit":     { "width": 5,   "anchor": "w" }
-            }
-        },
-        {
-            "items": [
-                {
-                    "label":    "terrain resistance",
-                    "value":    "chassis:terrainResistance",
-                    "format":   "{} / {} / {}"
-                }
-            ],
-            "option": {
-                "label":    { "width": 16,  "anchor": "e" },
-                "value":    { "width": 12,   "anchor": "e" }
-            }
+            ]
         }
     ]
-]
+}

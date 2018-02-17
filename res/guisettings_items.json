@@ -1,339 +1,303 @@
-[
-    [
+{
+    "guioption": {
+        "label":    { "width": 20,  "anchor": "e" },
+        "value":    { "width": 4,   "anchor": "e" },
+        "unit":     { "width": 5,   "anchor": "w" }
+    },
+    "columns": [
         {
-            "title": null,
-            "titleoption": {
-                "label": { "width": 20, "anchor": "w" }
-            },
-            "items": [
+            "rows": [
                 {
-                    "label":    "damage armor",
-                    "value":    "shell:damage_armor",
-                    "unit":     "HP"
+                    "items": [
+                        {
+                            "label":    "damage armor",
+                            "value":    "shell:damage_armor",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "piercing power",
+                            "value":    "shell:piercingPower",
+                            "unit":     "mm"
+                        },
+                        {
+                            "label":    "reload time",
+                            "value":    "gun:reloadTime",
+                            "unit":     "s"
+                        },
+                        {
+                            "label":    "clip count",
+                            "value":    "gun:clipCount",
+                            "unit":     "pcs",
+                            "attr":     "phantom"
+                        },
+                        {
+                            "label":    "clip rate",
+                            "value":    "gun:clipRate",
+                            "unit":     "rpm",
+                            "attr":     "phantom"
+                        },
+                        {
+                            "label":    "aiming time",
+                            "value":    "gun:aimingTime",
+                            "unit":     "s"
+                        }
+                    ]
                 },
                 {
-                    "label":    "piercing power",
-                    "value":    "shell:piercingPower",
-                    "unit":     "mm"
+                    "items": [
+                        {
+                            "label":    "shot dispersion radius",
+                            "value":    "gun:shotDispersionRadius",
+                            "format":   "{:.2f}",
+                            "consider": "float",
+                            "unit":     "m"
+                        },
+                        {
+                            "label":    "... factor movement",
+                            "value":    "chassis:vehicleMovement",
+                            "format":   "{:.2f}",
+                            "consider": "float"                   
+                        },
+                        {
+                            "label":    "... factor rotation",
+                            "value":    "chassis:vehicleRotation",
+                            "format":   "{:.2f}",
+                            "consider": "float"                   
+                        },
+                        {
+                            "label":    "... factor turret rotation",
+                            "value":    "gun:turretRotation",
+                            "format":   "{:.2f}",
+                            "consider": "float"                   
+                        },
+                        {
+                            "label":    "... factor after shot",
+                            "value":    "gun:afterShot",
+                            "format":   "{:.2f}",
+                            "consider": "float"                   
+                        },
+                        {
+                            "label":    "...factor gun damaged",
+                            "value":    "gun:whileGunDamaged",
+                            "format":   "{:.2f}",
+                            "consider": "float"
+                        }
+                    ]
                 },
                 {
-                    "label":    "reload time",
-                    "value":    "gun:reloadTime",
-                    "unit":     "s"
-                },
-                {
-                    "label":    "clip count",
-                    "value":    "gun:clipCount",
-                    "unit":     "pcs",
-                    "attr":     "phantom"
-                },
-                {
-                    "label":    "clip rate",
-                    "value":    "gun:clipRate",
-                    "unit":     "rpm",
-                    "attr":     "phantom"
-                },
-                {
-                    "label":    "aiming time",
-                    "value":    "gun:aimingTime",
-                    "unit":     "s"
+                    "items": [
+                        {
+                            "label":    "damage devices",
+                            "value":    "shell:damage_devices",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "explosion radius",
+                            "value":    "shell:explosionRadius",
+                            "unit":     "m",
+                            "attr":     "phantom"
+                        },
+                        {
+                            "label":    "stun duration",
+                            "value":    "shell:stunDuration",
+                            "unit":     "s",
+                            "attr":     "phantom"
+                        },
+                        {
+                            "label":    "caliber",
+                            "value":    "shell:caliber",
+                            "unit":     "mm"
+                        },
+                        {
+                            "label":    "shell speed",
+                            "value":    "shell:speed",
+                            "format":   "{:,.0f}",
+                            "consider": "float",
+                            "unit":     "m/s"
+                        },
+                        {
+                            "label":    "shell gravity",
+                            "value":    "shell:gravity",
+                            "unit":     "m/s2"
+                        },  
+                        {
+                            "label":    "max distance",
+                            "value":    "shell:maxDistance",
+                            "format":   "{:,.0f}",
+                            "consider": "float",
+                            "unit":     "m"
+                        }
+                    ]
                 }
-            ],
-            "option": {
-                "label":    { "width": 20,  "anchor": "e" },
-                "value":    { "width": 4,   "anchor": "e" },
-                "unit":     { "width": 5,   "anchor": "w" }
-            }
+            ]
         },
         {
-            "title": null,
-            "titleoption": {
-                "label": { "width": 20, "anchor": "w" }
-            },
-            "items": [
+            "rows": [
                 {
-                    "label":    "shot dispersion radius",
-                    "value":    "gun:shotDispersionRadius",
-                    "format":   "{:.2f}",
-                    "consider": "float",
-                    "unit":     "m"
-                },
-                {
-                    "label":    "... factor movement",
-                    "value":    "chassis:vehicleMovement",
-                    "format":   "{:.2f}",
-                    "consider": "float"                   
-                },
-                {
-                    "label":    "... factor rotation",
-                    "value":    "chassis:vehicleRotation",
-                    "format":   "{:.2f}",
-                    "consider": "float"                   
-                },
-                {
-                    "label":    "... factor turret rotation",
-                    "value":    "gun:turretRotation",
-                    "format":   "{:.2f}",
-                    "consider": "float"                   
-                },
-                {
-                    "label":    "... factor after shot",
-                    "value":    "gun:afterShot",
-                    "format":   "{:.2f}",
-                    "consider": "float"                   
-                },
-                {
-                    "label":    "...factor gun damaged",
-                    "value":    "gun:whileGunDamaged",
-                    "format":   "{:.2f}",
-                    "consider": "float"
+                    "items": [
+                        {
+                            "label":    "speed limits forward",
+                            "value":    "vehicle:speedLimits_forward",
+                            "unit":     "km/h"
+                        },
+                        {
+                            "label":    "... backward",
+                            "value":    "vehicle:speedLimits_backward",
+                            "unit":     "km/h"
+                        },
+                        {
+                            "label":    "engine power",
+                            "value":    "engine:power",
+                            "format":   "{:,.0f}",
+                            "consider": "float",
+                            "unit":     "hp"
+                        },
+                        {
+                            "label":    "terrain resistance hard",
+                            "value":    "chassis:terrainResistance_hard"
+                        },
+                        {
+                            "label":    "... medium",
+                            "value":    "chassis:terrainResistance_medium"
+                        },
+                        {
+                            "label":    "... soft",
+                            "value":    "chassis:terrainResistance_soft"
+                        }
+                    ]
                 }
-            ],
-            "option": {
-                "label":    { "width": 20,  "anchor": "e" },
-                "value":    { "width": 4,   "anchor": "e" },
-                "unit":     { "width": 5,   "anchor": "w" }
-            }
+            ]
         },
         {
-            "title": null,
-            "titleoption": {
-                "label": { "width": 20, "anchor": "w" }
-            },
-            "items": [
+            "rows": [
                 {
-                    "label":    "damage devices",
-                    "value":    "shell:damage_devices",
-                    "unit":     "HP"
+                    "guioption": {
+                        "label":    { "width": 18,  "anchor": "e" },
+                        "value":    { "width": 6,   "anchor": "e" },
+                        "unit":     { "width": 5,   "anchor": "w" }
+                    },
+                    "items": [
+                        {
+                            "label":    "total weight",
+                            "value":    "vehicle:totalWeight",
+                            "format":   "{:,.0f}",
+                            "unit":     "kg"
+                        },
+                        {
+                            "label":    "... hull",
+                            "value":    "vehicle:weight",
+                            "format":   "{:,.0f}",
+                            "unit":     "kg"
+                        },
+                        {
+                            "label":    "... chassis",
+                            "value":    "chassis:weight",
+                            "format":   "{:,.0f}",
+                            "unit":     "kg"
+                        },
+                        {
+                            "label":    "... turret",
+                            "value":    "turret:weight",
+                            "format":   "{:,.0f}",
+                            "unit":     "kg"
+                        },
+                        {
+                            "label":    "... engine",
+                            "value":    "engine:weight",
+                            "format":   "{:,.0f}",
+                            "unit":     "kg"
+                        },
+                        {
+                            "label":    "... fueltank",
+                            "value":    "fueltank:weight",
+                            "format":   "{:,.0f}",
+                            "unit":     "kg"
+                        },
+                        {
+                            "label":    "... radio",
+                            "value":    "radio:weight",
+                            "format":   "{:,.0f}",
+                            "unit":     "kg"
+                        },
+                        {
+                            "label":    "... gun",
+                            "value":    "gun:weight",
+                            "format":   "{:,.0f}",
+                            "unit":     "kg"
+                        }
+                    ]
                 },
                 {
-                    "label":    "explosion radius",
-                    "value":    "shell:explosionRadius",
-                    "unit":     "m",
-                    "attr":     "phantom"
-                },
-                {
-                    "label":    "stun duration",
-                    "value":    "shell:stunDuration",
-                    "unit":     "s",
-                    "attr":     "phantom"
-                },
-                {
-                    "label":    "caliber",
-                    "value":    "shell:caliber",
-                    "unit":     "mm"
-                },
-                {
-                    "label":    "shell speed",
-                    "value":    "shell:speed",
-                    "format":   "{:,.0f}",
-                    "consider": "float",
-                    "unit":     "m/s"
-                },  
-                {
-                    "label":    "shell gravity",
-                    "value":    "shell:gravity",
-                    "unit":     "m/s2"
-                },  
-                {
-                    "label":    "max distance",
-                    "value":    "shell:maxDistance",
-                    "format":   "{:,.0f}",
-                    "consider": "float",
-                    "unit":     "m"
+                    "items": [
+                        {
+                            "label":    "total health",
+                            "value":    "vehicle:totalHealth",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... hull",
+                            "value":    "vehicle:health",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... turret",
+                            "value":    "turret:health",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "module health ammo bay",
+                            "value":    "vehicle:ammoBayHealth",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... chassis",
+                            "value":    "chassis:health",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... turret rotator",
+                            "value":    "turret:turretRotatorHealth",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... surveying device",
+                            "value":    "turret:surveyingDeviceHealth",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... engine",
+                            "value":    "engine:health",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... fueltank",
+                            "value":    "fueltank:health",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... radio",
+                            "value":    "radio:health",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        },
+                        {
+                            "label":    "... gun",
+                            "value":    "gun:health",
+                            "format":   "{:,.0f}",
+                            "unit":     "HP"
+                        }
+                    ]
                 }
-            ],
-            "option": {
-                "label":    { "width": 20,  "anchor": "e" },
-                "value":    { "width": 4,   "anchor": "e" },
-                "unit":     { "width": 5,   "anchor": "w" }
-            }
+            ]
         }
-    ],
-    [
-        {
-            "title": null,
-            "titleoption": {
-                "label": { "width": 20, "anchor": "w" }
-            },
-            "items": [
-                {
-                    "label":    "speed limits forward",
-                    "value":    "vehicle:speedLimits_forward",
-                    "unit":     "km/h"
-                },
-                {
-                    "label":    "... backward",
-                    "value":    "vehicle:speedLimits_backward",
-                    "unit":     "km/h"
-                },
-                {                
-                    "label":    "engine power",
-                    "value":    "engine:power",
-                    "format":   "{:,.0f}",
-                    "consider": "float",
-                    "unit":     "hp"
-                },
-                {
-                    "label":    "terrain resistance hard",
-                    "value":    "chassis:terrainResistance_hard"
-                },
-                {
-                    "label":    "... medium",
-                    "value":    "chassis:terrainResistance_medium"
-                },
-                {
-                    "label":    "... soft",
-                    "value":    "chassis:terrainResistance_soft"
-                }
-            ],
-            "option": {
-                "label":    { "width": 20,  "anchor": "e" },
-                "value":    { "width": 4,   "anchor": "e" },
-                "unit":     { "width": 5,   "anchor": "w" }
-            }
-        }
-    ],
-    [
-        {
-            "title": null,
-            "titleoption": {
-                "label": { "width": 20, "anchor": "w" }
-            },
-            "items": [
-                {
-                    "label":    "total weight",
-                    "value":    "vehicle:totalWeight",
-                    "format":   "{:,.0f}",
-                    "unit":     "kg"
-                },
-                {
-                    "label":    "... hull",
-                    "value":    "vehicle:weight",
-                    "format":   "{:,.0f}",
-                    "unit":     "kg"
-                },
-                {
-                    "label":    "... chassis",
-                    "value":    "chassis:weight",
-                    "format":   "{:,.0f}",
-                    "unit":     "kg"
-                },
-                {
-                    "label":    "... turret",
-                    "value":    "turret:weight",
-                    "format":   "{:,.0f}",
-                    "unit":     "kg"
-                },
-                {
-                    "label":    "... engine",
-                    "value":    "engine:weight",
-                    "format":   "{:,.0f}",
-                    "unit":     "kg"
-                },
-                {
-                    "label":    "... fueltank",
-                    "value":    "fueltank:weight",
-                    "format":   "{:,.0f}",
-                    "unit":     "kg"
-                },
-                {
-                    "label":    "... radio",
-                    "value":    "radio:weight",
-                    "format":   "{:,.0f}",
-                    "unit":     "kg"
-                },
-                {
-                    "label":    "... gun",
-                    "value":    "gun:weight",
-                    "format":   "{:,.0f}",
-                    "unit":     "kg"
-                }
-            ],
-            "option": {
-                "label":    { "width": 18,  "anchor": "e" },
-                "value":    { "width": 6,   "anchor": "e" },
-                "unit":     { "width": 5,   "anchor": "w" }
-            }
-        },
-        {
-            "title": null,
-            "titleoption": {
-                "label": { "width": 20, "anchor": "w" }
-            },
-            "items": [
-                {
-                    "label":    "total health",
-                    "value":    "vehicle:totalHealth",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... hull",
-                    "value":    "vehicle:health",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... turret",
-                    "value":    "turret:health",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "module health ammo bay",
-                    "value":    "vehicle:ammoBayHealth",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... chassis",
-                    "value":    "chassis:health",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... turret rotator",
-                    "value":    "turret:turretRotatorHealth",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... surveying device",
-                    "value":    "turret:surveyingDeviceHealth",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... engine",
-                    "value":    "engine:health",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... fueltank",
-                    "value":    "fueltank:health",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... radio",
-                    "value":    "radio:health",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                },
-                {
-                    "label":    "... gun",
-                    "value":    "gun:health",
-                    "format":   "{:,.0f}",
-                    "unit":     "HP"
-                }
-            ],
-            "option": {
-                "label":    { "width": 18,  "anchor": "e" },
-                "value":    { "width": 6,   "anchor": "e" },
-                "unit":     { "width": 5,   "anchor": "w" }
-            }
-        }
-    ]        
-]
+    ]
+}
