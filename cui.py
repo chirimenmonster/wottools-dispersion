@@ -87,13 +87,15 @@ class Command:
             param['shell'] = strage.fetchShellList(None, param)[0][0]
         if 'siege' not in param:
             param['siege'] = None
-        result = strage.getDescription(param)
+        titles, values = strage.getDescription(param)
         if config.csvoutput:
-            message = csvoutput.createMessage(strage, result)
+            message = csvoutput.createMessage(strage, titles + values)
             print(message)
         else:
-            for r in result:
-                print('{0[0]:>32}: {0[1]}'.format(r))
+            for r in titles:
+                print('{0:>33} {1}'.format(r[0], ', '.join(r[1:])))
+            for r in values:
+                print('{0[1]:>32}:{0[2]:>6}: {0[3]}'.format(r))
 
 if __name__ == '__main__':
     sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')

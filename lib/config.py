@@ -31,7 +31,8 @@ def parseArgument(mode=None):
     parser.add_argument('-g', dest='GUI_DIR', help='gui folder extracted.  ex. ".\test\gui"')
     parser.add_argument('--secret', action='store_true', help='include secret tanks')
     parser.add_argument('--gui-items', dest='gui_items', help='change guisettings_items.json')
-    
+    parser.add_argument('--vehicle', dest='vehicle', help='vehicle name.  ex. "R80_KV1"')
+        
     if mode == 'test':
         parser.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
         parser.add_argument('--list', dest='pattern', help='show vehicle list for NATION:TIER:TYPE.  ex. "germany:9:HT"')
@@ -44,8 +45,6 @@ def parseArgument(mode=None):
         parser.add_argument('--list-radio', dest='vehicle_radio', help='list radio for vehicle.  ex. "R80_KV1"')
         parser.add_argument('--list-gun', dest='vehicle_gun', help='list gun for vehicle and turret.  ex. "R80_KV1:Turret_2_KV1"')
         parser.add_argument('--list-shell', dest='gun_shell', help='list shell for gun and turret.  ex. "ussr:_85mm_F-30"')
-
-        parser.add_argument('--info', dest='vehicle', help='view info for vehicle.  ex. "R80_KV1:Chassis_KV1_2:Turret_2_KV1:V-2K:_10RK:_85mm_F-30:_85mm_UBR-365K"')
 
     parser.parse_args(namespace=g_config)
     if g_config.SCRIPTS_DIR:

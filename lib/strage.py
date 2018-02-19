@@ -17,7 +17,8 @@ class Strage(object):
         self.findText = self.__findEntry.getText
         
         self.__nationOrder = self.find('settings:nationsOrder', {})
-        self.__vehicleList, self.__vehicleNation = self.__fetchVehicleList()
+        self.__vehicleList = self.__fetchVehicleList()
+        self.__vehicleIndex = self.__createIndexVehicle(self.__vehicleList)
 
         self.__getDropdownList = {
             'nation':   self.fetchNationList,
@@ -53,18 +54,28 @@ class Strage(object):
                 tier = self.find('vehicle:tier', param)
                 type = self.find('vehicle:type', param)
                 secret = self.find('vehicle:secret', param)
+                data = { 'id':id, 'vehicle':item, 'nation':nation, 'tier':tier, 'type':type, 'secret':secret }
                 if not secret == 'secret' or config.secret:
-                    vehicles[nation][tier][type].append({ 'id':id, 'vehicle':item })
-        rev = {}
+                    vehicles[nation][tier][type].append(data)
         for nation, tier, type in product(nations, tiers, types):
             list = sorted(vehicles[nation][tier][type], key=lambda v: v['id'])
-            vehicles[nation][tier][type] = [ v['vehicle'] for v in list ]
-            for v in list:
-                rev[v['vehicle']] = nation
-        return vehicles, rev
+            vehicles[nation][tier][type] = list
+        return vehicles
+
+    def __createIndexVehicle(self, database):
+        index = {}
+        for nation in database.keys():
+            for tier in database[nation].keys():
+                for type in database[nation][tier].keys():
+                    for data in database[nation][tier][type]:
+                        index[data['vehicle']] = data
+        return index
+
+    def getParamFromVehicle(self, vehicle):
+        return self.__vehicleIndex[vehicle]
 
     def getVehicleNation(self, vehicle):
-        return self.__vehicleNation[vehicle]
+        return self.__vehicleIndex[vehicle]['nation']
 
     def getVehicleDescription(self, param):
         result = []
@@ -74,20 +85,21 @@ class Strage(object):
         return result
 
     def getDescription(self, param):
-        values = []
+        titles = []
         for schema in self.__titlesdesc:
             value = []
             for item in schema['value']:
-                value.append(self.find(item, param))
-            values.append([ schema['label'], *value ])
-        values.append([ 'Siege:', param['siege'] or 'None' ])
+                value.append(self.findText({ 'value':item }, param))
+            titles.append([ schema['label'], *value ])
+        titles.append([ 'Siege:', param['siege'] or 'None' ])
+        values = []
         for column in self.__itemgroup['columns']:
             for row in column['rows']:
                 for schema in row['items']:
                     value = self.find(schema['value'], param)
                     header = [ schema['value'], schema['label'], schema.get('unit', '') ]
                     values.append(header + (value if isinstance(value, list) else [ value ]) )
-        return values
+        return titles, values
 
     def getVehicleInfo(self, param):
         items = []
@@ -129,7 +141,7 @@ class Strage(object):
         types = TYPES if param['type'] == '*' else [ param['type'] ]
         items = []
         for nation, tier, type in product(nations, tiers, types):
-            items.extend(self.__vehicleList[nation][tier][type])
+            items.extend([ v['vehicle'] for v in self.__vehicleList[nation][tier][type] ])
         return self.__getDropdownItems('vehicle', items, param, schema)
 
     def fetchChassisList(self, schema, param):

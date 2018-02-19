@@ -39,8 +39,13 @@ class Application(tkinter.Frame):
         self.createSpecView(self.master, self.__itemgroup, None)
         self.createCommandView(self.master)
 
+        if config.vehicle is not None:
+            param = self.__strage.getParamFromVehicle(config.vehicle)
+        else:
+            param = None
+    
         self.packTitleDesc()
-        self.changeVehicleFilter()
+        self.changeVehicleFilter(param)
 
     def createSelectorBars(self, master):
         self.__selectorSchema = {}
@@ -134,7 +139,11 @@ class Application(tkinter.Frame):
         text = self.__strage.findText(schema, param)
         return text
 
-    def changeVehicleFilter(self):
+    def changeVehicleFilter(self, param=None):
+        if param is not None:
+            self.__selector['nation'].select(param['nation'])
+            self.__selector['tier'].select(param['tier'])
+            self.__selector['type'].select(param['type'])
         self.__selector['vehicle'].update()
         self.changeVehicle()
 
@@ -238,7 +247,11 @@ class DropdownList(tkinter.Frame):
             self.__combobox.current(len(list) - 1)
         else:
             self.__combobox.current(0)
- 
+
+    def select(self, value):
+        index = self.__values.index(value)
+        self.__combobox.current(index)
+    
     def getSelected(self):
         index = self.__combobox.current()
         return self.__values[index]
