@@ -240,6 +240,14 @@
             }
         ]
     },
+    "vehicle:speedLimits": {
+        "resources": [
+            {
+                "func":     "join",
+                "args":     [ "vehicle:speedLimits_forward", "vehicle:speedLimits_backward" ]
+            }
+        ]
+    },
     "vehicle:speedLimits_forward": {
         "resources": [
             {
@@ -553,6 +561,30 @@
             {
                 "file":     "vehicles/{nation}/components/engines.xml",
                 "xpath":    "shared/{engine}/maxHealth"
+            }
+        ]
+    },
+    "engine:rpmRange": {
+        "resources": [
+            {
+                "func":     "join",
+                "args":     [ "engine:rpmMax", "engine:rpmMin" ]
+            }
+        ]
+    },
+    "engine:rpmMax": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/engines.xml",
+                "xpath":    "shared/{engine}/rpm_max"
+            }
+        ]
+    },
+    "engine:rpmMin": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/engines.xml",
+                "xpath":    "shared/{engine}/rpm_min"
             }
         ]
     },

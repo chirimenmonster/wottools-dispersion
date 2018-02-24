@@ -14,6 +14,23 @@
                     },
                     "items": [
                         {
+                            "label":    "engine power (hp)",
+                            "value":    "engine:power",
+                            "consider": "float",
+                            "format":   "{:.1f}"
+                        },
+                        {
+                            "label":    "rpm range (rpm)",
+                            "value":    "engine:rpmRange",
+                            "format":   "{} / {}"
+                        },
+                        {
+                            "label":    "weight (ton)",
+                            "value":    "vehicle:totalWeight",
+                            "factor":   0.001,
+                            "format":   "{:.1f}"
+                        },
+                        {
                             "label":    "p/w ratio (hp/ton)",
                             "value":    "vehicle:powerWeightRatio",
                             "factor":   1000,
@@ -21,9 +38,9 @@
                         },
                         {
                             "label":    "speed limit (km/h)",
-                            "value":    "vehicle:speedLimits_forward",
+                            "value":    "vehicle:speedLimits",
                             "consider": "float",
-                            "format":   "{:.1f}"
+                            "format":   "{:.1f} / {:.1f}"
                         },
                         {
                             "label":    "max speed (km/h)",
