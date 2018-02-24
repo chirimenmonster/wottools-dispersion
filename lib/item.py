@@ -22,6 +22,11 @@ class FindEntry(object):
         }
 
     def find(self, node, param):
+        key = None
+        match = re.match(r'(.*)\[(\d+)\]', node)
+        if match:
+            node = match.group(1)
+            key = int(match.group(2))
         schema = self.__itemschema[node]
         param = self.__getModifiedParam(node, param)
         result = None
@@ -34,6 +39,12 @@ class FindEntry(object):
         result = self.__convertType(schema, result)
         if 'map' in schema:
             result = self.__getMappedData(schema['map'], result)
+        if key is not None:
+            if not isinstance(result, list) and not isinstance(result, ElementTree.Element):
+                logger.error('find: spceify index, but node is not list: {}'.format(node))
+                logger.error('type: {}'.format(result))
+                raise ValueError
+            result = result[key]
         return result
 
     def __getXmlTree(self, resource, param):

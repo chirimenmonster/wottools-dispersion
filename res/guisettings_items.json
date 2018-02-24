@@ -154,15 +154,15 @@
                         },
                         {
                             "label":    "terrain resistance hard",
-                            "value":    "chassis:terrainResistance_hard"
+                            "value":    "chassis:terrainResistance[0]"
                         },
                         {
                             "label":    "... medium",
-                            "value":    "chassis:terrainResistance_medium"
+                            "value":    "chassis:terrainResistance[1]"
                         },
                         {
                             "label":    "... soft",
-                            "value":    "chassis:terrainResistance_soft"
+                            "value":    "chassis:terrainResistance[2]"
                         }
                     ]
                 }

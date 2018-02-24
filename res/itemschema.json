@@ -72,7 +72,7 @@
         "resources": [
             {
                 "func":     "div",
-                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance_hard", "physics:specificFriction" ]
+                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance[0]", "physics:specificFriction" ]
             }
         ]
     },
@@ -80,7 +80,7 @@
         "resources": [
             {
                 "func":     "div",
-                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance_medium", "physics:specificFriction" ]
+                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance[1]", "physics:specificFriction" ]
             }
         ]
     },
@@ -88,7 +88,7 @@
         "resources": [
             {
                 "func":     "div",
-                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance_soft", "physics:specificFriction" ]
+                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance[2]", "physics:specificFriction" ]
             }
         ]
     },
@@ -386,33 +386,6 @@
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
                 "xpath":    "chassis/{chassis}/terrainResistance"
-            }
-        ]
-    },
-    "chassis:terrainResistance_hard": {
-        "map":      "[0]",
-        "resources": [
-            {
-                "func":     "join",
-                "args":     [ "chassis:terrainResistance" ]
-            }
-        ]
-    },
-    "chassis:terrainResistance_medium": {
-        "map":      "[1]",
-        "resources": [
-            {
-                "func":     "join",
-                "args":     [ "chassis:terrainResistance" ]
-            }
-        ]
-    },
-    "chassis:terrainResistance_soft": {
-        "map":      "[2]",
-        "resources": [
-            {
-                "func":     "join",
-                "args":     [ "chassis:terrainResistance" ]
             }
         ]
     },
@@ -860,6 +833,56 @@
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
                 "xpath":    "shared/{gun}/shots"
+            }
+        ]
+    },
+    "gun:piercingPower": {
+        "resources": [
+            {
+                "func":     "join",
+                "args":     [ "gun:piercingPower_1", "gun:piercingPower_2", "gun:piercingPower_3" ]
+            }
+        ]
+    },
+    "gun:piercingPower_1": {
+        "addparams": [
+            {
+                "xtag":     "shell",
+                "value":    "gun:shots[0]"
+            }
+        ],
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/guns.xml",
+                "xpath":    "shared/{gun}/shots/{shell}/piercingPower"
+            }
+        ]
+    },
+    "gun:piercingPower_2": {
+        "addparams": [
+            {
+                "xtag":     "shell",
+                "value":    "gun:shots[1]"
+            }
+        ],
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/guns.xml",
+                "xpath":    "shared/{gun}/shots/{shell}/piercingPower"
+            }
+        ]
+    },
+    "gun:piercingPower_3": {
+        "addparams": [
+            {
+                "xtag":     "shell",
+                "value":    "gun:shots[2]"
+            }
+        ],
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/guns.xml",
+                "xpath":    "shared/{gun}/shots/{shell}/piercingPower"
             }
         ]
     },
