@@ -13,6 +13,85 @@
             }
         ]
     },
+    "physics:hpToWatts": {
+        "resources": [
+            {
+                "immediate":    735.5
+            }
+        ]
+    },
+    "physics:specificFriction": {
+        "resources": [
+            {
+                "immediate":    0.6867000000000001
+            }
+        ]
+    },
+    "vehicle:totalWeight": {
+        "resources": [
+            {
+                "func":     "sum",
+                "args":     [ "hull:weight", "chassis:weight", "turret:weight",
+                                "engine:weight", "fueltank:weight", "radio:weight", "gun:weight" ]
+            }
+        ]
+    },
+    "vehicle:totalHealth": {
+        "resources": [
+            {
+                "func":     "sum",
+                "args":     [ "hull:health", "turret:health" ]
+            }
+        ]
+    },
+    "vehicle:powerWeightRatio": {
+        "resources": [
+            {
+                "func":     "div",
+                "args":     [ "engine:power", "vehicle:totalWeight" ]
+            }
+        ]
+    },
+    "vehicle:powerWeightRatioSI": {
+        "resources": [
+            {
+                "func":     "mul",
+                "args":     [ "vehicle:powerWeightRatio", "physics:hpToWatts" ]
+            }
+        ]
+    },
+    "vehicle:maxSpeed": {
+        "resources": [
+            {
+                "func":     "join",
+                "args":     [ "vehicle:maxSpeed_hard", "vehicle:maxSpeed_medium", "vehicle:maxSpeed_soft" ]
+            }
+        ]
+    },
+    "vehicle:maxSpeed_hard": {
+        "resources": [
+            {
+                "func":     "div",
+                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance_hard", "physics:specificFriction" ]
+            }
+        ]
+    },
+    "vehicle:maxSpeed_medium": {
+        "resources": [
+            {
+                "func":     "div",
+                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance_medium", "physics:specificFriction" ]
+            }
+        ]
+    },
+    "vehicle:maxSpeed_soft": {
+        "resources": [
+            {
+                "func":     "div",
+                "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance_soft", "physics:specificFriction" ]
+            }
+        ]
+    },
     "vehicle:list": {
         "value":    "nodelist",
         "resources": [
@@ -161,50 +240,6 @@
             }
         ]
     },
-    "vehicle:totalWeight": {
-        "resources": [
-            {
-                "func":     "sum",
-                "args":     [ "vehicle:weight", "chassis:weight", "turret:weight",
-                                "engine:weight", "fueltank:weight", "radio:weight", "gun:weight" ]
-            }
-        ]
-    },
-    "vehicle:weight": {
-        "value":    "float",
-        "resources": [
-            {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "hull/weight"
-            }
-        ]
-    },
-    "vehicle:totalHealth": {
-        "resources": [
-            {
-                "func":     "sum",
-                "args":     [ "vehicle:health", "turret:health" ]
-            }
-        ]
-    },
-    "vehicle:health": {
-        "value":    "float",
-        "resources": [
-            {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "hull/maxHealth"
-            }
-        ]
-    },
-    "vehicle:ammoBayHealth": {
-        "value":    "float",
-        "resources": [
-            {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "hull/ammoBayHealth/maxHealth"
-            }
-        ]
-    },
     "vehicle:speedLimits_forward": {
         "resources": [
             {
@@ -272,6 +307,33 @@
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
                 "xpath":    "radios"
+            }
+        ]
+    },
+    "hull:weight": {
+        "value":    "float",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "hull/weight"
+            }
+        ]
+    },
+    "hull:health": {
+        "value":    "float",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "hull/maxHealth"
+            }
+        ]
+    },
+    "hull:ammoBayHealth": {
+        "value":    "float",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "hull/ammoBayHealth/maxHealth"
             }
         ]
     },

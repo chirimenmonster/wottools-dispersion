@@ -185,7 +185,7 @@
                         },
                         {
                             "label":    "... hull",
-                            "value":    "vehicle:weight",
+                            "value":    "hull:weight",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         },
@@ -237,7 +237,7 @@
                         },
                         {
                             "label":    "... hull",
-                            "value":    "vehicle:health",
+                            "value":    "hull:health",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
@@ -249,7 +249,7 @@
                         },
                         {
                             "label":    "module health ammo bay",
-                            "value":    "vehicle:ammoBayHealth",
+                            "value":    "hull:ammoBayHealth",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },

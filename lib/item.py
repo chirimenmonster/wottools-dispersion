@@ -15,6 +15,8 @@ class FindEntry(object):
         self.__xmltree = {}
         self.__functions = {
             'sum':  self.__functionSum,
+            'mul':  self.__functionMul,
+            'div':  self.__functionDiv,
             'or':   self.__functionOr,
             'join': self.__functionJoin
         }
@@ -164,7 +166,28 @@ class FindEntry(object):
             value = float(value)
             result += value
         return result
-            
+
+    def __functionMul(self, args, param):
+        result = 1.0
+        for arg in args:
+            value = self.find(arg, param)
+            if value is None:
+                return None
+            value = float(value)
+            result *= value
+        return result
+
+    def __functionDiv(self, args, param):
+        result = self.find(args[0], param)
+        result = float(result)
+        for arg in args[1:]:
+            value = self.find(arg, param)
+            if value is None:
+                return None
+            value = float(value)
+            result /= value
+        return result
+    
     def __functionOr(self, args, param):
         result = None
         for arg in args:
@@ -195,6 +218,7 @@ class FindFormattedEntry(FindEntry):
         if not isinstance(value, list):
             value = [ value ]
         value = [ self.__consider(v, schema.get('consider', None)) for v in value ]
+        value = [ self.__factor(v, schema.get('factor', None)) for v in value ]
         text = self.__format(value, schema.get('format', None))
         if text is None:
             text = ''
@@ -211,6 +235,15 @@ class FindFormattedEntry(FindEntry):
             logger.error('consider type not implement: {}'.format(consider))
             raise ValueError
         return node
+
+    def __factor(self, nodes, factor):
+        if factor is None or nodes is None or nodes == []:
+            return nodes
+        if isinstance(nodes, list):
+            result = [ node * factor for node in nodes ]
+        else:
+            result = nodes * factor
+        return result
 
     def __format(self, nodes, template):
         if nodes is None or nodes == []:
