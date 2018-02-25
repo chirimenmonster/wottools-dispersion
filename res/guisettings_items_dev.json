@@ -92,6 +92,24 @@
                             "value":    "gun:invisibilityFactorAtShot"
                         }
                     ]
+                },
+                {
+                    "guioption": {
+                        "label":    { "width": 16,  "anchor": "e" },
+                        "value":    { "width": 12,  "anchor": "e" }
+                    },
+                    "items": [
+                        {
+                            "label":    "piercing power",
+                            "value":    "shot:piercingPower",
+                            "join":     " / "
+                        },
+                        {
+                            "label":    "damage",
+                            "value":    "shot:damage",
+                            "join":     " / "
+                        }
+                    ]
                 }
             ]
         }

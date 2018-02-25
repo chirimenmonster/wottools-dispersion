@@ -1,4 +1,4 @@
-from logging import getLogger
+from logging import getLogger, DEBUG
 import re
 from xml.etree import ElementTree
 
@@ -7,6 +7,7 @@ from lib.translate import g_translate as translate
 from lib.utils import readXmlData
 
 logger = getLogger(__name__)
+logger.setLevel(DEBUG)
 
 class FindEntry(object):
 
@@ -22,11 +23,11 @@ class FindEntry(object):
         }
 
     def find(self, node, param):
-        key = None
+        index = None
         match = re.match(r'(.*)\[(\d+)\]', node)
         if match:
             node = match.group(1)
-            key = int(match.group(2))
+            index = int(match.group(2))
         schema = self.__itemschema[node]
         param = self.__getModifiedParam(node, param)
         result = None
@@ -39,12 +40,12 @@ class FindEntry(object):
         result = self.__convertType(schema, result)
         if 'map' in schema:
             result = self.__getMappedData(schema['map'], result)
-        if key is not None:
+        if index is not None:
             if not isinstance(result, list) and not isinstance(result, ElementTree.Element):
                 logger.error('find: spceify index, but node is not list: {}'.format(node))
                 logger.error('type: {}'.format(result))
                 raise ValueError
-            result = result[key]
+            result = result[index] if len(result) > index else None
         return result
 
     def __getXmlTree(self, resource, param):
@@ -93,6 +94,8 @@ class FindEntry(object):
         if 'addparams' in schema:
             for p in schema['addparams']:
                 value = self.find(p['value'], param)
+                if isinstance(value, ElementTree.Element):
+                    value = value.tag
                 param[p['xtag']] = value
         return param
 
@@ -230,7 +233,10 @@ class FindFormattedEntry(FindEntry):
             value = [ value ]
         value = [ self.__consider(v, schema.get('consider', None)) for v in value ]
         value = [ self.__factor(v, schema.get('factor', None)) for v in value ]
-        text = self.__format(value, schema.get('format', None))
+        if schema.get('format', None):
+            text = self.__format(value, schema.get('format', None))
+        else:
+            text = self.__join(value, schema.get('join', None))       
         if text is None:
             text = ''
         return text
@@ -260,18 +266,24 @@ class FindFormattedEntry(FindEntry):
         if nodes is None or nodes == []:
             return None
         nodes = nodes.copy()
-        if template is not None:
-            matches = [ m for m in re.finditer('\{[^}]*\}', template) ]
-            list = range(len(matches))
-            for i in range(len(matches))[::-1]:
-                m = matches[i]
-                if nodes[i] is None:
-                    template = template[:m.start()] + template[m.end():]
-                    del nodes[i]
-            text = template.format(*nodes)
-        else:
-            for i in range(len(nodes))[::-1]:
-                if nodes[i] is None:
-                    del nodes[i]
-            text = ' '.join(nodes)
+        matches = [ m for m in re.finditer('\{[^}]*\}', template) ]
+        list = range(len(matches))
+        for i in range(len(matches))[::-1]:
+            m = matches[i]
+            if nodes[i] is None:
+                template = template[:m.start()] + template[m.end():]
+                del nodes[i]
+        text = template.format(*nodes)
+        return text
+
+    def __join(self, nodes, sep):
+        if nodes is None or nodes == []:
+            return None
+        nodes = nodes.copy()
+        if sep is None:
+            sep = ' '
+        for i in range(len(nodes))[::-1]:
+            if nodes[i] is None:
+                del nodes[i]
+        text = sep.join(nodes)
         return text

@@ -836,53 +836,106 @@
             }
         ]
     },
-    "gun:piercingPower": {
+    "shot:piercingPower": {
         "resources": [
             {
                 "func":     "join",
-                "args":     [ "gun:piercingPower_1", "gun:piercingPower_2", "gun:piercingPower_3" ]
+                "args":     [ "shot:piercingPower_1", "shot:piercingPower_2", "shot:piercingPower_3" ]
             }
         ]
     },
-    "gun:piercingPower_1": {
+    "shot:piercingPower_1": {
+        "map":      "[0]",
         "addparams": [
             {
-                "xtag":     "shell",
+                "xtag":     "shot",
                 "value":    "gun:shots[0]"
             }
         ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots/{shell}/piercingPower"
+                "xpath":    "shared/{gun}/shots/{shot}/piercingPower"
             }
         ]
     },
-    "gun:piercingPower_2": {
+    "shot:piercingPower_2": {
+        "map":      "[0]",
         "addparams": [
             {
-                "xtag":     "shell",
+                "xtag":     "shot",
                 "value":    "gun:shots[1]"
             }
         ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots/{shell}/piercingPower"
+                "xpath":    "shared/{gun}/shots/{shot}/piercingPower"
             }
         ]
     },
-    "gun:piercingPower_3": {
+    "shot:piercingPower_3": {
+        "map":      "[0]",
         "addparams": [
             {
-                "xtag":     "shell",
+                "xtag":     "shot",
                 "value":    "gun:shots[2]"
             }
         ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots/{shell}/piercingPower"
+                "xpath":    "shared/{gun}/shots/{shot}/piercingPower"
+            }
+        ]
+    },
+    "shot:damage": {
+        "resources": [
+            {
+                "func":     "join",
+                "args":     [ "shot:damage_1", "shot:damage_2", "shot:damage_3" ]
+            }
+        ]
+    },
+    "shot:damage_1": {
+        "addparams": [
+            {
+                "xtag":     "shot",
+                "value":    "gun:shots[0]"
+            }
+        ],
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/shells.xml",
+                "xpath":    "{shot}/damage/armor"
+            }
+        ]
+    },
+    "shot:damage_2": {
+        "addparams": [
+            {
+                "xtag":     "shot",
+                "value":    "gun:shots[1]"
+            }
+        ],
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/shells.xml",
+                "xpath":    "{shot}/damage/armor"
+            }
+        ]
+    },
+    "shot:damage_3": {
+        "addparams": [
+            {
+                "xtag":     "shot",
+                "value":    "gun:shots[2]"
+            }
+        ],
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/shells.xml",
+                "xpath":    "{shot}/damage/armor"
             }
         ]
     },
