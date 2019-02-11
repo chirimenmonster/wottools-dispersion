@@ -47,7 +47,7 @@ class Strage(object):
                     vehicles[nation][tier][type] = []
         for nation in nations:
             param = { 'nation': nation }
-            items = [ node.tag for node in self.find('vehicle:list', param) ]
+            items = [ node.tag for node in self.find('vehicle:list', param) if node.tag != 'xmlns:xmlref' ]
             for item in items:
                 param = { 'nation': nation, 'vehicle': item }
                 id = int(self.find('vehicle:id', param))
