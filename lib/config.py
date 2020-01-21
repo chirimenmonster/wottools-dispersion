@@ -45,6 +45,7 @@ def parseArgument(mode=None):
         parser.add_argument('--list-radio', dest='vehicle_radio', help='list radio for vehicle.  ex. "R80_KV1"')
         parser.add_argument('--list-gun', dest='vehicle_gun', help='list gun for vehicle and turret.  ex. "R80_KV1:Turret_2_KV1"')
         parser.add_argument('--list-shell', dest='gun_shell', help='list shell for gun and turret.  ex. "ussr:_85mm_F-30"')
+        parser.add_argument('--params', dest='show_params', help='parameter names to show.  ex. "shell_speed:shell_gravity"')
 
     parser.parse_args(namespace=g_config)
     if g_config.SCRIPTS_DIR:

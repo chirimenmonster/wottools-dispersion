@@ -70,7 +70,7 @@ class Command:
 
 
     @staticmethod
-    def infoVehicle(strage, arg):
+    def infoVehicle(strage, arg, showParams):
         p = arg.split(':')
         nation = strage.getVehicleNation(p[0])
         if len(p) == 7:
@@ -88,14 +88,26 @@ class Command:
         if 'siege' not in param:
             param['siege'] = None
         titles, values = strage.getDescription(param)
+        if showParams:
+            tagList = showParams.split(',')
+            result = [ v for v in values if v[0] in tagList ]
+        else:
+            result = values
         if config.csvoutput:
-            message = csvoutput.createMessage(strage, titles + values)
+            if showParams:
+                message = csvoutput.createMessage(strage, [titles[0][:2] + sum(result, [])])
+            else:
+                message = csvoutput.createMessage(strage, titles + result)
             print(message)
         else:
-            for r in titles:
-                print('{0:>33} {1}'.format(r[0], ', '.join(r[1:])))
-            for r in values:
-                print('{0[1]:>32}:{0[2]:>6}: {0[3]}'.format(r))
+            if showParams:
+                for r in result:
+                    print('{0[1]:>32}:{0[2]:>6}: {0[3]}'.format(r))
+            else:
+                for r in titles:
+                    print('{0:>33} {1}'.format(r[0], ', '.join(r[1:])))
+                for r in result:
+                    print('{0[1]:>32}:{0[2]:>6}: {0[3]}'.format(r))
 
 if __name__ == '__main__':
     sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
@@ -130,4 +142,4 @@ if __name__ == '__main__':
         Command.listShell(strage, *config.gun_shell.split(':'))
 
     if config.vehicle:
-        Command.infoVehicle(strage, config.vehicle)
+        Command.infoVehicle(strage, config.vehicle, config.show_params)
