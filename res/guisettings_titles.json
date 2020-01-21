@@ -38,5 +38,10 @@
         "label":    "Shell:",
         "format":   "{} ({}): {} ({})",
         "value":    [ "shell:userString", "shell:index", "shell:kind", "shell:kindShort" ]
+    },
+    {
+        "label":    "Secret:",
+        "format":   "{}",
+        "value":    [ "vehicle:secret" ]
     }
 ]
