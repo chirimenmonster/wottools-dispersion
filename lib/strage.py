@@ -136,13 +136,18 @@ class Strage(object):
         return result
 
     def fetchVehicleList(self, schema, param):
-        nations = [ n[0] for n in self.__nationOrder ] if param['nation'] == '*' else [ param['nation'] ]
+        nations = [ n for n in self.__nationOrder ] if param['nation'] == '*' else [ param['nation'] ]
         tiers = TIERS if param['tier'] == '*' else [ param['tier'] ]
         types = TYPES if param['type'] == '*' else [ param['type'] ]
-        items = []
-        for nation, tier, type in product(nations, tiers, types):
-            items.extend([ v['vehicle'] for v in self.__vehicleList[nation][tier][type] ])
-        return self.__getDropdownItems('vehicle', items, param, schema)
+        result = []
+        for nation in nations:
+            items = []
+            for tier, type in product(tiers, types):
+                items.extend([ v['vehicle'] for v in self.__vehicleList[nation][tier][type] ])
+            newparam = param.copy()
+            newparam['nation'] = nation
+            result.extend(self.__getDropdownItems('vehicle', items, newparam, schema))
+        return result
 
     def fetchChassisList(self, schema, param):
         nodes = self.find('vehicle:chassis', param)
