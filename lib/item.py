@@ -28,7 +28,11 @@ class FindEntry(object):
         if match:
             node = match.group(1)
             index = int(match.group(2))
-        schema = self.__itemschema[node]
+        try:
+            schema = self.__itemschema[node]
+        except:
+            logger.error('FindEntry.find(): bad key: "{}"'.format(node))
+            raise
         param = self.__getModifiedParam(node, param)
         result = None
         for r in schema['resources']:

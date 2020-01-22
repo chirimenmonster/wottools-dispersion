@@ -77,14 +77,12 @@ class Strage(object):
     def getVehicleNation(self, vehicle):
         return self.__vehicleIndex[vehicle]['nation']
 
-    def getVehicleDescription(self, param):
-        result = []
-        for node in [ 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
-            value = self.getDescription(node, param)
-            result.append([ node, self.__itemdef['title'][node]['format'].format(*value) ])
-        return result
-
     def getDescription(self, param):
+        titles = self.getVehicleDescription(param)
+        values = self.getVehicleInfo(param)
+        return titles, values
+
+    def getVehicleDescription(self, param):
         titles = []
         for schema in self.__titlesdesc:
             value = []
@@ -92,6 +90,9 @@ class Strage(object):
                 value.append(self.findText({ 'value':item }, param))
             titles.append([ schema['label'], *value ])
         titles.append([ 'Siege:', param['siege'] or 'None' ])
+        return titles
+
+    def getVehicleInfo(self, param):
         values = []
         for column in self.__itemgroup['columns']:
             for row in column['rows']:
@@ -99,17 +100,12 @@ class Strage(object):
                     value = self.find(schema['value'], param)
                     header = [ schema['value'], schema['label'], schema.get('unit', '') ]
                     values.append(header + (value if isinstance(value, list) else [ value ]) )
-        return titles, values
+        return values
 
-    def getVehicleInfo(self, param):
-        items = []
-        for column in self.__itemgroup:
-            for row in column:
-                items += row['items']
-        result = []
-        for target in items:
-            result.append([ node, strage.find(target, param) ])
+    def getVehicleItemsInfo(self, vehicleSpec, tags):
+        result = { t:self.find(t, vehicleSpec) for t in tags }
         return result
+
 
     def getDropdownList(self, schema, param):
         return self.__getDropdownList[schema['id']](schema.get('label', None), param)

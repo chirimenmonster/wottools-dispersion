@@ -1,7 +1,9 @@
 import argparse
+import os
 
 from lib.resources import g_resources
 
+BASE_DIRS = [ 'C:/Games/World_of_Tanks', 'C:/Games/World_of_Tanks_ASIA' ]
 
 class Config:
     BASE_DIR = 'C:/Games/World_of_Tanks'
@@ -25,6 +27,11 @@ class Config:
 g_config = Config()
 
 def parseArgument(mode=None):
+    for d in BASE_DIRS:
+        if os.path.isdir(d):
+            g_config.BASE_DIR = d
+            break
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', dest='BASE_DIR', help='specify <WoT_game_folder>')
     parser.add_argument('-s', dest='SCRIPTS_DIR', help='scripts folder extracted.  ex. "C:\git\wot.scripts\scripts"')
@@ -44,8 +51,9 @@ def parseArgument(mode=None):
         parser.add_argument('--list-engine', dest='vehicle_engine', help='list engine for vehicle.  ex. "R80_KV1"')
         parser.add_argument('--list-radio', dest='vehicle_radio', help='list radio for vehicle.  ex. "R80_KV1"')
         parser.add_argument('--list-gun', dest='vehicle_gun', help='list gun for vehicle and turret.  ex. "R80_KV1:Turret_2_KV1"')
-        parser.add_argument('--list-shell', dest='gun_shell', help='list shell for gun and turret.  ex. "ussr:_85mm_F-30"')
+        parser.add_argument('--list-shell', dest='gun_shell', help='list shell for vehicle or pattern.  ex. "R80_KV1" or "germany:9:HT"')
         parser.add_argument('--params', dest='show_params', help='parameter names to show.  ex. "shell_speed:shell_gravity"')
+        parser.add_argument('--info', dest='info', help='parameter names to show.  ex. "shell_speed:shell_gravity"')
 
     parser.parse_args(namespace=g_config)
     if g_config.SCRIPTS_DIR:

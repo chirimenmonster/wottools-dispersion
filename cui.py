@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import logging
 import sys
 import io
@@ -6,14 +8,25 @@ from lib import csvoutput
 from lib.strage import Strage
 from lib.config import parseArgument, g_config as config 
 
+
+def getListVehicle(strage, pattern):
+    nation, tier, type = pattern.split(':')
+    result = []
+    for t in type.split(','):
+        param = { 'nation':nation.lower(), 'tier':tier, 'type':t.upper() }
+        result.extend(strage.fetchVehicleList(None, param))
+    return [ v[0] for v in result ]
+
+
+
 class Command:
 
     @staticmethod
     def listVehicle(strage, pattern):
-        nation, tier, type = pattern.split(':')
-        param = { 'nation':nation.lower(), 'tier':tier, 'type':type.upper() }
-        for r in strage.fetchVehicleList(None, param):
-            print('{0[0]:<32} : {0[1]}'.format(r))
+        for vehicle in getListVehicle(strage, pattern):
+            nation = strage.getVehicleNation(vehicle)
+            info = strage.getVehicleItemsInfo({'nation':nation, 'vehicle':vehicle}, ['vehicle:index', 'vehicle:shortUserString'])
+            print('{:<32} : {}'.format(info['vehicle:index'], info['vehicle:shortUserString']))
 
     @staticmethod
     def listNation(strage):
@@ -63,12 +76,31 @@ class Command:
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
-    def listShell(strage, nation, gun):
-        param = { 'nation':nation, 'gun':gun }
-        for r in strage.fetchShellList(None, param):
-            print('{0[0]:<32}: {0[1]}'.format(r))
-
-
+    def listShell(strage, vehicleSpec, showParams):
+        if ':' in vehicleSpec:
+            vehicleList = getListVehicle(strage, vehicleSpec)
+        else:
+            vehicleList = [ vehicleSpec ]
+        specList = []
+        for vehicle in vehicleList:
+            nation = strage.getVehicleNation(vehicle)
+            for turret in strage.fetchTurretList(None, { 'nation':nation, 'vehicle':vehicle }):
+                for gun in strage.fetchGunList(None, { 'nation':nation, 'vehicle':vehicle, 'turret':turret[0] }):
+                    for shell in strage.fetchShellList(None, { 'nation':nation, 'vehicle':vehicle, 'turret':turret[0], 'gun':gun[0] }):
+                        v = { 'nation':nation, 'vehicle':vehicle, 'turret':turret[0], 'gun':gun[0], 'shell':shell[0] }
+                        specList.append(v)
+        if showParams:
+            tagList = showParams.split(',')
+        else:
+            tagList = [ 'vehicle:index', 'gun:index', 'shell:index' ]
+        result = [ strage.getVehicleItemsInfo(v, tagList) for v in specList ]
+        if config.csvoutput:
+            message = csvoutput.createMessageByArrayOfDict(result)
+            print(message)
+        else:
+            for r in result:
+                print(r)
+  
     @staticmethod
     def infoVehicle(strage, arg, showParams):
         p = arg.split(':')
@@ -108,6 +140,7 @@ class Command:
                     print('{0:>33} {1}'.format(r[0], ', '.join(r[1:])))
                 for r in result:
                     print('{0[1]:>32}:{0[2]:>6}: {0[3]}'.format(r))
+        print(strage.getVehicleItemsInfo(param, tagList))
 
 if __name__ == '__main__':
     sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
@@ -139,7 +172,7 @@ if __name__ == '__main__':
     if config.vehicle_gun:
         Command.listGun(strage, *config.vehicle_gun.split(':'))
     if config.gun_shell:
-        Command.listShell(strage, *config.gun_shell.split(':'))
+        Command.listShell(strage, config.gun_shell, config.show_params)
 
     if config.vehicle:
         Command.infoVehicle(strage, config.vehicle, config.show_params)
