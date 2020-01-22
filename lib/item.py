@@ -83,6 +83,8 @@ class FindEntry(object):
         return value
 
     def __substitute(self, format, param):
+        if not isinstance(format, str):
+            return format
         for match in re.finditer('\{[^}]+\}', format):
             key = match.group()[1:-1]
             if param.get(key, None) is None:
@@ -108,7 +110,7 @@ class FindEntry(object):
         if 'file' in resource:
             result = self.__findNode(resource, param)
         elif 'immediate' in resource:
-            result = resource['immediate']
+            result = self.__substitute(resource['immediate'], param)
         elif 'func' in resource:
             if resource['func'] in self.__functions:
                 result = self.__functions[resource['func']](resource['args'], param)

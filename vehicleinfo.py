@@ -18,6 +18,16 @@ def getListVehicle(strage, pattern):
     return [ v[0] for v in result ]
 
 
+def getDefaultVehicleSpec(strage, vehicleSpec):
+    v = vehicleSpec.copy()
+    v.setdefault('chassis', strage.fetchChassisList(None, v)[-1][0])
+    v.setdefault('turret', strage.fetchTurretList(None, v)[-1][0])
+    v.setdefault('engine', strage.fetchEngineList(None, v)[-1][0])
+    v.setdefault('radio', strage.fetchRadioList(None, v)[-1][0])
+    v.setdefault('gun', strage.fetchGunList(None, v)[-1][0])
+    v.setdefault('shell', strage.fetchShellList(None, v)[0][0])
+    return v
+
 
 class Command:
 
@@ -55,11 +65,29 @@ class Command:
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
-    def listEngine(strage, vehicle):
-        nation = strage.getVehicleNation(vehicle)
-        param = { 'nation':nation, 'vehicle':vehicle }
-        for r in strage.fetchEngineList(None, param):
-            print('{0[0]:<32}: {0[1]}'.format(r))
+    def listEngine(strage, vehicleSpec, showParams):
+        if ':' in vehicleSpec:
+            vehicleList = getListVehicle(strage, vehicleSpec)
+        else:
+            vehicleList = [ vehicleSpec ]
+        specList = []
+        for vehicle in vehicleList:
+            nation = strage.getVehicleNation(vehicle)
+            for engine in strage.fetchEngineList(None, { 'nation':nation, 'vehicle':vehicle }):
+                v = { 'nation':nation, 'vehicle':vehicle, 'engine':engine[0] }
+                v = getDefaultVehicleSpec(strage, v)
+                specList.append(v)
+        if showParams:
+            tagList = showParams.split(',')
+        else:
+            tagList = [ 'vehicle:index', 'gun:index', 'engine:index' ]
+        result = [ strage.getVehicleItemsInfo(v, tagList) for v in specList ]
+        if config.csvoutput:
+            message = csvoutput.createMessageByArrayOfDict(result)
+            print(message)
+        else:
+            for r in result:
+                print(r)
 
     @staticmethod
     def listRadio(strage, vehicle):
@@ -166,7 +194,7 @@ if __name__ == '__main__':
     if config.vehicle_turret:
         Command.listTurret(strage, config.vehicle_turret)
     if config.vehicle_engine:
-        Command.listEngine(strage, config.vehicle_engine)
+        Command.listEngine(strage, config.vehicle_engine, config.show_params)
     if config.vehicle_radio:
         Command.listRadio(strage, config.vehicle_radio)
     if config.vehicle_gun:

@@ -27,6 +27,13 @@
             }
         ]
     },
+    "vehicle:nation": {
+        "resources": [
+            {
+                "immediate":    "{nation}"
+            }
+        ]
+    },
     "vehicle:totalWeight": {
         "resources": [
             {
