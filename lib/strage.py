@@ -219,13 +219,14 @@ class Strage(object):
                     raise ValueError('incorrect tier designation: "{}"'.format(vfilter['tier']))
             tiers = vfilter['tier']
         if 'type' in vfilter and isinstance(vfilter['type'], list):
-            for vt infilter['type']:
+            for vt in vfilter['type']:
                 if vt not in TYPES:
                     raise ValueError('incorrect vehicle type designation: "{}"'.format(vfilter['type']))
-            types = [vfilter['type']]
+            types = vfilter['type']
         vehicles = []
         for nation in nations:
             for tier in tiers:
                 for vtype in types:
                     vehicles.extend(self.__vehicleList[nation][tier][vtype])
-        return vehicles
+        result = [ d['vehicle'] for d in vehicles ]
+        return result

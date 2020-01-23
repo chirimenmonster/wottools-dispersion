@@ -10,7 +10,7 @@ from lib.config import parseArgument, g_config as config
 
 
 def getListVehicle(strage, pattern):
-    if ':' not in vehicleSpec:
+    if ':' not in pattern:
         return [ pattern ]
     nation, tier, vtype = pattern.split(':')
     vspec = {}
@@ -48,8 +48,8 @@ class Command:
     def listVehicle(strage, pattern):
         for vehicle in getListVehicle(strage, pattern):
             nation = strage.getVehicleNation(vehicle)
-            info = strage.getVehicleItemsInfo({'nation':nation, 'vehicle':vehicle}, ['vehicle:index', 'vehicle:shortUserString'])
-            print('{:<32} : {}'.format(info['vehicle:index'], info['vehicle:shortUserString']))
+            info = strage.getVehicleItemsInfo({'nation':nation, 'vehicle':vehicle}, ['vehicle:index', 'vehicle:userString'])
+            print('{:<32} : {}'.format(info['vehicle:index'], info['vehicle:userString']))
 
     @staticmethod
     def listNation(strage):
