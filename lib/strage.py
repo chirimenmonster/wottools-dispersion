@@ -179,3 +179,53 @@ class Strage(object):
         value = self.find('vehicle:siegeMode', param)
         result = [ [ None, 'normal' ], [ 'siege', 'siege' ] ] if value else []
         return result
+
+
+
+    def getVehicleItemsInfo(self, vspec, tags):
+        result = {}
+        for nodeId in tags:
+            value = self.find(nodeId, vspec)
+            result[nodeId] = value
+        return result
+
+
+    def getModuleList(self, vspec, module):
+        id = {
+            'chassis':  'vehicle:chassis',
+            'turret':   'vehicle:turrets',
+            'engine':   'vehicle:engines',
+            'radio':    'vehicle:radios',
+            'gun':      'turret:guns',
+            'shell':    'gun:shots'
+        }[module]
+        nodes = self.find(id, vspec)
+        tags = [ n.tag for n in nodes ] if nodes else []
+        return tags
+
+
+    def getVehicleList(self, vfilter):
+        nations = self.__nationOrder
+        tiers = TIERS
+        types = TYPES
+        if 'nation' in vfilter and isinstance(vfilter['nation'], list):
+            for n in vfilter['nation']:
+                if n not in self.__nationOrder:
+                    raise ValueError('incorrect nation designation: "{}"'.format(vfilter['nation']))
+            nation = vfilter['nation']
+        if 'tier' in vfilter and isinstance(vfilter['tier'], list):
+            for t in vfilter['tier']:
+                if t not in TIERS:
+                    raise ValueError('incorrect tier designation: "{}"'.format(vfilter['tier']))
+            tiers = vfilter['tier']
+        if 'type' in vfilter and isinstance(vfilter['type'], list):
+            for vt infilter['type']:
+                if vt not in TYPES:
+                    raise ValueError('incorrect vehicle type designation: "{}"'.format(vfilter['type']))
+            types = [vfilter['type']]
+        vehicles = []
+        for nation in nations:
+            for tier in tiers:
+                for vtype in types:
+                    vehicles.extend(self.__vehicleList[nation][tier][vtype])
+        return vehicles

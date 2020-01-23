@@ -10,23 +10,36 @@ from lib.config import parseArgument, g_config as config
 
 
 def getListVehicle(strage, pattern):
-    nation, tier, type = pattern.split(':')
-    result = []
-    for t in type.split(','):
-        param = { 'nation':nation.lower(), 'tier':tier, 'type':t.upper() }
-        result.extend(strage.fetchVehicleList(None, param))
-    return [ v[0] for v in result ]
+    if ':' not in vehicleSpec:
+        return [ pattern ]
+    nation, tier, vtype = pattern.split(':')
+    vspec = {}
+    if nation == '' or nation == '*':
+        vspec['nation'] = None
+    else:
+        vspec['nation'] = nation.lower().split(',')
+    if tier == '' or tier == '*':
+        vspec['tier'] = None
+    else:
+        vspec['tier'] = tier.split(',')
+    if vtype == '' or vtype == '*':
+        vspec['type'] = None
+    else:
+        vspec['type'] = vtype.upper().split(',')
+    vehicles = strage.getVehicleList(vspec)
+    return vehicles
 
 
-def getDefaultVehicleSpec(strage, vehicleSpec):
-    v = vehicleSpec.copy()
-    v.setdefault('chassis', strage.fetchChassisList(None, v)[-1][0])
-    v.setdefault('turret', strage.fetchTurretList(None, v)[-1][0])
-    v.setdefault('engine', strage.fetchEngineList(None, v)[-1][0])
-    v.setdefault('radio', strage.fetchRadioList(None, v)[-1][0])
-    v.setdefault('gun', strage.fetchGunList(None, v)[-1][0])
-    v.setdefault('shell', strage.fetchShellList(None, v)[0][0])
-    return v
+def getDefaultVehicleSpec(strage, vid, mspec):
+    nation = strage.getVehicleNation(vid)
+    vspec = { 'nation':nation, 'vehicle':vid }
+    if mspec is not None:
+        vspec.update(mspec)
+    for name in ('chassis', 'turret', 'engine', 'radio', 'gun', 'shell'):
+        if name not in vspec:
+            array = strage.getModuleList(vspec, name)
+            vspec[name] = array[config.moduleSpecified[name]]
+    return vspec
 
 
 class Command:
@@ -65,23 +78,19 @@ class Command:
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
-    def listEngine(strage, vehicleSpec, showParams):
-        if ':' in vehicleSpec:
-            vehicleList = getListVehicle(strage, vehicleSpec)
-        else:
-            vehicleList = [ vehicleSpec ]
-        specList = []
-        for vehicle in vehicleList:
-            nation = strage.getVehicleNation(vehicle)
-            for engine in strage.fetchEngineList(None, { 'nation':nation, 'vehicle':vehicle }):
-                v = { 'nation':nation, 'vehicle':vehicle, 'engine':engine[0] }
-                v = getDefaultVehicleSpec(strage, v)
-                specList.append(v)
+    def listEngine(strage, vfilter, showParams):
+        vehicles = getListVehicle(strage, vfilter)
+        vspecs = []
+        for vid in vehicles:
+            engines = strage.getModuleList(vid, {}, 'engine')
+            for eid in engines:
+                vs = getDefaultVehicleSpec(strage, vid, {'engine':eid})
+                vspecs.append(vs)
         if showParams:
-            tagList = showParams.split(',')
+            tags = showParams.split(',')
         else:
-            tagList = [ 'vehicle:index', 'gun:index', 'engine:index' ]
-        result = [ strage.getVehicleItemsInfo(v, tagList) for v in specList ]
+            tags = [ 'vehicle:index', 'gun:index', 'engine:index' ]
+        result = [ strage.getVehicleItemsInfo(vs, tags) for vs in vspecs ]
         if config.csvoutput:
             message = csvoutput.createMessageByArrayOfDict(result)
             print(message)
@@ -105,11 +114,10 @@ class Command:
 
     @staticmethod
     def listShell(strage, vehicleSpec, showParams):
-        if ':' in vehicleSpec:
-            vehicleList = getListVehicle(strage, vehicleSpec)
-        else:
-            vehicleList = [ vehicleSpec ]
+        vehicleList = getListVehicle(strage, vehicleSpec)
         specList = []
+        
+        
         for vehicle in vehicleList:
             nation = strage.getVehicleNation(vehicle)
             for turret in strage.fetchTurretList(None, { 'nation':nation, 'vehicle':vehicle }):

@@ -23,6 +23,15 @@ class Config:
             'extracted':    None
         }
     }
+    moduleSpecified = {
+        'chassis':  -1,
+        'turret':   -1,
+        'engine':   -1,
+        'radio':    -1,
+        'gun':      -1,
+        'shell':    0
+    }
+
 
 g_config = Config()
 
