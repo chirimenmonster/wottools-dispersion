@@ -30,9 +30,13 @@ def getListVehicle(strage, pattern):
     return vehicles
 
 
-def getDefaultVehicleSpec(strage, vid, mspec):
+def getVehicleSpec(strage, vid):
     nation = strage.getVehicleNation(vid)
     vspec = { 'nation':nation, 'vehicle':vid }
+    return vspec
+
+def getDefaultVehicleSpec(strage, vid, mspec):
+    vspec = getVehicleSpec(strage, vid)
     if mspec is not None:
         vspec.update(mspec)
     for name in ('chassis', 'turret', 'engine', 'radio', 'gun', 'shell'):
@@ -82,7 +86,8 @@ class Command:
         vehicles = getListVehicle(strage, vfilter)
         vspecs = []
         for vid in vehicles:
-            engines = strage.getModuleList(vid, {}, 'engine')
+            vs = getVehicleSpec(strage, vid)
+            engines = strage.getModuleList(vs, 'engine')
             for eid in engines:
                 vs = getDefaultVehicleSpec(strage, vid, {'engine':eid})
                 vspecs.append(vs)
@@ -113,23 +118,30 @@ class Command:
             print('{0[0]:<32}: {0[1]}'.format(r))
 
     @staticmethod
-    def listShell(strage, vehicleSpec, showParams):
-        vehicleList = getListVehicle(strage, vehicleSpec)
-        specList = []
-        
-        
-        for vehicle in vehicleList:
-            nation = strage.getVehicleNation(vehicle)
-            for turret in strage.fetchTurretList(None, { 'nation':nation, 'vehicle':vehicle }):
-                for gun in strage.fetchGunList(None, { 'nation':nation, 'vehicle':vehicle, 'turret':turret[0] }):
-                    for shell in strage.fetchShellList(None, { 'nation':nation, 'vehicle':vehicle, 'turret':turret[0], 'gun':gun[0] }):
-                        v = { 'nation':nation, 'vehicle':vehicle, 'turret':turret[0], 'gun':gun[0], 'shell':shell[0] }
-                        specList.append(v)
+    def listShell(strage, vfilter, showParams):
+        vehicles = getListVehicle(strage, vfilter)
+        vspecs = []
+        vdict = {}
+        for vid in vehicles:
+            vs = getVehicleSpec(strage, vid)
+            turrets = strage.getModuleList(vs, 'turret')
+            for tid in turrets:
+                vs['turret'] = tid
+                guns = strage.getModuleList(vs, 'gun')
+                for gid in guns:
+                    if (vid,gid) in vdict:
+                        continue
+                    vdict[(vid,gid)] = True
+                    vs['gun'] = gid
+                    shells = strage.getModuleList(vs, 'shell')
+                    for sid in shells:
+                        vs['shell'] = sid
+                        vspecs.append(vs.copy())
         if showParams:
-            tagList = showParams.split(',')
+            tags = showParams.split(',')
         else:
-            tagList = [ 'vehicle:index', 'gun:index', 'shell:index' ]
-        result = [ strage.getVehicleItemsInfo(v, tagList) for v in specList ]
+            tags = [ 'vehicle:index', 'gun:index', 'shell:index' ]
+        result = [ strage.getVehicleItemsInfo(vs, tags) for vs in vspecs ]
         if config.csvoutput:
             message = csvoutput.createMessageByArrayOfDict(result)
             print(message)

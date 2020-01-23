@@ -212,7 +212,7 @@ class Strage(object):
             for n in vfilter['nation']:
                 if n not in self.__nationOrder:
                     raise ValueError('incorrect nation designation: "{}"'.format(vfilter['nation']))
-            nation = vfilter['nation']
+            nations = vfilter['nation']
         if 'tier' in vfilter and isinstance(vfilter['tier'], list):
             for t in vfilter['tier']:
                 if t not in TIERS:
