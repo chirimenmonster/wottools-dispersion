@@ -9,7 +9,7 @@
             },
             {
                 "immediate": [ "germany", "ussr", "usa", "uk", "france", "china", "japan",
-                                "czech", "sweden", "poland" ]
+                                "czech", "sweden", "poland", "italy" ]
             }
         ]
     },
@@ -24,6 +24,13 @@
         "resources": [
             {
                 "immediate":    0.6867000000000001
+            }
+        ]
+    },
+    "vehicle:nation": {
+        "resources": [
+            {
+                "immediate":    "{nation}"
             }
         ]
     },

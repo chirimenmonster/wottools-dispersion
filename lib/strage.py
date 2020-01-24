@@ -1,9 +1,13 @@
+import logging
 from itertools import product
 
 from lib.config import g_config as config
 from lib.resources import g_resources, TIERS, TIERS_LABEL, TYPES
 from lib.translate import g_translate as translate
 from lib.item import FindFormattedEntry
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 class Strage(object):
 
@@ -17,6 +21,7 @@ class Strage(object):
         self.findText = self.__findEntry.getText
         
         self.__nationOrder = self.find('settings:nationsOrder', {})
+        logger.debug(self.__nationOrder)
         self.__vehicleList = self.__fetchVehicleList()
         self.__vehicleIndex = self.__createIndexVehicle(self.__vehicleList)
 
@@ -77,14 +82,12 @@ class Strage(object):
     def getVehicleNation(self, vehicle):
         return self.__vehicleIndex[vehicle]['nation']
 
-    def getVehicleDescription(self, param):
-        result = []
-        for node in [ 'vehicle', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]:
-            value = self.getDescription(node, param)
-            result.append([ node, self.__itemdef['title'][node]['format'].format(*value) ])
-        return result
-
     def getDescription(self, param):
+        titles = self.getVehicleDescription(param)
+        values = self.getVehicleInfo(param)
+        return titles, values
+
+    def getVehicleDescription(self, param):
         titles = []
         for schema in self.__titlesdesc:
             value = []
@@ -92,6 +95,9 @@ class Strage(object):
                 value.append(self.findText({ 'value':item }, param))
             titles.append([ schema['label'], *value ])
         titles.append([ 'Siege:', param['siege'] or 'None' ])
+        return titles
+
+    def getVehicleInfo(self, param):
         values = []
         for column in self.__itemgroup['columns']:
             for row in column['rows']:
@@ -99,17 +105,12 @@ class Strage(object):
                     value = self.find(schema['value'], param)
                     header = [ schema['value'], schema['label'], schema.get('unit', '') ]
                     values.append(header + (value if isinstance(value, list) else [ value ]) )
-        return titles, values
+        return values
 
-    def getVehicleInfo(self, param):
-        items = []
-        for column in self.__itemgroup:
-            for row in column:
-                items += row['items']
-        result = []
-        for target in items:
-            result.append([ node, strage.find(target, param) ])
+    def getVehicleItemsInfo(self, vehicleSpec, tags):
+        result = { t:self.find(t, vehicleSpec) for t in tags }
         return result
+
 
     def getDropdownList(self, schema, param):
         return self.__getDropdownList[schema['id']](schema.get('label', None), param)
@@ -182,4 +183,55 @@ class Strage(object):
     def fetchSiegeList(self, schema, param):
         value = self.find('vehicle:siegeMode', param)
         result = [ [ None, 'normal' ], [ 'siege', 'siege' ] ] if value else []
+        return result
+
+
+
+    def getVehicleItemsInfo(self, vspec, tags):
+        result = {}
+        for nodeId in tags:
+            value = self.find(nodeId, vspec)
+            result[nodeId] = value
+        return result
+
+
+    def getModuleList(self, vspec, module):
+        id = {
+            'chassis':  'vehicle:chassis',
+            'turret':   'vehicle:turrets',
+            'engine':   'vehicle:engines',
+            'radio':    'vehicle:radios',
+            'gun':      'turret:guns',
+            'shell':    'gun:shots'
+        }[module]
+        nodes = self.find(id, vspec)
+        tags = [ n.tag for n in nodes ] if nodes else []
+        return tags
+
+
+    def getVehicleList(self, vfilter):
+        nations = self.__nationOrder
+        tiers = TIERS
+        types = TYPES
+        if 'nation' in vfilter and isinstance(vfilter['nation'], list):
+            for n in vfilter['nation']:
+                if n not in self.__nationOrder:
+                    raise ValueError('incorrect nation designation: "{}"'.format(vfilter['nation']))
+            nations = vfilter['nation']
+        if 'tier' in vfilter and isinstance(vfilter['tier'], list):
+            for t in vfilter['tier']:
+                if t not in TIERS:
+                    raise ValueError('incorrect tier designation: "{}"'.format(vfilter['tier']))
+            tiers = vfilter['tier']
+        if 'type' in vfilter and isinstance(vfilter['type'], list):
+            for vt in vfilter['type']:
+                if vt not in TYPES:
+                    raise ValueError('incorrect vehicle type designation: "{}"'.format(vfilter['type']))
+            types = vfilter['type']
+        vehicles = []
+        for nation in nations:
+            for tier in tiers:
+                for vtype in types:
+                    vehicles.extend(self.__vehicleList[nation][tier][vtype])
+        result = [ d['vehicle'] for d in vehicles ]
         return result
