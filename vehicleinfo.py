@@ -32,62 +32,57 @@ def getListVehicle(strage, pattern):
 
 def getVehicleSpec(strage, vid):
     nation = strage.getVehicleNation(vid)
-    vspec = { 'nation':nation, 'vehicle':vid }
+    vspec = {'nation':nation, 'vehicle':vid}
     return vspec
 
-def getDefaultVehicleSpec(strage, vid, mspec):
-    vspec = getVehicleSpec(strage, vid)
-    if mspec is not None:
-        vspec.update(mspec)
-    for name in ('chassis', 'turret', 'engine', 'radio', 'gun', 'shell'):
-        if name not in vspec:
-            array = strage.getModuleList(vspec, name)
-            vspec[name] = array[config.moduleSpecified[name]]
-    return vspec
-
-
-def _listSimpleModule(strage, vfilter, module):
-    if module not in ['chassis', 'turret', 'engine', 'radio']:
-        raise ValueError('not support as simple module: "{}"'.format(module))
+def getVehicleModuleSpecs(strage, vfilter, mfilter):
     vehicles = getListVehicle(strage, vfilter)
-    vspecs = []
-    for vid in vehicles:
-        vs = getVehicleSpec(strage, vid)
-        mlist = strage.getModuleList(vs, module)
-        for mid in mlist:
-            vs[module] = mid
-            vspecs.append(vs.copy())
-    return vspecs
-
-def _listGun(strage, vfilter):
-    oldvspecs = _listSimpleModule(strage, vfilter, 'turret')
-    vspecs = []
-    for vs in oldvspecs:
-        guns = strage.getModuleList(vs, 'gun')
-        for gid in guns:
-            vs['gun'] = gid
-            vspecs.append(vs.copy())
-    return vspecs
-
-def _listShell(strage, vfilter):
-    oldvspecs = _listGun(strage, vfilter)
-    vspecs = []
-    for vs in oldvspecs:
-        shells = strage.getModuleList(vs, 'shell')
-        for sid in shells:
-            vs['shell'] = sid
-            vspecs.append(vs.copy())
+    vspecs = [ getVehicleSpec(strage, vid) for vid in vehicles ]
+    if mfilter is None:
+        mfilter = config.moduleSpecified
+    for module in ('chassis', 'turret', 'engine', 'radio', 'gun', 'shell'):
+        if module not in mfilter or mfilter[module] is None or mfilter[module] == '*':
+            index = None
+        elif isinstance(mfilter[module], int):
+            index = mfilter[module]
+        elif mfilter[module].isdigit() or (mfilter[module][0] == '-' and mfilter[module][1:].isdigit()):
+            index = int(mfilter[module])
+        else:
+            logger.error('bad specified: {}'.format(mspec))
+            raise
+        newvspecs = []
+        for vs in vspecs:
+            mlist = strage.getModuleList(vs, module)
+            if index is not None:
+                mlist = [ mlist[index] ]
+            for mid in mlist:
+                newvs = vs.copy()
+                newvs[module] = mid
+                newvspecs.append(newvs)
+        vspecs = newvspecs
     return vspecs
 
 
 def _getVehicleValues(vspecs, tags):
     result = [ strage.getVehicleItemsInfo(vs, tags) for vs in vspecs ]
     return result
-    
+
+def _removeDuplicate(values):
+    if config.suppress_unique:
+        return values
+    result = []
+    data = {}
+    for v in values:
+        k = tuple(v.values())
+        if k not in data:
+            data[k] = True
+            result.append(v)
+    return result
+
 def _outputValues(values):
     if config.csvoutput:
-        message = csvoutput.createMessageByArrayOfDict(values)
-        print(message)
+        message = csvoutput.createMessageByArrayOfDict(values, not config.suppress_header)
+        print(message, end='')
     else:
         for v in values:
             print(v)
@@ -115,71 +110,42 @@ class Command:
         print(', '.join([ v[0] for v in strage.fetchTypeList(None, None) ]))
 
     @staticmethod
-    def listChassis(strage, vfilter, params):
-        tags = params.split(',') if params else ['vehicle:index', 'chassis:index']
-        vspecs = _listSimpleModule(strage, vfilter, 'chassis')
+    def listModule(strage, vfilter, modules, params):
+        defaultModule = {
+            'chassis':  [ 'chassis' ],
+            'turret':   [ 'turret' ],
+            'engine':   [ 'engine' ],
+            'radio':    [ 'radio' ],
+            'gun':      [ 'turret', 'gun' ],
+            'shell':    [ 'turret', 'gun', 'shell' ]
+        }
+        defaultTag = {
+            'chassis':  'chassis:index',
+            'turret':   'turret:index',
+            'engine':   'engine:index',
+            'radio':    'radio:index',
+            'gun':      'gun:index',
+            'shell':    'shell:index'
+        }
+        mfilter = config.moduleSpecified.copy()
+        tags = [ 'vehicle:index' ]
+        if ',' not in modules:
+            for mname in defaultModule[modules]:
+                mfilter[mname] = None
+                tags.append(defaultTag[mname])
+        else:
+            for mname in modules.split(','):
+                if mname == '':
+                    continue
+                mfilter[mname] = None
+                tags.append(defaultTag[mname])
+        if params is not None:
+            tags = params.split(',')
+        vspecs = getVehicleModuleSpecs(strage, vfilter, mfilter)
         result = _getVehicleValues(vspecs, tags)
+        result = _removeDuplicate(result)
         _outputValues(result)
 
-    @staticmethod
-    def listTurret(strage, vfilter, params):
-        tags = params.split(',') if params else ['vehicle:index', 'turret:index']
-        vspecs = _listSimpleModule(strage, vfilter, 'turret')
-        result = _getVehicleValues(vspecs, tags)
-        _outputValues(result)
-
-    @staticmethod
-    def listEngine(strage, vfilter, params):
-        tags = params.split(',') if params else ['vehicle:index', 'engine:index']
-        vspecs = _listSimpleModule(strage, vfilter, 'engine')
-        result = _getVehicleValues(vspecs, tags)
-        _outputValues(result)
-
-    @staticmethod
-    def listRadio(strage, vfilter, params):
-        tags = params.split(',') if params else ['vehicle:index', 'radio:index']
-        vspecs = _listSimpleModule(strage, vfilter, 'radio')
-        result = _getVehicleValues(vspecs, tags)
-        _outputValues(result)
-
-    @staticmethod
-    def listGun(strage, vfilter, showParams):
-        vspecs = _listGun(strage, vfilter)
-        if showParams:
-            tags = showParams.split(',')
-        else:
-            tags = [ 'vehicle:index', 'gun:index' ]
-        result = [ strage.getVehicleItemsInfo(vs, tags) for vs in vspecs ]
-        if config.csvoutput:
-            message = csvoutput.createMessageByArrayOfDict(result)
-            print(message)
-        else:
-            for r in result:
-                print(r)
-
-    @staticmethod
-    def listShell(strage, vfilter, showParams):
-        oldvspecs = _listShell(strage, vfilter)
-        vspecs = []
-        vdict = {}
-        for vs in oldvspecs:
-            uid = (vs['vehicle'], vs['gun'])
-            if uid in vdict:
-                continue
-            vdict[uid] = True
-            vspecs.append(vs)
-        if showParams:
-            tags = showParams.split(',')
-        else:
-            tags = [ 'vehicle:index', 'gun:index', 'shell:index' ]
-        result = [ strage.getVehicleItemsInfo(vs, tags) for vs in vspecs ]
-        if config.csvoutput:
-            message = csvoutput.createMessageByArrayOfDict(result)
-            print(message)
-        else:
-            for r in result:
-                print(r)
-  
     @staticmethod
     def infoVehicle(strage, arg, showParams):
         p = arg.split(':')
@@ -227,8 +193,10 @@ if __name__ == '__main__':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
     
     logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s')
+    logger = logging.getLogger(__name__)
+    logger.addHandler(logging.StreamHandler())
     
-    parseArgument(mode='test')
+    parseArgument(mode='cui')
     strage = Strage()
 
     if config.list_nation:
@@ -237,21 +205,11 @@ if __name__ == '__main__':
         Command.listTier(strage)
     if config.list_type:
         Command.listType(strage)
-    if config.pattern:
-        Command.listVehicle(strage, config.pattern)
+    #if config.pattern:
+    #    Command.listVehicle(strage, config.pattern)
 
-    if config.vehicle_chassis:
-        Command.listChassis(strage, config.vehicle_chassis, config.show_params)
-    if config.vehicle_turret:
-        Command.listTurret(strage, config.vehicle_turret, config.show_params)
-    if config.vehicle_engine:
-        Command.listEngine(strage, config.vehicle_engine, config.show_params)
-    if config.vehicle_radio:
-        Command.listRadio(strage, config.vehicle_radio, config.show_params)
-    if config.vehicle_gun:
-        Command.listGun(strage, config.vehicle_gun, config.show_params)
-    if config.gun_shell:
-        Command.listShell(strage, config.gun_shell, config.show_params)
+    if config.list_module:
+        Command.listModule(strage, config.vehicle, config.list_module, config.show_params)
 
-    if config.vehicle:
-        Command.infoVehicle(strage, config.vehicle, config.show_params)
+    #if config.vehicle:
+    #    Command.infoVehicle(strage, config.vehicle, config.show_params)

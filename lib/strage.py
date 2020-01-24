@@ -1,9 +1,13 @@
+import logging
 from itertools import product
 
 from lib.config import g_config as config
 from lib.resources import g_resources, TIERS, TIERS_LABEL, TYPES
 from lib.translate import g_translate as translate
 from lib.item import FindFormattedEntry
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 class Strage(object):
 
@@ -17,6 +21,7 @@ class Strage(object):
         self.findText = self.__findEntry.getText
         
         self.__nationOrder = self.find('settings:nationsOrder', {})
+        logger.debug(self.__nationOrder)
         self.__vehicleList = self.__fetchVehicleList()
         self.__vehicleIndex = self.__createIndexVehicle(self.__vehicleList)
 

@@ -1,13 +1,14 @@
-from logging import getLogger, DEBUG
+from logging import getLogger, WARNING, DEBUG
 import re
 from xml.etree import ElementTree
 
 from lib.resources import g_resources
 from lib.translate import g_translate as translate
-from lib.utils import readXmlData
+from lib.utils import readXmlData, readData
 
 logger = getLogger(__name__)
-logger.setLevel(DEBUG)
+logger.setLevel(WARNING)
+
 
 class FindEntry(object):
 
@@ -23,6 +24,7 @@ class FindEntry(object):
         }
 
     def find(self, node, param):
+        #logger.debug('find: {}, {}'.format(node, param))
         index = None
         match = re.match(r'(.*)\[(\d+)\]', node)
         if match:
@@ -58,21 +60,26 @@ class FindEntry(object):
             param['vehicle'] = param['vehicle_file']
         file = self.__substitute(resource['file'], param)
         if not file:
+            logger.error('__getXmlTree: file not found: {}'.format(file))
             return None
         if file not in self.__xmltree:
             domain, target = file.split('/', 1)
             self.__xmltree[file] = readXmlData(domain, target)
+            logger.debug('readXmlData: {}, {}'.format(file, self.__xmltree[file]))
         root = self.__xmltree[file]
         return root
 
     def __findNode(self, resource, param):
+        #logger.debug('__findNode: {}, {}'.format(resource, param))
         root = self.__getXmlTree(resource, param)
         if root is None:
+            logger.debug('__findNode: not found: {}, {}'.format(resource, param))
             return None
         if 'xpath' in resource:
             value = self.__getNodesXpath(root, resource['xpath'], param)
         elif 'custom' in resource:
             if resource['custom'] == 'getNationsOrder()':
+                logger.debug('__findNode: getNationsOrder')
                 value = self.__getNodesCustomGetNationsOrder(root)
             else:
                 logger.error('__findNode: not implement func: {}'.format(resource['custom']))
@@ -172,10 +179,15 @@ class FindEntry(object):
         return nodes
 
     def __getNodesCustomGetNationsOrder(self, root):
-        for child in root.findall('setting'):
+        logger.debug('__getNodesCustomGetNationsOrder')
+        result = None
+        for child in root.findall('settings'):
+            logger.debug('__getNodesCustomGetNationsOrder: {}'.format(child))
             if child.findtext('name') == 'nations_order':
-                return [ i.text for i in child.findall('value/item') ]
-        return None
+                result = [ i.text for i in child.findall('value') ]
+                break
+        logger.debug('__getNodesCustomGetNationsOrder: {}'.format(result))
+        return result
 
     def __functionSum(self, args, param):
         result = 0
