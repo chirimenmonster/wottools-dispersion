@@ -25,6 +25,22 @@
                             "unit":     "s"
                         },
                         {
+                            "label":    "dual gun charge time",
+                            "value":    "gun:dualGunChargeTime",
+                            "unit":     "s",
+                            "format":   "{:.1f}",
+                            "consider": "float",
+                            "attr":     "phantom"
+                        },
+                        {
+                            "label":    "dual gun reload lock time",
+                            "value":    "gun:dualGunReloadLockTime",
+                            "unit":     "s",
+                            "format":   "{:.1f}",
+                            "consider": "float",
+                            "attr":     "phantom"
+                        },
+                        {
                             "label":    "clip count",
                             "value":    "gun:clipCount",
                             "unit":     "pcs",

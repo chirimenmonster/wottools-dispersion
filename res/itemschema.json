@@ -834,6 +834,22 @@
             }
         ]
     },
+    "gun:dualGunChargeTime": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "turrets0/{turret}/guns/{gun}/dualGun/chargeTime"
+            }
+        ]
+    },
+    "gun:dualGunReloadLockTime": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "turrets0/{turret}/guns/{gun}/dualGun/reloadLockTime"
+            }
+        ]
+    },
     "gun:shots": {
         "value":    "nodelist",
         "resources": [
