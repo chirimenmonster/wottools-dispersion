@@ -62,6 +62,7 @@ def parseArgument(mode=None):
         parser.add_argument('--params', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')
         parser.add_argument('--suppress-unique', action='store_true', dest='suppress_unique', help='suppress remove duplicate')
         parser.add_argument('--suppress-header', action='store_true', dest='suppress_header', help='suppress output csv header')
+        parser.add_argument('--prefer-userstring', action='store_const', const='userString', default='index', dest='indextag', help='prefer userString')
 
     parser.parse_args(namespace=g_config)
     if g_config.SCRIPTS_DIR:

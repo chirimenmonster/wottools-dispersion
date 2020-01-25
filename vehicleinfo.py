@@ -9,6 +9,7 @@ from lib.strage import Strage
 from lib.config import parseArgument, g_config as config 
 
 
+
 def getListVehicle(strage, pattern):
     if ':' not in pattern:
         return [ pattern ]
@@ -120,16 +121,18 @@ class Command:
             'shell':    [ 'turret', 'gun', 'shell' ]
         }
         defaultTag = {
-            'chassis':  'chassis:index',
-            'turret':   'turret:index',
-            'engine':   'engine:index',
-            'radio':    'radio:index',
-            'gun':      'gun:index',
-            'shell':    'shell:index'
+            'chassis':  'chassis:' + config.indextag,
+            'turret':   'turret:' + config.indextag,
+            'engine':   'engine:' + config.indextag,
+            'radio':    'radio:' + config.indextag,
+            'gun':      'gun:' + config.indextag,
+            'shell':    'shell:' + config.indextag
         }
         mfilter = config.moduleSpecified.copy()
-        tags = [ 'vehicle:index' ]
-        if ',' not in modules:
+        tags = [ 'vehicle:' + config.indextag ]
+        if modules is None:
+            pass
+        elif ',' not in modules:
             for mname in defaultModule[modules]:
                 mfilter[mname] = None
                 tags.append(defaultTag[mname])
@@ -210,6 +213,8 @@ if __name__ == '__main__':
 
     if config.list_module:
         Command.listModule(strage, config.vehicle, config.list_module, config.show_params)
+    else:
+        Command.listModule(strage, config.vehicle, None, config.show_params)
 
     #if config.vehicle:
     #    Command.infoVehicle(strage, config.vehicle, config.show_params)
