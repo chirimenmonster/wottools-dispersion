@@ -43,7 +43,6 @@ $ ./vehicleinfo.py --vehicle ussr:8:mt
 
 + list available module pattern.  arg of option `--list-module` may be chassis, turret, engine, radio, gun, shell.
 
-
 ```
 $ ./vehicleinfo.py --vehicle R20_T-44 --list-module gun
 {'vehicle:index': 'R20_T-44', 'turret:index': 'T-44', 'gun:index': '_85mm_ZiS_S-53'}
@@ -53,3 +52,12 @@ $ ./vehicleinfo.py --vehicle R20_T-44 --list-module gun
 {'vehicle:index': 'R20_T-44', 'turret:index': 'T-44-100', 'gun:index': '_100mm_D10T'}
 {'vehicle:index': 'R20_T-44', 'turret:index': 'T-44-100', 'gun:index': '_100mm_LB-1'}
 {'vehicle:index': 'R20_T-44', 'turret:index': 'T-44-100', 'gun:index': '_122mm_D-25-44'}
+```
+
++ show shell gravity without spg.  removed duplicate lines.
+
+```
+$ ./vehicleinfo.py --vehicle ::lt,mt,td,ht --list-module shell --params shell:gravity --csv
+shell:gravity
+9.81
+```
