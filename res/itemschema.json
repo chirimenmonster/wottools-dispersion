@@ -697,6 +697,7 @@
         ]
     },
     "gun:userString": {
+        "format":   "24s",
         "map":      "gettext",
         "resources": [
             {
@@ -1005,6 +1006,7 @@
         ]
     },
     "shell:kindShort": {
+        "format":   "4s",
         "map": {
             "ARMOR_PIERCING": "AP", "ARMOR_PIERCING_CR": "APCR",
             "HIGH_EXPLOSIVE": "HE", "HOLLOW_CHARGE": "HEAT"

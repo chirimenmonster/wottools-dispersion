@@ -54,13 +54,15 @@ def parseArgument(mode=None):
         parser.add_argument('--vehicle', dest='vehicle', help='vehicle name or filter NATION:TIER:TYPE.  ex. "R80_KV1" or "germany:9:HT"')
 
     if mode == 'cui':
-        parser.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
-        parser.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
+        group.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
         parser.add_argument('--list-nation', action='store_true', help='show nations')
         parser.add_argument('--list-tier', action='store_true', help='show tiers')
         parser.add_argument('--list-type', action='store_true', help='show vehicle types')
         parser.add_argument('--list-module', dest='list_module', help='list modules.  ex. "gun" or "engine,radio')
         parser.add_argument('--params', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')
+        parser.add_argument('--headers', dest='show_headers', help='header names to show.')
         parser.add_argument('--suppress-unique', action='store_true', dest='suppress_unique', help='suppress remove duplicate')
         parser.add_argument('--suppress-header', action='store_true', dest='suppress_header', help='suppress output csv header')
         parser.add_argument('--suppress-empty', action='store_true', dest='suppress_empty', help='suppress output recodes with empty parameter')

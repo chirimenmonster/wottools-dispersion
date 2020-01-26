@@ -91,21 +91,27 @@ def _outputValues(records):
     if config.csvoutput:
         message = csvoutput.createMessageByArrayOfDict(records, not config.suppress_header)
         print(message, end='')
-    if config.outputjson:
+    elif config.outputjson:
         print(json.dumps(records, ensure_ascii=False, indent=2))
     else:
-        form = ''
+        forms = []
         widths = []
         for k in records[0].keys():
             if 'format' in g_resources.itemschema[k]:
                 f = '{!s:' + g_resources.itemschema[k]['format'] + '}'
             else:
-                f = '{!s:>8}'
-            form += f
+                f = '{!s:>7}'
+            forms.append(f)
             widths.append(len(f.format(None)))
-        print(form.format(*[ k[-(w-1):] for k,w in zip(records[0].keys(), widths) ]))
+        if config.show_headers:
+            tokens = [ f.format(k) for f,w,k in zip(forms, widths, config.show_headers.split(',')) ]
+            widths = [ len(t) for t in tokens ]
+        else:
+            tokens = [ f.format(k)[:w] for f,w,k in zip(forms, widths, records[0].keys()) ]
+        print(' '.join(tokens))
         for r in records:
-            print(form.format(*r.values()))
+            values = [ ('{!s:' + str(w) + '}').format(f.format(r[k])) for f,w,k in zip(forms, widths, r.keys()) ]
+            print(' '.join(values))
 
 
 class Command:
