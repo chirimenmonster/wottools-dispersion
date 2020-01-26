@@ -109,6 +109,7 @@
         ]
     },
     "vehicle:index": {
+        "format":   "31s",
         "value":    "nodename",
         "resources": [
             {
@@ -126,6 +127,7 @@
         ]
     },
     "vehicle:userString": {
+        "format":   "27s",
         "map":      "gettext",
         "resources": [
             {
@@ -135,12 +137,18 @@
         ]
     },
     "vehicle:shortUserString": {
+        "format":   "15s",
         "map":      "gettext",
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
                 "xpath":    "{vehicle}/shortUserString"
+            },
+            {
+                "file":     "vehicles/{nation}/list.xml",
+                "xpath":    "{vehicle}/userString"
             }
+
         ]
     },
     "vehicle:displayString": {
@@ -689,6 +697,7 @@
         ]
     },
     "gun:userString": {
+        "format":   "24s",
         "map":      "gettext",
         "resources": [
             {
@@ -997,6 +1006,7 @@
         ]
     },
     "shell:kindShort": {
+        "format":   "4s",
         "map": {
             "ARMOR_PIERCING": "AP", "ARMOR_PIERCING_CR": "APCR",
             "HIGH_EXPLOSIVE": "HE", "HOLLOW_CHARGE": "HEAT"
