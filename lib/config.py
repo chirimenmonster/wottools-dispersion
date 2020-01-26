@@ -55,6 +55,7 @@ def parseArgument(mode=None):
 
     if mode == 'cui':
         parser.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
+        parser.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
         parser.add_argument('--list-nation', action='store_true', help='show nations')
         parser.add_argument('--list-tier', action='store_true', help='show tiers')
         parser.add_argument('--list-type', action='store_true', help='show vehicle types')
@@ -62,6 +63,7 @@ def parseArgument(mode=None):
         parser.add_argument('--params', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')
         parser.add_argument('--suppress-unique', action='store_true', dest='suppress_unique', help='suppress remove duplicate')
         parser.add_argument('--suppress-header', action='store_true', dest='suppress_header', help='suppress output csv header')
+        parser.add_argument('--suppress-empty', action='store_true', dest='suppress_empty', help='suppress output recodes with empty parameter')
         parser.add_argument('--prefer-userstring', action='store_const', const='userString', default='index', dest='indextag', help='prefer userString')
 
     parser.parse_args(namespace=g_config)

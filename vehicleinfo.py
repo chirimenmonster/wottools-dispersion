@@ -3,11 +3,12 @@
 import logging
 import sys
 import io
+import json
 
 from lib import csvoutput
 from lib.strage import Strage
 from lib.config import parseArgument, g_config as config 
-
+from lib.resources import g_resources
 
 
 def getListVehicle(strage, pattern):
@@ -80,13 +81,31 @@ def _removeDuplicate(values):
             result.append(v)
     return result
 
-def _outputValues(values):
+def _removeEmpty(records):
+    if not config.suppress_empty:
+        return records
+    records = [ r for r in records if None not in r.values() ]
+    return records
+
+def _outputValues(records):
     if config.csvoutput:
-        message = csvoutput.createMessageByArrayOfDict(values, not config.suppress_header)
+        message = csvoutput.createMessageByArrayOfDict(records, not config.suppress_header)
         print(message, end='')
+    if config.outputjson:
+        print(json.dumps(records, ensure_ascii=False, indent=2))
     else:
-        for v in values:
-            print(v)
+        form = ''
+        widths = []
+        for k in records[0].keys():
+            if 'format' in g_resources.itemschema[k]:
+                f = '{!s:' + g_resources.itemschema[k]['format'] + '}'
+            else:
+                f = '{!s:>8}'
+            form += f
+            widths.append(len(f.format(None)))
+        print(form.format(*[ k[-(w-1):] for k,w in zip(records[0].keys(), widths) ]))
+        for r in records:
+            print(form.format(*r.values()))
 
 
 class Command:
@@ -147,6 +166,7 @@ class Command:
         vspecs = getVehicleModuleSpecs(strage, vfilter, mfilter)
         result = _getVehicleValues(vspecs, tags)
         result = _removeDuplicate(result)
+        result = _removeEmpty(result)
         _outputValues(result)
 
     @staticmethod

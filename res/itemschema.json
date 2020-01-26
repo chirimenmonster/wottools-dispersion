@@ -109,6 +109,7 @@
         ]
     },
     "vehicle:index": {
+        "format":   "32s",
         "value":    "nodename",
         "resources": [
             {
@@ -126,6 +127,7 @@
         ]
     },
     "vehicle:userString": {
+        "format":   "32s",
         "map":      "gettext",
         "resources": [
             {
@@ -135,12 +137,18 @@
         ]
     },
     "vehicle:shortUserString": {
+        "format":   "16s",
         "map":      "gettext",
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
                 "xpath":    "{vehicle}/shortUserString"
+            },
+            {
+                "file":     "vehicles/{nation}/list.xml",
+                "xpath":    "{vehicle}/userString"
             }
+
         ]
     },
     "vehicle:displayString": {
