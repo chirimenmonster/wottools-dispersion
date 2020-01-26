@@ -103,12 +103,13 @@ def _outputValues(records):
                 f = '{!s:>7}'
             forms.append(f)
             widths.append(len(f.format(None)))
-        if config.show_headers:
-            tokens = [ f.format(k) for f,w,k in zip(forms, widths, config.show_headers.split(',')) ]
-            widths = [ len(t) for t in tokens ]
-        else:
-            tokens = [ f.format(k)[:w] for f,w,k in zip(forms, widths, records[0].keys()) ]
-        print(' '.join(tokens))
+        if not config.suppress_header:
+            if config.show_headers:
+                tokens = [ f.format(k) for f,w,k in zip(forms, widths, config.show_headers.split(',')) ]
+                widths = [ len(t) for t in tokens ]
+            else:
+                tokens = [ f.format(k)[:w] for f,w,k in zip(forms, widths, records[0].keys()) ]
+            print(' '.join(tokens))
         for r in records:
             values = [ ('{!s:' + str(w) + '}').format(f.format(r[k])) for f,w,k in zip(forms, widths, r.keys()) ]
             print(' '.join(values))

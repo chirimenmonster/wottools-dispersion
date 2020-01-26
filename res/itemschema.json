@@ -109,7 +109,7 @@
         ]
     },
     "vehicle:index": {
-        "format":   "32s",
+        "format":   "31s",
         "value":    "nodename",
         "resources": [
             {
@@ -127,7 +127,7 @@
         ]
     },
     "vehicle:userString": {
-        "format":   "32s",
+        "format":   "27s",
         "map":      "gettext",
         "resources": [
             {
@@ -137,7 +137,7 @@
         ]
     },
     "vehicle:shortUserString": {
-        "format":   "16s",
+        "format":   "15s",
         "map":      "gettext",
         "resources": [
             {
