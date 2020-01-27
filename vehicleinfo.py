@@ -87,6 +87,21 @@ def _removeEmpty(records):
     records = [ r for r in records if None not in r.values() ]
     return records
 
+def _sort(records):
+    if not config.sort:
+        return records
+    sortKeys = config.sort.split(',')
+    keyFuncs = []
+    for k in sortKeys:
+        schema = g_resources.itemschema[k]
+        func = lambda x,key=k: x[key]
+        if 'sort' in schema:
+            if schema['sort'] == 'float':
+                func = lambda x,key=k: float(x[key])
+        keyFuncs.append(func)
+    records = sorted(records, key=lambda x: tuple([ f(x) for f in keyFuncs ]))
+    return records
+
 def _outputValues(records):
     if config.csvoutput:
         message = csvoutput.createMessageByArrayOfDict(records, not config.suppress_header)
@@ -174,6 +189,7 @@ class Command:
         result = _getVehicleValues(vspecs, tags)
         result = _removeDuplicate(result)
         result = _removeEmpty(result)
+        result = _sort(result)
         _outputValues(result)
 
     @staticmethod

@@ -63,6 +63,7 @@ def parseArgument(mode=None):
         parser.add_argument('--list-module', dest='list_module', help='list modules.  ex. "gun" or "engine,radio')
         parser.add_argument('--params', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')
         parser.add_argument('--headers', dest='show_headers', help='header names to show.')
+        parser.add_argument('--sort', dest='sort', help='parameter names to sort.')
         parser.add_argument('--suppress-unique', action='store_true', dest='suppress_unique', help='suppress remove duplicate')
         parser.add_argument('--suppress-header', action='store_true', dest='suppress_header', help='suppress output csv header')
         parser.add_argument('--suppress-empty', action='store_true', dest='suppress_empty', help='suppress output recodes with empty parameter')

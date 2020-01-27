@@ -680,6 +680,7 @@
         ]
     },
     "gun:index": {
+        "format":   "36s",
         "value":    "nodename",
         "resources": [
             {
@@ -1019,6 +1020,7 @@
         ]
     },
     "shell:caliber": {
+        "sort":     "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1027,6 +1029,7 @@
         ]
     },
     "shell:explosionRadius": {
+        "sort":     "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1035,6 +1038,7 @@
         ]
     },
     "shell:stunDuration": {
+        "sort":     "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1043,6 +1047,7 @@
         ]
     },
     "shell:damage_armor": {
+        "sort":     "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1051,6 +1056,7 @@
         ]
     },
     "shell:damage_devices": {
+        "sort":     "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1059,6 +1065,7 @@
         ]
     },
     "shell:speed": {
+        "sort":     "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -1067,6 +1074,7 @@
         ]
     },
     "shell:gravity": {
+        "sort":     "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -1075,6 +1083,7 @@
         ]
     },
     "shell:maxDistance": {
+        "sort":     "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -1083,6 +1092,7 @@
         ]
     },
     "shell:piercingPower": {
+        "sort":     "float",
         "map":      "[0]",
         "resources": [
             {
