@@ -60,7 +60,7 @@ class FindEntry(object):
             param['vehicle'] = param['vehicle_file']
         file = self.__substitute(resource['file'], param)
         if not file:
-            logger.error('__getXmlTree: file not found: {}'.format(file))
+            logger.error('__getXmlTree: resource "file" not found: {}'.format(resource['file']))
             return None
         if file not in self.__xmltree:
             domain, target = file.split('/', 1)
@@ -135,7 +135,9 @@ class FindEntry(object):
             elif schema['value'] == 'nodelist':
                 result = data
             elif schema['value'] == 'float':
-                result = float(data.text)
+                #result = float(data.text)
+                result = data.text
+                pass
             else:
                 logger.error('unknown value keyword: {}'.format(schema['value']))
                 raise ValueError

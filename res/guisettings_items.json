@@ -196,48 +196,56 @@
                         {
                             "label":    "total weight",
                             "value":    "vehicle:totalWeight",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         },
                         {
                             "label":    "... hull",
                             "value":    "hull:weight",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         },
                         {
                             "label":    "... chassis",
                             "value":    "chassis:weight",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         },
                         {
                             "label":    "... turret",
                             "value":    "turret:weight",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         },
                         {
                             "label":    "... engine",
                             "value":    "engine:weight",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         },
                         {
                             "label":    "... fueltank",
                             "value":    "fueltank:weight",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         },
                         {
                             "label":    "... radio",
                             "value":    "radio:weight",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         },
                         {
                             "label":    "... gun",
                             "value":    "gun:weight",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "kg"
                         }
@@ -248,66 +256,77 @@
                         {
                             "label":    "total health",
                             "value":    "vehicle:totalHealth",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... hull",
                             "value":    "hull:health",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... turret",
                             "value":    "turret:health",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "module health ammo bay",
                             "value":    "hull:ammoBayHealth",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... chassis",
                             "value":    "chassis:health",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... turret rotator",
                             "value":    "turret:turretRotatorHealth",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... surveying device",
                             "value":    "turret:surveyingDeviceHealth",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... engine",
                             "value":    "engine:health",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... fueltank",
                             "value":    "fueltank:health",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... radio",
                             "value":    "radio:health",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "... gun",
                             "value":    "gun:health",
+                            "consider": "float",
                             "format":   "{:,.0f}",
                             "unit":     "HP"
                         }
