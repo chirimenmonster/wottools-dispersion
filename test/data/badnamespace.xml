@@ -1,0 +1,12 @@
+<root>
+  <xmlns:xmlref>http://bwt/xmlref</xmlns:xmlref>
+  <A21_T14>
+    <id>0</id>
+    <userString>#usa_vehicles:T14</userString>
+    <description>#usa_vehicles:T14_descr</description>
+    <price>1500<gold/></price>
+    <notInShop>true</notInShop>
+    <tags>heavyTank improvedVentilation_class3_user mediumCaliberTankRammer_user wetCombatPack_class1_user enhancedVertical_springs_class2_user HD</tags>
+    <level>5</level>
+  </A21_T14>
+</root>
