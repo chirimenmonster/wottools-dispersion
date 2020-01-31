@@ -135,3 +135,27 @@ class Strage(object):
         if not isinstance(path, PathInfo):
             path = PathInfo(path, pkg)
         return path in self.__cachedXml
+
+
+class Element(object):
+
+    def __init__(self, root):
+        self.__root = root
+
+    def findText(self, key):
+        return self.__root.findtext(key)
+        
+    def findNodename(self, key):
+        node = self.__root.find(key)
+        return node.tag if node else None
+
+    def findNodelist(self, key):
+        return list(map(Element, self.__root.findall(key)))
+    
+    @property
+    def tag(self):
+        return self.__root.tag
+
+    @property
+    def text(self):
+        return self.__root.text

@@ -72,12 +72,11 @@ class StrageTestCase(unittest.TestCase):
     def test_vpath_readXml(self):
         file = 'test/data/res/gui/gui_settings.xml'
         strage = vp.Strage()
-        path = vp.PathInfo(file)
         with open(file, 'rb') as fp:
             data = ET.tostring(ET.fromstring(fp.read()), encoding='utf-8')
         self.assertFalse(strage.isCachedXml(file))
         self.assertEqual(data, ET.tostring(strage.readXml(file), encoding='utf-8'))
-        self.assertTrue(strage.isCachedXml(path))
+        self.assertTrue(strage.isCachedXml(file))
         with self.assertRaises(FileNotFoundError):
             strage.readXml('missing.xml')
         with self.assertRaises(KeyError):
@@ -85,6 +84,34 @@ class StrageTestCase(unittest.TestCase):
         element = strage.readXml('test/data/badnamespace.xml')
         self.assertEqual('#usa_vehicles:T14', element.find('A21_T14/userString').text)
 
+
+class ElementTestCase(unittest.TestCase):
+
+    def setUp(self):
+        vpath = vp.VPath(scriptsdir='test/data/res')
+        path = vpath.getPathInfo('vehicles/ussr/list.xml')
+        strage = vp.Strage()
+        root = strage.readXml(path)
+        self.element = vp.Element(root)
+
+    def test_element_findText(self):
+        self.assertEqual('#ussr_vehicles:T-34', self.element.findText('R04_T-34/userString'))
+        self.assertIsNone(self.element.findText('R04_T-34/missing'))
+
+    def test_element_findNodename(self):
+        self.assertEqual('R04_T-34', self.element.findNodename('R04_T-34'))
+        self.assertIsNone(self.element.findNodename('missing'))
+
+    def test_element_findNodelist(self):
+        result = self.element.findNodelist('*')
+        self.assertIsInstance(result, list)
+        self.assertIsInstance(result[0], vp.Element)
+        self.assertEqual('R04_T-34', result[1].tag)
+        result = self.element.findNodelist('missing')
+        self.assertIsInstance(result, list)
+        self.assertEqual(0, len(result))
+        
+    
 
 if __name__ == '__main__':
     unittest.main()
