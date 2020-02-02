@@ -126,7 +126,7 @@ class ResourceTestCase(unittest.TestCase):
         
     def test_resource_getFromFile(self):
         result = self.resource.getFromFile('vehicles/{nation}/list.xml', '{vehicle}/userString')
-        self.assertEqual('#ussr_vehicles:T-34', result[0].text)
+        self.assertEqual('#ussr_vehicles:T-34', result[0])
         result = self.resource.getFromFile('vehicles/{nation}/list.xml', '{vehicle}/missing')
         self.assertEqual(0, len(result))
         with self.assertRaises(FileNotFoundError):
@@ -142,24 +142,26 @@ class ResourceTestCase(unittest.TestCase):
         result = self.resource.getNodes(resources=resources)
         self.assertIsInstance(result, list)
         self.assertIn('ussr', result)
-
+                   
     def test_resource_getNodes_immediateValue_list(self):
-        resources = [{'file':'gui/gui_settings.xml', 'xpath':'missing'}, {"immediate":["germany", "ussr", "usa", "uk"]}]
+        resources = [{'file':'gui/gui_settings.xml', 'xpath':'missing'}, {'immediate':['germany', 'ussr', 'usa', 'uk']}]
         result = self.resource.getNodes(resources=resources)
         self.assertIsInstance(result, list)
         self.assertEqual(['germany', 'ussr', 'usa', 'uk'], result)
+        result = self.resource.getNodes(resources=resources, order=['ussr', 'germany', 'uk'])
+        self.assertEqual(['ussr', 'germany', 'uk', 'usa'], result)
         
-    def test_resource_getNodes_immediateValue_float(self):
-        result = self.resource.getNodes('physics:hpToWatts')
-        self.assertEqual(735.5, result)
+    def test_resource_getNodes_immediateValue_string(self):
+        self.assertEqual('ussr', self.resource.getNodes('vehicle:nation'))
+        self.assertEqual(735.5, self.resource.getNodes('physics:hpToWatts'))
 
     def test_resource_getNodes_func_sum(self):
         result = self.resource.getNodes('vehicle:totalWeight')
         self.assertEqual(29390.0, result)
 
     def test_resource_getNodes_func_div(self):
-        result = self.resource.getNodes('vehicle:powerWeightRatio')
-        self.assertEqual(0.01701258931609391, result)
+        self.assertEqual(0.01701258931609391, self.resource.getNodes('vehicle:powerWeightRatio'))
+        self.assertEqual(14.016600510789694, self.resource.getNodes('vehicle:maxSpeed_medium'))
 
     def test_resource_getNodes_func_mul(self):
         result = self.resource.getNodes('vehicle:powerWeightRatioSI')
@@ -171,6 +173,9 @@ class ResourceTestCase(unittest.TestCase):
 
     def test_resource_getRawValue(self):
         self.assertEqual('#ussr_vehicles:T-34', self.resource.getRawValue('vehicle:shortUserString'))
+        resources = [{'file':'vehicles/{nation}/list.xml', 'xpath':'*/name()'}]
+        result = self.resource.getRawValue(resources=resources, type='nodelist')
+        self.assertEqual(['Observer', 'R04_T-34', 'R02_SU-85', 'R01_IS', 'R03_BT-7'], result)
 
     def test_resource_assingMap(self):
         value = self.resource.getRawValue('vehicle:type')

@@ -176,65 +176,105 @@ class Resource(object):
             'sum':  self.func_sum,
             'mul':  self.func_mul,
             'div':  self.func_div,
-            'join':  self.func_join,
+            'join': self.func_join,
+            'or':   self.func_or,
         }
 
-    def assign(self, string):
-        if self.__param is None:
-            return string
-        return string.format(**self.__param)
+    def substitute(self, value, addparams=None):
+        if addparams is not None:
+            if self.__param is None:
+                param = addparams
+            else:
+                param = self.__param.copy()
+                param.update(addparams)
+        else:
+            if self.__param is None:
+                param = None
+            else:
+                param = self.__param
+        if param is not None:
+            if isinstance(value, list):
+                value = list(map(self.substitute, value))
+            elif isinstance(value, str):
+                value = value.format(**self.__param)
+        return value
 
-    def getFromFile(self, file, xpath):
-        file = self.assign(file)
+    def getFromFile(self, file, xpath, addparams=None):
+        file = self.substitute(file)
         path = self.__vpath.getPathInfo(file)
         root = self.__strage.readXml(path)
         self.element = Element(root)
-        xpath = self.assign(xpath)
-        return self.element.findall(xpath)
+        xpath = self.substitute(xpath, addparams=addparams)
+        xpath, n = re.subn(r'/name\(\)$', '', xpath)
+        result = self.element.findall(xpath)
+        if len(result) > 0:
+            if n > 0:
+                result = list(map(lambda x:x.tag, result))
+            else:
+                result = list(map(lambda x:x.text, result))
+        return result
 
-    def getNodes(self, tag=None, resources=None):
+    def getNodes(self, tag=None, resources=None, order=None, addparams=None):
         if resources is None:
             resources = self.__schema[tag]['resources']
         for r in resources:
             if 'file' in r and 'xpath' in r:
-                result = self.getFromFile(**r)
+                result = self.getFromFile(**r, addparams=addparams)
                 if len(result) > 0:
-                    result = list(map(lambda x:x.text, result))
                     break
             elif 'file' in r and 'custom' in r:
                 raise NotImplementedError ('resource: {}'.format(r))           
             elif 'immediate' in r:
-                return r['immediate']
+                result = self.substitute(r['immediate'], addparams=addparams)
+                break
             elif 'func' in r:
                 func = self.__function.get(r['func'], None)
                 if func is None:
                     raise NotImplementedError ('func: {}'.format(r['func']))
-                return func(r['args'])
+                result = func(r['args'])
+                break
             else:
                 raise NotImplementedError('resource: {}'.format(r))
-        return result
+        if tag is not None and order is None:
+            order = self.__schema[tag].get('order', None)
+        if order is not None:
+            result = self.sort(result, order)
+        return result    
 
-    def getRawValue(self, tag):
-        result = self.getNodes(tag)
+    def getRawValue(self, tag=None, resources=None, type=None, addparams=None):
+        result = self.getNodes(tag, resources=resources, addparams=addparams)
         if isinstance(result, list):
-            valueType = self.__schema[tag].get('value', 'text')
-            if valueType == 'nodelist':
+            if type is None and tag is not None:
+                valueType = self.__schema[tag].get('value', 'text')
+            else:
+                valueType = type
+            if valueType == 'nodelist' or valueType == 'list':
                 pass
             elif valueType == 'text':
                 result = result[0]
+                pass
             elif valueType == 'float':
                 result = result[0]
+                pass
             else:
                 raise NotImplementedError('value: {}'.format(valueType))
         return result
 
     def getValue(self, tag):
-        match = re.fullmatch(r'^(.*)\[(\d*)\]$', tag)
         pos = None
+        match = re.fullmatch(r'^(.*)\[(\d*)\]$', tag)
         if match:
             tag = match.group(1)
             pos = int(match.group(2))
-        result = self.getRawValue(tag)
+        if 'addparams' in self.__schema[tag]:
+            addparams = {}
+            for p in self.__schema[tag]['addparams']:
+                xtag = p['xtag']
+                value = self.getValue(p['value'])
+                addparams = {xtag:value}
+        else:
+            addparams = None
+        result = self.getRawValue(tag, addparams=addparams)
         result = self.assignMap(tag, result)
         if pos is not None:
             result = result[pos]
@@ -255,6 +295,12 @@ class Resource(object):
         elif rule == '[0]':
             raise NotImplementedError
         return result
+
+    def sort(self, values, order):
+        if not isinstance(values, list):
+            return values
+        values = sorted(values, key=lambda x:order.index(x) if x in order else float('inf'))
+        return values
 
     def func_sum(self, args):
         values = list(map(lambda x:float(self.getValue(x)), args))
@@ -287,4 +333,11 @@ class Resource(object):
                 result.extend(v)
             else:
                 result.append(v)
+        return result
+
+    def func_or(self, args):
+        values = list(map(lambda x:self.getValue(x), args))
+        result = None
+        for v in values:
+            result = result or v
         return result
