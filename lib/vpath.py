@@ -7,6 +7,7 @@ from collections import namedtuple
 import xml.etree.ElementTree as ET
 
 from lib.XmlUnpacker import XmlUnpacker
+from lib.translate import g_gettext
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -149,6 +150,9 @@ class Element(object):
         node = self.__root.find(key)
         return node.tag if node else None
 
+    def findall(self, key):
+        return list(map(Element, self.__root.findall(key)))
+
     def findNodelist(self, key):
         return list(map(Element, self.__root.findall(key)))
     
@@ -159,3 +163,68 @@ class Element(object):
     @property
     def text(self):
         return self.__root.text
+
+
+class Resource(object):
+
+    def __init__(self, strage, vpath, schema, param=None):
+        self.__strage = strage
+        self.__vpath = vpath
+        self.__schema = schema
+        self.__param = param
+
+    def getResources(self, tag):
+        return self.__schema[tag]['resources']
+
+    def assign(self, string):
+        if self.__param is None:
+            return string
+        return string.format(**self.__param)
+
+    def getFromFile(self, file, xpath):
+        file = self.assign(file)
+        path = self.__vpath.getPathInfo(file)
+        root = self.__strage.readXml(path)
+        self.element = Element(root)
+        xpath = self.assign(xpath)
+        return self.element.findall(xpath)
+
+    def getNodes(self, tag):
+        resources = self.getResources(tag)
+        for r in resources:
+            if 'file' in r:
+                result = self.getFromFile(**r)
+                if len(result) > 0:
+                    break
+            else:
+                raise NotImplementedError
+        return result
+
+    def getRawValue(self, tag):
+        nodelist = self.getNodes(tag)
+        valueType = self.__schema[tag].get('value', 'text')
+        if valueType == 'nodelist':
+            result = nodelist
+        elif valueType == 'text':
+            result = nodelist[0].text
+        else:
+            raise NotImplementedError
+        return result
+
+    def assignMap(self, tag, value):
+        rule = self.__schema[tag].get('map', None)
+        if rule is None:
+            result = value
+        elif isinstance(rule, dict):
+            result = ' '.join(filter(None, map(lambda x: rule.get(x, None), value.split())))
+        elif rule == 'roman':
+            raise NotImplementedError
+        elif rule == 'gettext':
+            result = g_gettext.translate(value)
+        elif rule == 'split':
+            raise NotImplementedError
+        elif rule == '[0]':
+            raise NotImplementedError
+        return result
+
+
