@@ -116,18 +116,14 @@ class ElementTestCase(unittest.TestCase):
 class ResourceTestCase(unittest.TestCase):
 
     def setUp(self):
-        strage = vp.Strage()
-        vpath = vp.VPath(scriptsdir='test/data/res')
+        self.strage = vp.Strage()
+        self.vpath = vp.VPath(scriptsdir='test/data/res', guidir='test/data/res')
         with open('res/itemschema.json', 'r') as fp:
-            schema = json.load(fp)
-        param = {'nation':'ussr', 'vehicle':'R04_T-34'}
-        self.resource = vp.Resource(strage, vpath, schema, param)
-    
-    def test_resource_getResources(self):
-        resources = [{'file':'vehicles/{nation}/list.xml', 'xpath':'{vehicle}/shortUserString'},
-            {'file':'vehicles/{nation}/list.xml','xpath':'{vehicle}/userString'}]
-        self.assertEqual(resources, self.resource.getResources('vehicle:shortUserString'))
-    
+            self.schema = json.load(fp)
+        param = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
+            'engine':'V-2-34', 'fueltank':'Average', 'radio':'_9RM', 'gun':'_76mm_S-54'}
+        self.resource = vp.Resource(self.strage, self.vpath, self.schema, param)
+        
     def test_resource_getFromFile(self):
         result = self.resource.getFromFile('vehicles/{nation}/list.xml', '{vehicle}/userString')
         self.assertEqual('#ussr_vehicles:T-34', result[0].text)
@@ -137,9 +133,41 @@ class ResourceTestCase(unittest.TestCase):
             result = self.resource.getFromFile('vehicles/{nation}/missing', '{vehicle}/userString')
     
     def test_resource_getNodes(self):
-        nodes = self.resource.getFromFile('vehicles/{nation}/list.xml', '{vehicle}/userString')
-        self.assertEqual(1, len(nodes))
-        self.assertEqual('#ussr_vehicles:T-34', nodes[0].text)
+        result = self.resource.getNodes('vehicle:userString')
+        self.assertEqual(1, len(result))
+        self.assertEqual('#ussr_vehicles:T-34', result[0])
+        
+    def test_resource_getNodes_resources(self):
+        resources = [{'file':'gui/gui_settings.xml', 'xpath':'settings/value'}]
+        result = self.resource.getNodes(resources=resources)
+        self.assertIsInstance(result, list)
+        self.assertIn('ussr', result)
+
+    def test_resource_getNodes_immediateValue_list(self):
+        resources = [{'file':'gui/gui_settings.xml', 'xpath':'missing'}, {"immediate":["germany", "ussr", "usa", "uk"]}]
+        result = self.resource.getNodes(resources=resources)
+        self.assertIsInstance(result, list)
+        self.assertEqual(['germany', 'ussr', 'usa', 'uk'], result)
+        
+    def test_resource_getNodes_immediateValue_float(self):
+        result = self.resource.getNodes('physics:hpToWatts')
+        self.assertEqual(735.5, result)
+
+    def test_resource_getNodes_func_sum(self):
+        result = self.resource.getNodes('vehicle:totalWeight')
+        self.assertEqual(29390.0, result)
+
+    def test_resource_getNodes_func_div(self):
+        result = self.resource.getNodes('vehicle:powerWeightRatio')
+        self.assertEqual(0.01701258931609391, result)
+
+    def test_resource_getNodes_func_mul(self):
+        result = self.resource.getNodes('vehicle:powerWeightRatioSI')
+        self.assertEqual(12.51275944198707, result)
+
+    def test_resource_getNodes_func_join(self):
+        result = self.resource.getNodes('vehicle:maxSpeed')
+        self.assertEqual([16.565073330933274, 14.016600510789694, 7.922426375663741], result)
 
     def test_resource_getRawValue(self):
         self.assertEqual('#ussr_vehicles:T-34', self.resource.getRawValue('vehicle:shortUserString'))
@@ -155,8 +183,9 @@ class ResourceTestCase(unittest.TestCase):
         self.assertEqual('#ussr_vehicles:T-34', value)
         self.assertEqual('T-34', self.resource.assignMap('vehicle:userString', value))
 
-    def test_resource_assignFunc(self):
-        pass
+    def test_resource_assingMap_split(self):
+        value = self.resource.getRawValue('chassis:terrainResistance')
+        self.assertEqual(['1.1', '1.3', '2.3'], self.resource.assignMap('chassis:terrainResistance', value))
             
 
 class ConvertTestCase(unittest.TestCase):

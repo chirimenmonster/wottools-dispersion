@@ -172,9 +172,12 @@ class Resource(object):
         self.__vpath = vpath
         self.__schema = schema
         self.__param = param
-
-    def getResources(self, tag):
-        return self.__schema[tag]['resources']
+        self.__function = {
+            'sum':  self.func_sum,
+            'mul':  self.func_mul,
+            'div':  self.func_div,
+            'join':  self.func_join,
+        }
 
     def assign(self, string):
         if self.__param is None:
@@ -189,26 +192,52 @@ class Resource(object):
         xpath = self.assign(xpath)
         return self.element.findall(xpath)
 
-    def getNodes(self, tag):
-        resources = self.getResources(tag)
+    def getNodes(self, tag=None, resources=None):
+        if resources is None:
+            resources = self.__schema[tag]['resources']
         for r in resources:
-            if 'file' in r:
+            if 'file' in r and 'xpath' in r:
                 result = self.getFromFile(**r)
                 if len(result) > 0:
+                    result = list(map(lambda x:x.text, result))
                     break
+            elif 'file' in r and 'custom' in r:
+                raise NotImplementedError ('resource: {}'.format(r))           
+            elif 'immediate' in r:
+                return r['immediate']
+            elif 'func' in r:
+                func = self.__function.get(r['func'], None)
+                if func is None:
+                    raise NotImplementedError ('func: {}'.format(r['func']))
+                return func(r['args'])
             else:
-                raise NotImplementedError
+                raise NotImplementedError('resource: {}'.format(r))
         return result
 
     def getRawValue(self, tag):
-        nodelist = self.getNodes(tag)
-        valueType = self.__schema[tag].get('value', 'text')
-        if valueType == 'nodelist':
-            result = nodelist
-        elif valueType == 'text':
-            result = nodelist[0].text
-        else:
-            raise NotImplementedError
+        result = self.getNodes(tag)
+        if isinstance(result, list):
+            valueType = self.__schema[tag].get('value', 'text')
+            if valueType == 'nodelist':
+                pass
+            elif valueType == 'text':
+                result = result[0]
+            elif valueType == 'float':
+                result = result[0]
+            else:
+                raise NotImplementedError('value: {}'.format(valueType))
+        return result
+
+    def getValue(self, tag):
+        match = re.fullmatch(r'^(.*)\[(\d*)\]$', tag)
+        pos = None
+        if match:
+            tag = match.group(1)
+            pos = int(match.group(2))
+        result = self.getRawValue(tag)
+        result = self.assignMap(tag, result)
+        if pos is not None:
+            result = result[pos]
         return result
 
     def assignMap(self, tag, value):
@@ -222,9 +251,40 @@ class Resource(object):
         elif rule == 'gettext':
             result = g_gettext.translate(value)
         elif rule == 'split':
-            raise NotImplementedError
+            result = value.split()
         elif rule == '[0]':
             raise NotImplementedError
         return result
 
+    def func_sum(self, args):
+        values = list(map(lambda x:float(self.getValue(x)), args))
+        return sum(values)
 
+    def func_div(self, args):
+        try:
+            values = list(map(lambda x:float(self.getValue(x)), args))
+        except:
+            values = list(map(lambda x:self.getValue(x), args))
+            print(values)
+            raise
+        result = values.pop(0)
+        for v in values:
+            result /= v
+        return result
+
+    def func_mul(self, args):
+        values = list(map(lambda x:float(self.getValue(x)), args))
+        result = 1.0
+        for v in values:
+            result *= v
+        return result
+
+    def func_join(self, args):
+        values = list(map(lambda x:self.getValue(x), args))
+        result = []
+        for v in values:
+            if isinstance(v, list):
+                result.extend(v)
+            else:
+                result.append(v)
+        return result
