@@ -675,11 +675,10 @@
     },
     "gun:index": {
         "format":   "36s",
-        "value":    "nodename",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}"
+                "xpath":    "shared/{gun}/name()"
             }
         ]
     },
@@ -855,11 +854,11 @@
         ]
     },
     "gun:shots": {
-        "value":    "nodelist",
+        "value":    "list",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots"
+                "xpath":    "shared/{gun}/shots/*/name()"
             }
         ]
     },
@@ -967,11 +966,10 @@
         ]
     },
     "shell:index": {
-        "value":    "nodename",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
-                "xpath":    "{shell}"
+                "xpath":    "{shell}/name()"
             }
         ]
     },

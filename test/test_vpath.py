@@ -118,22 +118,32 @@ class ResourceTestCase(unittest.TestCase):
     def setUp(self):
         self.strage = vp.Strage()
         self.vpath = vp.VPath(scriptsdir='test/data/res', guidir='test/data/res')
-        with open('res/itemschema.json', 'r') as fp:
+        with open('test/data/itemschema.json', 'r') as fp:
             self.schema = json.load(fp)
-        param = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
-            'engine':'V-2-34', 'fueltank':'Average', 'radio':'_9RM', 'gun':'_76mm_S-54'}
-        self.resource = vp.Resource(self.strage, self.vpath, self.schema, param)
-        
+        self.param = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
+            'engine':'V-2-34', 'radio':'_9RM', 'gun':'_76mm_S-54'}
+        self.resource = vp.Resource(self.strage, self.vpath, self.schema, self.param)
+
+    def test_resource_substitute(self):
+        result = self.resource.substitute('vehicles/{nation}/list.xml', {'nation':'ussr'})
+        self.assertEqual('vehicles/ussr/list.xml', result)
+        with self.assertRaises(KeyError):
+            result = self.resource.substitute('vehicles/{nation}/list.xml', {})
+        result = self.resource.substitute('vehicles/{nation}/list.xml', {'nation':'ussr'})
+        self.assertEqual('vehicles/ussr/list.xml', result)
+        result = self.resource.substitute('vehicles/{nation}/{vehicle}.xml', {'nation':'ussr', 'vehicle':'R04_T34'})
+        self.assertEqual('vehicles/ussr/R04_T34.xml', result)
+
     def test_resource_getFromFile(self):
-        result = self.resource.getFromFile('vehicles/{nation}/list.xml', '{vehicle}/userString')
+        result = self.resource.getFromFile('vehicles/ussr/list.xml', 'R04_T-34/userString')
         self.assertEqual('#ussr_vehicles:T-34', result[0])
-        result = self.resource.getFromFile('vehicles/{nation}/list.xml', '{vehicle}/missing')
+        result = self.resource.getFromFile('vehicles/ussr/list.xml', 'R04_T-34/missing')
         self.assertEqual(0, len(result))
         with self.assertRaises(FileNotFoundError):
-            result = self.resource.getFromFile('vehicles/{nation}/missing', '{vehicle}/userString')
+            result = self.resource.getFromFile('vehicles/ussr/missing', 'R04_T-34/userString')
     
-    def test_resource_getNodes(self):
-        result = self.resource.getNodes('vehicle:userString')
+    def test_resource_getValue(self):
+        result = self.resource.getValue('vehicle:userString', self.param)
         self.assertEqual(1, len(result))
         self.assertEqual('#ussr_vehicles:T-34', result[0])
         
@@ -148,49 +158,53 @@ class ResourceTestCase(unittest.TestCase):
         result = self.resource.getNodes(resources=resources)
         self.assertIsInstance(result, list)
         self.assertEqual(['germany', 'ussr', 'usa', 'uk'], result)
-        result = self.resource.getNodes(resources=resources, order=['ussr', 'germany', 'uk'])
+        result = self.resource.getValue(ctx=self.param, resources=resources, type='list', order=['ussr', 'germany', 'uk'])
         self.assertEqual(['ussr', 'germany', 'uk', 'usa'], result)
         
     def test_resource_getNodes_immediateValue_string(self):
-        self.assertEqual('ussr', self.resource.getNodes('vehicle:nation'))
-        self.assertEqual(735.5, self.resource.getNodes('physics:hpToWatts'))
+        self.assertEqual('ussr', self.resource.getValue('vehicle:nation', self.param))
+        self.assertEqual(735.5, self.resource.getValue('physics:hpToWatts', self.param))
 
     def test_resource_getNodes_func_sum(self):
-        result = self.resource.getNodes('vehicle:totalWeight')
+        result = self.resource.getValue('vehicle:totalWeight', self.param)
         self.assertEqual(29390.0, result)
 
     def test_resource_getNodes_func_div(self):
-        self.assertEqual(0.01701258931609391, self.resource.getNodes('vehicle:powerWeightRatio'))
-        self.assertEqual(14.016600510789694, self.resource.getNodes('vehicle:maxSpeed_medium'))
+        self.assertEqual(0.01701258931609391, self.resource.getValue('vehicle:powerWeightRatio', self.param))
+        self.assertEqual(14.016600510789694, self.resource.getValue('vehicle:maxSpeed_medium', self.param))
 
     def test_resource_getNodes_func_mul(self):
-        result = self.resource.getNodes('vehicle:powerWeightRatioSI')
+        result = self.resource.getValue('vehicle:powerWeightRatioSI', self.param)
         self.assertEqual(12.51275944198707, result)
 
     def test_resource_getNodes_func_join(self):
-        result = self.resource.getNodes('vehicle:maxSpeed')
+        result = self.resource.getValue('vehicle:maxSpeed', self.param)
         self.assertEqual([16.565073330933274, 14.016600510789694, 7.922426375663741], result)
 
-    def test_resource_getRawValue(self):
-        self.assertEqual('#ussr_vehicles:T-34', self.resource.getRawValue('vehicle:shortUserString'))
+    def test_resource_getValue(self):
+        self.assertEqual('T-34', self.resource.getValue('vehicle:shortUserString', self.param))
         resources = [{'file':'vehicles/{nation}/list.xml', 'xpath':'*/name()'}]
-        result = self.resource.getRawValue(resources=resources, type='nodelist')
+        result = self.resource.getValue(ctx=self.param, resources=resources, type='list')
         self.assertEqual(['Observer', 'R04_T-34', 'R02_SU-85', 'R01_IS', 'R03_BT-7'], result)
 
+
+    def test_resource_convert(self):
+        value = ['Observer', 'R04_T-34', 'R02_SU-85']
+        self.assertEqual('R04_T-34', self.resource.convert(value[1:2]))
+        self.assertEqual('Observer R04_T-34 R02_SU-85', self.resource.convert(value))
+        self.assertEqual(['Observer', 'R04_T-34', 'R02_SU-85'], self.resource.convert(value, 'list'))
+
+
     def test_resource_assingMap(self):
-        value = self.resource.getRawValue('vehicle:type')
-        self.assertIn('mediumTank', value.split())
-        self.assertEqual('MT', self.resource.assignMap('vehicle:type', value))
-        self.assertEqual('MT HT', self.resource.assignMap('vehicle:type', ' unknown mediumTank unknown heavyTank secret '))
+        dictmap = {'lightTank': 'LT', 'mediumTank': 'MT', 'heavyTank': 'HT'}
+        self.assertEqual('MT', self.resource.assignMap('mediumTank', dictmap))
+        self.assertEqual('MT HT', self.resource.assignMap(' unknown mediumTank unknown heavyTank secret ', dictmap))
 
     def test_resource_assingMap_gettext(self):
-        value = self.resource.getRawValue('vehicle:userString')
-        self.assertEqual('#ussr_vehicles:T-34', value)
-        self.assertEqual('T-34', self.resource.assignMap('vehicle:userString', value))
+        self.assertEqual('T-34', self.resource.assignMap('#ussr_vehicles:T-34', 'gettext'))
 
     def test_resource_assingMap_split(self):
-        value = self.resource.getRawValue('chassis:terrainResistance')
-        self.assertEqual(['1.1', '1.3', '2.3'], self.resource.assignMap('chassis:terrainResistance', value))
+        self.assertEqual(['1.1', '1.3', '2.3'], self.resource.assignMap('1.1 1.3 2.3', 'split'))
             
 
 class ConvertTestCase(unittest.TestCase):
