@@ -7,6 +7,7 @@ from lib.vpath import Strage, VPath, Resource
 
 
 VehicleTag = namedtuple('VehicleTag', 'nation id vehicle tier type secret')
+VehicleSpec = namedtuple('VehicleSpec', 'nations tiers types secrets', defaults=(None, None, None, None))
 ModuleSpec = namedtuple('ModuleSpec', 'chassis turret engine radio gun shell', defaults=(-1, -1, -1, -1, -1, 1))
 MODULE_SELECTABLE = [ 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]
 
@@ -14,7 +15,8 @@ class VehicleDatabase(object):
 
     def __init__(self):
         self.strage = Strage()
-        self.vpath = VPath(scriptsdir='e:/git/wot.scripts', guipkg=None)
+        #self.vpath = VPath(scriptsdir='../wot.scripts', guipkg=None)
+        self.vpath = VPath(pkgdir='/c/games/world_of_tanks_ASIA/res/packages')
         with open('test/data/itemschema.json', 'r') as fp:
             self.schema = json.load(fp)
         self.resource = Resource(self.strage, self.vpath, self.schema)
@@ -43,7 +45,10 @@ class VehicleDatabase(object):
         result = self.__indexes[vehicle]
         return result._asdict()
 
-    def getList(self, nations=None, tiers=None, types=None, secrets=None):
+    def getVehicleCtx(self, vehicleSpec=None):
+        if vehicleSpec is None:
+            vehicleSpec = VehicleSpec()
+        nations, tiers, types, secrets = vehicleSpec
         def dynfilter(x):
             if nations and x.nation not in nations:
                 return False
@@ -76,7 +81,7 @@ class VehicleDatabase(object):
             result[tag] = value
         return result
 
-    def getVehicleModuleCtx(self, vehicle, moduleSpec=None):
+    def getModuleCtx(self, vehicle, moduleSpec=None):
         ctxs = [ self.getCtx(vehicle) ]
         for module in MODULE_SELECTABLE:
             attr = getattr(moduleSpec, module) if moduleSpec is not None else None
@@ -95,4 +100,10 @@ class VehicleDatabase(object):
                     newctx[module] = moduleID
                     newctxlist.append(newctx)
             ctxs = newctxlist
+        return ctxs
+
+    def getVehicleModuleCtx(self, vehicleSpec=None, moduleSpec=None):
+        ctxs = []
+        for ctx in self.getVehicleCtx(vehicleSpec):
+            ctxs.extend(self.getModuleCtx(ctx.vehicle, moduleSpec))
         return ctxs

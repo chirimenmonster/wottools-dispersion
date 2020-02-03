@@ -55,6 +55,7 @@ def parseArgument(mode=None):
 
     if mode == 'cui':
         group = parser.add_mutually_exclusive_group()
+        group.add_argument('--new', dest='new', action='store_true', help='new process')
         group.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
         group.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
         parser.add_argument('--list-nation', action='store_true', help='show nations')

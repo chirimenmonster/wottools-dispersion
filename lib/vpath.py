@@ -186,7 +186,11 @@ class Resource(object):
         root = self.__strage.readXml(path)
         self.element = Element(root)
         xpath, n = re.subn(r'/name\(\)$', '', xpath)
-        result = self.element.findall(xpath)
+        try:
+            result = self.element.findall(xpath)
+            result = list(filter(lambda x:x.tag != 'xmlns:xmlref', result))
+        except:
+            raise ValueError('xpath={}'.format(xpath))
         if len(result) > 0:
             if n == 1:
                 result = list(map(lambda x:x.tag, result))
