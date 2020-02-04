@@ -97,6 +97,7 @@ class Strage(object):
     def __init__(self):
         self.__cachedData = {}
         self.__cachedXml = {}
+        self.__cachedZip = {}
 
     def readStream(self, path, pkg=None):
         if not isinstance(path, PathInfo):

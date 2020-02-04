@@ -23,7 +23,7 @@ class SchemaTestCase(unittest.TestCase):
         self.resource = vp.Resource(self.strage, self.vpath, self.schema)
     
     def test_schema(self):
-        self.assertEqual(['germany', 'ussr', 'usa'], self.resource.getValue('settings:nationsOrder'))
+        self.assertEqual(['germany', 'ussr', 'usa', 'japan', 'china', 'uk', 'france', 'czech', 'poland', 'italy', 'sweden'], self.resource.getValue('settings:nationsOrder'))
         self.assertEqual(735.5, self.resource.getValue('physics:hpToWatts'))
         self.assertEqual('ussr', self.resource.getValue('vehicle:nation', self.ctx))
         self.assertEqual(29390.0, self.resource.getValue('vehicle:totalWeight', self.ctx))        

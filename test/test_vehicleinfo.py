@@ -6,20 +6,18 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from lib.config import g_config as config
-from vehicleinfo import Command
+from lib.vehicleinfo2 import listVehicleModule
 
 class VehicleInfoTestCase(unittest.TestCase):
 
     def setUp(self):
-        config.SCRIPTS_DIR = '../wot.scripts'
         config.GUI_DIR = 'test/data/res'
+        config.scriptspkg = 'test/data/res/packages/scripts.pkg'
         config.schema = 'test/data/itemschema.json'
-        config.suppress_unique = False
-        config.suppress_empty = False
-        config.sort = None
-        config.csvoutput = None
         config.outputjson = True
 
     def test_listModule2(self):
-        result = Command.listModule2('germany:8:lt', 'shell', 'shell:gravity')
-
+        self.assertEqual([{'shell:gravity':'9.81'}], listVehicleModule('germany::lt,mt,ht,td', 'shell', 'shell:gravity'))
+        result = listVehicleModule('::', 'shell', 'shell:gravity')
+        self.assertEqual(26, len(result))
+        print(result)

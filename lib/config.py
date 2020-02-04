@@ -11,6 +11,17 @@ class Config:
     LOCALE_RELPATH = 'res'
     VEHICLES = 'vehicles'
     GUI_SETTINGS = 'gui'
+    SCRIPTS_DIR = None
+    GUI_DIR = None
+    pkgdir = None
+    scriptspkg = None
+    guipkg = None
+    schema = None
+    suppress_unique = False
+    suppress_empty = False
+    csvoutput = False
+    outputjson = False
+    sort = None
     DATA = {
         VEHICLES: {
             'vpath':        'scripts/item_defs/vehicles',
@@ -31,7 +42,6 @@ class Config:
         'gun':      -1,
         'shell':    0
     }
-
 
 g_config = Config()
 
@@ -55,7 +65,6 @@ def parseArgument(mode=None):
 
     if mode == 'cui':
         group = parser.add_mutually_exclusive_group()
-        group.add_argument('--new', dest='new', action='store_true', help='new process')
         group.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
         group.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
         parser.add_argument('--list-nation', action='store_true', help='show nations')
@@ -69,6 +78,7 @@ def parseArgument(mode=None):
         parser.add_argument('--suppress-header', action='store_true', dest='suppress_header', help='suppress output csv header')
         parser.add_argument('--suppress-empty', action='store_true', dest='suppress_empty', help='suppress output recodes with empty parameter')
         parser.add_argument('--prefer-userstring', action='store_const', const='userString', default='index', dest='indextag', help='prefer userString')
+        parser.add_argument('--new', dest='new', action='store_true', help='new process')
 
     parser.parse_args(namespace=g_config)
     if g_config.SCRIPTS_DIR:

@@ -14,7 +14,7 @@ MODULE_SELECTABLE = [ 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]
 
 def getResource(config):
     strage = Strage()
-    vpath = VPath(scriptsdir=config.SCRIPTS_DIR, guidir=config.GUI_DIR)
+    vpath = VPath(pkgdir=config.pkgdir, scriptsdir=config.SCRIPTS_DIR, guidir=config.GUI_DIR, scriptspkg=config.scriptspkg)
     schema = Settings(schema=config.schema).schema
     resource = Resource(strage, vpath, schema)
     return resource
