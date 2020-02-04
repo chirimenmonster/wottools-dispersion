@@ -3,7 +3,7 @@ import json
 from collections import namedtuple
 
 from lib.resources import TIERS, TYPES
-from lib.vpath import Strage, VPath, Resource
+from lib.vpath import Strage, VPath, Settings, Resource
 
 
 VehicleTag = namedtuple('VehicleTag', 'nation id vehicle tier type secret')
@@ -11,15 +11,19 @@ VehicleSpec = namedtuple('VehicleSpec', 'nations tiers types secrets', defaults=
 ModuleSpec = namedtuple('ModuleSpec', 'chassis turret engine radio gun shell', defaults=(-1, -1, -1, -1, -1, 1))
 MODULE_SELECTABLE = [ 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]
 
+
+def getResource(config):
+    strage = Strage()
+    vpath = VPath(scriptsdir=config.SCRIPTS_DIR, guidir=config.GUI_DIR)
+    schema = Settings(schema=config.schema).schema
+    resource = Resource(strage, vpath, schema)
+    return resource
+
+
 class VehicleDatabase(object):
 
-    def __init__(self):
-        self.strage = Strage()
-        #self.vpath = VPath(scriptsdir='../wot.scripts', guipkg=None)
-        self.vpath = VPath(pkgdir='/c/games/world_of_tanks_ASIA/res/packages')
-        with open('test/data/itemschema.json', 'r') as fp:
-            self.schema = json.load(fp)
-        self.resource = Resource(self.strage, self.vpath, self.schema)
+    def __init__(self, resource):
+        self.resource = resource
     
     def prepare(self):
         nationsOrder = self.resource.getValue('settings:nationsOrder')

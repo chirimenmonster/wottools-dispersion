@@ -2,16 +2,22 @@
 import os
 import sys
 import unittest
+import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+from lib.vpath import Strage, VPath, Settings, Resource
 from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
 
 
 class VehicleTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.vd = VehicleDatabase()
+        strage = Strage()
+        vpath = VPath(scriptsdir='../wot.scripts', guidir='test/data/res')
+        schema = Settings(schema='test/data/itemschema.json').schema
+        resource = Resource(strage, vpath, schema)
+        self.vd = VehicleDatabase(resource)
         self.vd.prepare()
 
     def test_getVehicleCtx(self):

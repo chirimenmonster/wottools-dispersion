@@ -10,7 +10,7 @@ from lib.strage import Strage
 from lib.config import parseArgument, g_config as config 
 from lib.resources import g_resources
 
-from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
+from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec, getResource
 
 
 def getListVehicle(strage, pattern):
@@ -215,7 +215,8 @@ class Command:
                 for m in defaultModule[mname]:
                     d = {m: None}
                     moduleSpec = moduleSpec._replace(**d)
-        vd = VehicleDatabase()
+        print('config.schema={}', config.schema)
+        vd = VehicleDatabase(getResource(config))
         vd.prepare()
         ctxs = vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)
         result = []

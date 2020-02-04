@@ -1,10 +1,14 @@
 
 import logging
+import os
 import io
 import re
+import json
 import zipfile
 from collections import namedtuple
 import xml.etree.ElementTree as ET
+
+import traceback
 
 from lib.resources import TIERS_LABEL
 from lib.XmlUnpacker import XmlUnpacker
@@ -68,6 +72,24 @@ class VPath(object):
             pkgpath = '/'.join([ p.pkgdir, pkg ]) if p.pkgdir else pkg
             result = PathInfo(rpath, pkgpath)
         return result
+
+
+class Settings(object):
+
+    def __init__(self, dir=None, schema=None):
+        self.__dir = dir
+        if schema:
+            self.__path_schema = schema
+        else:
+            self.__path_schema = os.path.join(self.__dir, 'itemschema.json')
+        self.__schema = None
+
+    @property
+    def schema(self):
+        if self.__schema is None:
+            with open(self.__path_schema, 'r') as fp:
+                self.__schema = json.load(fp)
+        return self.__schema
 
 
 class Strage(object):
@@ -344,7 +366,6 @@ class Resource(object):
             values = list(map(lambda x,c=ctx:float(self.getRefValue(x, c)), args))
         except:
             values = list(map(lambda x,c=ctx:self.getRefValue(x, c), args))
-            print(values)
             raise
         result = values.pop(0)
         for v in values:
