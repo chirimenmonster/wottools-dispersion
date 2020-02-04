@@ -18,6 +18,6 @@ class VehicleInfoTestCase(unittest.TestCase):
 
     def test_listModule2(self):
         self.assertEqual([{'shell:gravity':'9.81'}], listVehicleModule('germany::lt,mt,ht,td', 'shell', 'shell:gravity'))
-        result = listVehicleModule('::', 'shell', 'shell:gravity')
+        result = listVehicleModule('::', 'shell', 'shell:gravity', sort='shell:gravity')
         self.assertEqual(26, len(result))
         print(result)

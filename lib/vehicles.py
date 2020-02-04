@@ -17,7 +17,7 @@ def getResource(config):
     vpath = VPath(pkgdir=config.pkgdir, scriptsdir=config.SCRIPTS_DIR, guidir=config.GUI_DIR, scriptspkg=config.scriptspkg)
     schema = Settings(schema=config.schema).schema
     resource = Resource(strage, vpath, schema)
-    return resource
+    return resource, schema
 
 
 class VehicleDatabase(object):

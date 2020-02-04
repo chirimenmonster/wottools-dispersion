@@ -88,10 +88,13 @@ def _removeEmpty(records):
     records = [ r for r in records if None not in r.values() ]
     return records
 
-def _sort(records):
-    if not config.sort:
+def _sort(records, tags=None):
+    if config.sort is None and tags is None:
         return records
-    sortKeys = config.sort.split(',')
+    if tags is not None:
+        sortKeys = tags
+    else:
+        sortKeys = config.sort.split(',')
     keyFuncs = []
     for k in sortKeys:
         schema = g_resources.itemschema[k]
