@@ -106,9 +106,13 @@ class Strage(object):
             file, pkg = path
         if pkg:
             try:
-                with zipfile.ZipFile(pkg, 'r') as zip:
-                    with zip.open(file, 'r') as fp:
-                        stream = io.BytesIO(fp.read())
+                if pkg in self.__cachedZip:
+                    zip = self.__cachedZip[pkg]
+                else:
+                    zip = zipfile.ZipFile(pkg, 'r')
+                    self.__cachedZip[pkg] = zip
+                with zip.open(file, 'r') as fp:
+                    stream = io.BytesIO(fp.read())
             except FileNotFoundError:
                 raise FileNotFoundError('pkgfile not found: {}'.format(pkg))
             except KeyError:
