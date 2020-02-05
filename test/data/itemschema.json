@@ -12,6 +12,14 @@
             }
         ]
     },
+    "settings:typesOrder": {
+        "value":    "list",
+        "resources": [
+            {
+                "immediate": [ "LT", "MT", "HT", "TD", "SPG" ]
+            }
+        ]
+    },
     "physics:hpToWatts": {
         "resources": [
             {
@@ -1012,7 +1020,7 @@
         ]
     },
     "shell:caliber": {
-        "sort":     "float",
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1021,7 +1029,7 @@
         ]
     },
     "shell:explosionRadius": {
-        "sort":     "float",
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1030,7 +1038,7 @@
         ]
     },
     "shell:stunDuration": {
-        "sort":     "float",
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1039,7 +1047,7 @@
         ]
     },
     "shell:damage_armor": {
-        "sort":     "float",
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1048,7 +1056,7 @@
         ]
     },
     "shell:damage_devices": {
-        "sort":     "float",
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1057,7 +1065,7 @@
         ]
     },
     "shell:speed": {
-        "sort":     "float",
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -1066,7 +1074,7 @@
         ]
     },
     "shell:gravity": {
-        "sort":     "float",
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -1075,7 +1083,7 @@
         ]
     },
     "shell:maxDistance": {
-        "sort":     "float",
+        "value":  "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -1084,7 +1092,7 @@
         ]
     },
     "shell:piercingPower": {
-        "sort":     "float",
+        "value":    "float",
         "map":      "[0]",
         "resources": [
             {

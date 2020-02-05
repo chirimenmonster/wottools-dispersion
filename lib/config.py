@@ -56,6 +56,7 @@ def parseArgument(mode=None):
     parser.add_argument('-s', dest='SCRIPTS_DIR', help='scripts folder extracted.  ex. "C:/git/wot.scripts/scripts"')
     parser.add_argument('-g', dest='GUI_DIR', help='gui folder extracted.  ex. "./test/gui"')
     parser.add_argument('--secret', action='store_true', help='include secret tanks')
+    parser.add_argument('--schema', dest='schema', help='change itemschema.json')
     parser.add_argument('--gui-items', dest='gui_items', help='change guisettings_items.json')
 
     if mode != 'cui':

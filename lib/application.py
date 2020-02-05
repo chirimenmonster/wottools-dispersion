@@ -14,5 +14,6 @@ class Application(object):
         vpath = VPath(pkgdir=pkgdir, scriptsdir=scriptsdir, guidir=guidir, scriptspkg=scriptspkg)
         self.resource = Resource(strage, vpath, schema)
         self.schema = schema
+        self.config = config
 
 g_application = Application()

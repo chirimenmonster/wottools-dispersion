@@ -1,7 +1,6 @@
 
-from vehicleinfo import _removeDuplicate, _removeEmpty
+from vehicleinfo import _removeEmpty
 from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
-from lib.config import parseArgument, g_config as config 
 
 from lib.application import g_application as application
 
@@ -42,6 +41,19 @@ def listVehicleModule(vehicles, modules, params, sort=None):
     return result
 
 
+def _removeDuplicate(values):
+    if application.config.suppress_unique:
+        return values
+    result = []
+    data = {}
+    for v in values:
+        k = tuple(map(lambda x:repr(x) if isinstance(x, list) else x, v.values()))
+        if k not in data:
+            data[k] = True
+            result.append(v)
+    return result
+
+
 def _sort(records, tags=None):
     if tags is None:
         return records
@@ -49,8 +61,8 @@ def _sort(records, tags=None):
     for k in tags:
         schema = application.schema[k]
         func = lambda x,key=k: x[key]
-        if 'sort' in schema:
-            if schema['sort'] == 'float':
+        if 'value' in schema:
+            if schema['value'] == 'float':
                 func = lambda x,key=k: float(x[key])
         keyFuncs.append(func)
     records = sorted(records, key=lambda x: tuple([ f(x) for f in keyFuncs ]))
