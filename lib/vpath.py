@@ -208,7 +208,16 @@ class Resource(object):
             'or':   self.func_or,
         }
 
-    def getFromFile(self, file, xpath):
+    def getFromFile(self, file, xpath, param=None, ctx=None):
+        if ctx is None:
+            ctx = {}
+        if param is not None:
+            newctx = ctx.copy()
+            for xtag, value in param.items():
+                newctx[xtag] = self.getRefValue(value, ctx)
+            ctx = newctx
+        file = self.substitute(file, ctx)
+        xpath = self.substitute(xpath, ctx)
         path = self.__vpath.getPathInfo(file)
         root = self.__strage.readXml(path)
         self.element = Element(root)
@@ -228,18 +237,17 @@ class Resource(object):
     def getNodes(self, resources=None, ctx=None):
         for r in resources:
             if 'file' in r and 'xpath' in r:
-                file = self.substitute(r['file'], ctx)
-                xpath = self.substitute(r['xpath'], ctx)
+                file = r['file']
+                xpath = r['xpath']
+                param = r.get('param', None)
                 try:
-                    result = self.getFromFile(file=file, xpath=xpath)
+                    result = self.getFromFile(file, xpath, param, ctx)
                 except FileNotFoundError:
                     if r == resources[-1]:
                         raise
                     continue
                 if len(result) > 0:
                     break
-            elif 'file' in r and 'custom' in r:
-                raise NotImplementedError ('resource: {}'.format(r))
             elif 'immediate' in r:
                 result = self.substitute(r['immediate'], ctx)
                 break
@@ -253,24 +261,17 @@ class Resource(object):
                 raise NotImplementedError('resource: {}'.format(r))
         return result
 
-    def getValue(self, tag=None, ctx=None, resources=None, order=None, type=None, map=None, addparams=None):
+    def getValue(self, tag=None, ctx=None, resources=None, order=None, type=None, map=None):
         if tag is not None:
             schema = self.__schema[tag]
             if resources is None:
                 resources = schema.get('resources', None)
-            if addparams is None:
-                addparams = {}
-                for p in schema.get('addparams', {}):
-                    xtag = p['xtag']
-                    value = self.getRefValue(p['value'], ctx)
-                    addparams = {xtag:value}
             if order is None:
                 order = schema.get('order', None)
             if type is None:
                 type = schema.get('value', None)
             if map is None:
                 map = schema.get('map', None)
-        ctx = self.mergeparams(ctx, addparams)
         try:
             result = self.getNodes(resources=resources, ctx=ctx)
         except KeyError as e:
@@ -339,19 +340,20 @@ class Resource(object):
             return value
         if isinstance(rule, dict):
             result = ' '.join(filter(None, map(lambda x: rule.get(x, None), value.split())))
-        elif rule == 'roman':
+        elif rule == 'roman()':
             result = TIERS_LABEL.get(value, None)
-        elif rule == 'gettext':
+        elif rule == 'gettext()':
             result = g_gettext.translate(value)
-        elif rule == 'split':
-            result = value.split()
-        else:
-            match = re.fullmatch(r'^\[(\d*)\]$', rule)
-            if match:
-                pos = int(match.group(1))
-                result = value.split()[pos]
-            else:
+        elif rule.startswith('split()'):
+            match = re.fullmatch(r'split\(\)(\[(\d+)\])?', rule)
+            if match is None:
                 raise NotImplementedError('map rule: {}'.format(rule))
+            result = value.split()
+            if match.group(2) is not None:
+                pos = int(match.group(2))
+                result = result[pos]
+        else:
+            raise NotImplementedError('map rule: {}'.format(rule))
         return result
 
     def sort(self, values, order):

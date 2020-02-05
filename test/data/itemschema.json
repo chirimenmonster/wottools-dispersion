@@ -135,7 +135,7 @@
     },
     "vehicle:userString": {
         "format":   "27s",
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
@@ -145,7 +145,7 @@
     },
     "vehicle:shortUserString": {
         "format":   "15s",
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
@@ -159,7 +159,7 @@
         ]
     },
     "vehicle:displayString": {
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "func":     "or",
@@ -168,7 +168,7 @@
         ]
     },
     "vehicle:description": {
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
@@ -375,7 +375,7 @@
         ]
     },
     "chassis:userString": {
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -401,7 +401,7 @@
         ]
     },
     "chassis:terrainResistance": {
-        "map":      "split",
+        "map":      "split()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -443,7 +443,7 @@
         ]
     },
     "turret:userString": {
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -521,7 +521,7 @@
         ]
     },
     "engine:userString": {
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/engines.xml",
@@ -580,69 +580,48 @@
         ]
     },
     "fueltank:index": {
-        "addparams": [
-            {
-                "xtag":     "fueltank",
-                "value":    "vehicle:fueltank"
-            }
-        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
-                "xpath":    "shared/{fueltank}/name()"
+                "xpath":    "shared/{fueltank}/name()",
+                "param":    { "fueltank": "vehicle:fueltank" }
             }
         ]
     },
     "fueltank:id": {
-        "addparams": [
-            {
-                "xtag":     "fueltank",
-                "value":    "vehicle:fueltank"
-            }
-        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
-                "xpath":    "ids/{fueltank}"
+                "xpath":    "ids/{fueltank}",
+                "param":    { "fueltank": "vehicle:fueltank" }
             }
         ]
     },
     "fueltank:weight": {
         "value":    "float",
-        "addparams": [
-            {
-                "xtag":     "fueltank",
-                "value":    "vehicle:fueltank"
-            }
-        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
-                "xpath":    "shared/{fueltank}/weight"
+                "xpath":    "shared/{fueltank}/weight",
+                "param":    { "fueltank": "vehicle:fueltank" }
             }
         ]
     },
     "fueltank:health": {
         "value":    "float",
-        "addparams": [
-            {
-                "xtag":     "fueltank",
-                "value":    "vehicle:fueltank"
-            }
-        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
-                "xpath":    "shared/{fueltank}/maxHealth"
+                "xpath":    "shared/{fueltank}/maxHealth",
+                "param":    { "fueltank": "vehicle:fueltank" }
             }
         ]
     },
     "radio:index": {
-        "value":    "nodename",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/radios.xml",
-                "xpath":    "shared/{radio}"
+                "xpath":    "shared/{radio}/name()"
             }
         ]
     },
@@ -655,7 +634,7 @@
         ]
     },
     "radio:userString": {
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/radios.xml",
@@ -700,7 +679,7 @@
     },
     "gun:userString": {
         "format":   "24s",
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -709,7 +688,7 @@
         ]
     },
     "gun:tier": {
-        "map":      "roman",
+        "map":      "roman()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -879,47 +858,32 @@
         ]
     },
     "shot:piercingPower_1": {
-        "map":      "[0]",
-        "addparams": [
-            {
-                "xtag":     "shot",
-                "value":    "gun:shots[0]"
-            }
-        ],
+        "map":      "split()[0]",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots/{shot}/piercingPower"
+                "xpath":    "shared/{gun}/shots/{shot}/piercingPower",
+                "param":    { "shot": "gun:shots[0]" }
             }
         ]
     },
     "shot:piercingPower_2": {
-        "map":      "[0]",
-        "addparams": [
-            {
-                "xtag":     "shot",
-                "value":    "gun:shots[1]"
-            }
-        ],
+        "map":      "split()[0]",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots/{shot}/piercingPower"
+                "xpath":    "shared/{gun}/shots/{shot}/piercingPower",
+                "param":    { "shot": "gun:shots[1]" }
             }
         ]
     },
     "shot:piercingPower_3": {
-        "map":      "[0]",
-        "addparams": [
-            {
-                "xtag":     "shot",
-                "value":    "gun:shots[2]"
-            }
-        ],
+        "map":      "split()[0]",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots/{shot}/piercingPower"
+                "xpath":    "shared/{gun}/shots/{shot}/piercingPower",
+                "param":    { "shot": "gun:shots[2]" }
             }
         ]
     },
@@ -932,44 +896,29 @@
         ]
     },
     "shot:damage_1": {
-        "addparams": [
-            {
-                "xtag":     "shot",
-                "value":    "gun:shots[0]"
-            }
-        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
-                "xpath":    "{shot}/damage/armor"
+                "xpath":    "{shot}/damage/armor",
+                "param":    { "shot": "gun:shots[0]" }
             }
         ]
     },
     "shot:damage_2": {
-        "addparams": [
-            {
-                "xtag":     "shot",
-                "value":    "gun:shots[1]"
-            }
-        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
-                "xpath":    "{shot}/damage/armor"
+                "xpath":    "{shot}/damage/armor",
+                "param":    { "shot": "gun:shots[1]" }
             }
         ]
     },
     "shot:damage_3": {
-        "addparams": [
-            {
-                "xtag":     "shot",
-                "value":    "gun:shots[2]"
-            }
-        ],
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
-                "xpath":    "{shot}/damage/armor"
+                "xpath":    "{shot}/damage/armor",
+                "param":    { "shot": "gun:shots[2]" }
             }
         ]
     },
@@ -990,7 +939,7 @@
         ]
     },
     "shell:userString": {
-        "map":      "gettext",
+        "map":      "gettext()",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1093,7 +1042,7 @@
     },
     "shell:piercingPower": {
         "value":    "float",
-        "map":      "[0]",
+        "map":      "split()[0]",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",

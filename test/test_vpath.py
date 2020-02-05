@@ -201,10 +201,10 @@ class ResourceTestCase(unittest.TestCase):
         self.assertEqual('MT HT', self.resource.assignMap(' unknown mediumTank unknown heavyTank secret ', dictmap))
 
     def test_resource_assingMap_gettext(self):
-        self.assertEqual('T-34', self.resource.assignMap('#ussr_vehicles:T-34', 'gettext'))
+        self.assertEqual('T-34', self.resource.assignMap('#ussr_vehicles:T-34', 'gettext()'))
 
     def test_resource_assingMap_split(self):
-        self.assertEqual(['1.1', '1.3', '2.3'], self.resource.assignMap('1.1 1.3 2.3', 'split'))
+        self.assertEqual(['1.1', '1.3', '2.3'], self.resource.assignMap('1.1 1.3 2.3', 'split()'))
             
 
 class ConvertTestCase(unittest.TestCase):
