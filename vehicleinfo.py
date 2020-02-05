@@ -198,9 +198,11 @@ class Command:
 
     @staticmethod
     def listModule2(vehicles, modules, params):
+        from lib.application import g_application as app
         from lib.vehicleinfo2 import listVehicleModule
         config.schema = 'test/data/itemschema.json'
         config.pkgdir = os.path.join(config.BASE_DIR, config.PKG_RELPATH)
+        app.setup(config)
         result = listVehicleModule(vehicles, modules, params)
         _outputValues(result)
         
@@ -255,6 +257,11 @@ if __name__ == '__main__':
     logger.addHandler(logging.StreamHandler())
     
     parseArgument(mode='cui')
+    
+    if config.new:
+        Command.listModule2(config.vehicle, config.list_module, config.show_params)
+        sys.exit()
+    
     strage = Strage()
 
     if config.list_nation:
@@ -265,10 +272,7 @@ if __name__ == '__main__':
         Command.listType(strage)
     #if config.pattern:
     #    Command.listVehicle(strage, config.pattern)
-
-    if config.new:
-        Command.listModule2(config.vehicle, config.list_module, config.show_params)
-    elif config.list_module:
+    if config.list_module:
         Command.listModule(strage, config.vehicle, config.list_module, config.show_params)
     else:
         Command.listModule(strage, config.vehicle, None, config.show_params)

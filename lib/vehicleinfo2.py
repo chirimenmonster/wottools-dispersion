@@ -1,9 +1,10 @@
 
-from vehicleinfo import _removeDuplicate, _removeEmpty, _sort
-from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec, getResource
+from vehicleinfo import _removeDuplicate, _removeEmpty
+from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
 from lib.config import parseArgument, g_config as config 
 
-g_schema = None
+from lib.application import g_application as application
+
 
 def listVehicleModule(vehicles, modules, params, sort=None):
     global g_schema
@@ -26,9 +27,7 @@ def listVehicleModule(vehicles, modules, params, sort=None):
             for m in defaultModule[mname]:
                 d = {m: None}
                 moduleSpec = moduleSpec._replace(**d)
-    resources, schema = getResource(config)
-    g_schema = schema
-    vd = VehicleDatabase(resources)
+    vd = VehicleDatabase(application.resource)
     vd.prepare()
     ctxs = vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)
     showtags = params.split(',') if params is not None else None
@@ -48,7 +47,7 @@ def _sort(records, tags=None):
         return records
     keyFuncs = []
     for k in tags:
-        schema = g_schema[k]
+        schema = application.schema[k]
         func = lambda x,key=k: x[key]
         if 'sort' in schema:
             if schema['sort'] == 'float':

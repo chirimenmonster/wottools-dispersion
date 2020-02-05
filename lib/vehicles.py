@@ -3,21 +3,12 @@ import json
 from collections import namedtuple
 
 from lib.resources import TIERS, TYPES
-from lib.vpath import Strage, VPath, Settings, Resource
 
 
 VehicleTag = namedtuple('VehicleTag', 'nation id vehicle tier type secret')
 VehicleSpec = namedtuple('VehicleSpec', 'nations tiers types secrets', defaults=(None, None, None, None))
 ModuleSpec = namedtuple('ModuleSpec', 'chassis turret engine radio gun shell', defaults=(-1, -1, -1, -1, -1, 1))
 MODULE_SELECTABLE = [ 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]
-
-
-def getResource(config):
-    strage = Strage()
-    vpath = VPath(pkgdir=config.pkgdir, scriptsdir=config.SCRIPTS_DIR, guidir=config.GUI_DIR, scriptspkg=config.scriptspkg)
-    schema = Settings(schema=config.schema).schema
-    resource = Resource(strage, vpath, schema)
-    return resource, schema
 
 
 class VehicleDatabase(object):
