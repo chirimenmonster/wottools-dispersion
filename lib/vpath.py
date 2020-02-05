@@ -311,6 +311,8 @@ class Resource(object):
                 value = value.format(**ctx)
             except KeyError as e:
                 raise KeyError(e, value, ctx) from e
+            except TypeError as e:
+                raise TypeError(e.args[0], value, ctx) from e
         return value
 
     def convert(self, value, datatype=None):

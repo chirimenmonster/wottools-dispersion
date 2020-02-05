@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from lib.vpath import Strage, VPath, Settings, Resource
 from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
-
+from lib.translate import g_gettext
 
 class VehicleTestCase(unittest.TestCase):
 
@@ -19,6 +19,8 @@ class VehicleTestCase(unittest.TestCase):
         resource = Resource(strage, vpath, schema)
         self.vd = VehicleDatabase(resource)
         self.vd.prepare()
+        if g_gettext.localedir is None:
+            g_gettext.localedir = 'test/data/res'
 
     def test_getVehicleCtx(self):
         self.assertEqual(642, len(self.vd.getVehicleCtx()))

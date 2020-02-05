@@ -16,6 +16,7 @@ class Config:
     pkgdir = None
     scriptspkg = None
     guipkg = None
+    localedir = None
     schema = None
     suppress_unique = False
     suppress_empty = False
