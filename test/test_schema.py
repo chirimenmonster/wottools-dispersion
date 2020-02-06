@@ -13,7 +13,6 @@ from lib import translate as tr
 class SchemaTestCase(unittest.TestCase):
 
     def setUp(self):
-        tr.g_gettext.localedir = 'test/data/res'
         self.strage = vp.Strage()
         self.vpath = vp.VPath(scriptsdir='test/data/res', guidir='test/data/res')
         with open('test/data/itemschema.json', 'r') as fp:
@@ -21,7 +20,8 @@ class SchemaTestCase(unittest.TestCase):
         self.ctx = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
             'engine':'V-2-34', 'fueltank':'Average', 'radio':'_9RM', 'gun':'_76mm_S-54', 'shell':'_76mm_UBR-354MP'}
         self.resource = vp.Resource(self.strage, self.vpath, self.schema)
-    
+        self.resource.gettext = tr.Gettext(localedir='test/data/res')
+
     def test_schema(self):
         self.assertEqual(['germany', 'ussr', 'usa', 'japan', 'china', 'uk', 'france', 'czech', 'poland', 'italy', 'sweden'], self.resource.getValue('settings:nationsOrder'))
         self.assertEqual(735.5, self.resource.getValue('physics:hpToWatts'))

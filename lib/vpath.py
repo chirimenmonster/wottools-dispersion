@@ -12,7 +12,6 @@ import traceback
 
 from lib.resources import TIERS_LABEL
 from lib.XmlUnpacker import XmlUnpacker
-from lib.translate import g_gettext
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -199,6 +198,7 @@ class Resource(object):
         self.__strage = strage
         self.__vpath = vpath
         self.__schema = schema
+        self.__gettext = None
         self.__param = param
         self.__function = {
             'sum':  self.func_sum,
@@ -206,7 +206,16 @@ class Resource(object):
             'div':  self.func_div,
             'join': self.func_join,
             'or':   self.func_or,
+            'format':   self.func_format,
         }
+
+    @property
+    def gettext(self):
+        return self.__gettext
+        
+    @gettext.setter
+    def gettext(self, obj):
+        self.__gettext = obj
 
     def getFromFile(self, file, xpath, param=None, ctx=None):
         if ctx is None:
@@ -252,10 +261,14 @@ class Resource(object):
                 result = self.substitute(r['immediate'], ctx)
                 break
             elif 'func' in r:
-                func = self.__function.get(r['func'], None)
+                match = re.fullmatch(r'(.*)\((.*)\)', r['func'])
+                if match is None or match.group(1) is None:
+                    raise NotImplementedError ('func: {}'.format(r['func']))
+                func = self.__function.get(match.group(1), None)
+                arg0 = match.group(2)
                 if func is None:
                     raise NotImplementedError ('func: {}'.format(r['func']))
-                result = func(r['args'], ctx=ctx)
+                result = func(arg0, r['args'], ctx=ctx)
                 break
             else:
                 raise NotImplementedError('resource: {}'.format(r))
@@ -345,7 +358,9 @@ class Resource(object):
         elif rule == 'roman()':
             result = TIERS_LABEL.get(value, None)
         elif rule == 'gettext()':
-            result = g_gettext.translate(value)
+            if self.gettext is None:
+                raise AttributeError('translate engine is not prepared.')
+            result = self.gettext.translate(value)
         elif rule.startswith('split()'):
             match = re.fullmatch(r'split\(\)(\[(\d+)\])?', rule)
             if match is None:
@@ -366,11 +381,11 @@ class Resource(object):
         values = sorted(values, key=lambda x:order.index(x) if x in order else float('inf'))
         return values
 
-    def func_sum(self, args, ctx=None):
+    def func_sum(self, arg0, args, ctx=None):
         values = list(map(lambda x,c=ctx:float(self.getRefValue(x, c)), args))
         return sum(values)
 
-    def func_div(self, args, ctx=None):
+    def func_div(self, arg0, args, ctx=None):
         try:
             values = list(map(lambda x,c=ctx:float(self.getRefValue(x, c)), args))
         except:
@@ -381,14 +396,14 @@ class Resource(object):
             result /= v
         return result
 
-    def func_mul(self, args, ctx=None):
+    def func_mul(self, arg0, args, ctx=None):
         values = list(map(lambda x,c=ctx:float(self.getRefValue(x, c)), args))
         result = 1.0
         for v in values:
             result *= v
         return result
 
-    def func_join(self, args, ctx=None):
+    def func_join(self, arg0, args, ctx=None):
         values = list(map(lambda x,c=ctx:self.getRefValue(x, c), args))
         result = []
         for v in values:
@@ -398,9 +413,19 @@ class Resource(object):
                 result.append(v)
         return result
 
-    def func_or(self, args, ctx=None):
+    def func_or(self, arg0, args, ctx=None):
         values = list(map(lambda x,c=ctx:self.getRefValue(x, c), args))
         result = None
         for v in values:
             result = result or v
         return result
+
+    def func_format(self, arg0, args, ctx=None):
+        match = re.fullmatch(r'\'(.*)\'', arg0)
+        if match is None or match.group(1) is None:
+            ValueError('arg={}'.format(args0))
+        form = match.group(1)
+        values = list(map(lambda x,c=ctx:self.getRefValue(x, c), args))
+        result = form.format(*values)
+        return result
+

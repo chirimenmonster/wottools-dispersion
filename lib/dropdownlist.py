@@ -1,9 +1,18 @@
 
 from lib.resources import TIERS, TIERS_LABEL
 from lib.application import g_application as app
-from lib.vehicles import VehicleSpec
+from lib.vehicles import VehicleSpec, ModuleSpec
 
 class DropdownList(object):
+
+    tags = {
+        'chassis':  [ 'chassis:index', 'chassis:userString' ],
+        'turret':   [ 'turret:index', 'turret:userString' ],
+        'engine':   [ 'engine:index', 'engine:userString' ],
+        'radio':    [ 'radio:index', 'radio:userString' ],
+        'gun':      [ 'gun:index', 'gun:userString' ],
+        'shell':    [ 'shell:index', 'shell:displayString' ]
+    }
 
     def fetchNationList(self, schema=None, param=None):
         self.nationsOrder = app.resource.getValue('settings:nationsOrder')
@@ -24,5 +33,39 @@ class DropdownList(object):
         types = [ param['type'] ]
         ctxs = app.vd.getVehicleCtx(VehicleSpec(nations, tiers, types))
         tags = [ 'vehicle:index', 'vehicle:userString' ]
-        result = [ app.vd.getVehicleItems(tags, c._asdict()).values() for c in ctxs ]
+        result = [ list(app.vd.getVehicleItems(tags, c).values()) for c in ctxs ]
         return result
+
+    def _fetchModuleList(self, module, param=None):
+        vehicle = param['vehicle']
+        param = { k:v for k,v in param.items() if k in ModuleSpec._fields}
+        moduleSpec = ModuleSpec(**param)
+        moduleSpec = moduleSpec._replace(**{module:None})
+        ctxs = app.vd.getModuleCtx(vehicle, moduleSpec)
+        result = [ list(app.vd.getVehicleItems(self.tags[module], c).values()) for c in ctxs ]
+        return result
+
+    def fetchChassisList(self, schema=None, param=None):
+        result = self._fetchModuleList('chassis', param=param)
+        return result
+
+    def fetchTurretList(self, schema=None, param=None):
+        result = self._fetchModuleList('turret', param=param)
+        return result
+
+    def fetchEngineList(self, schema=None, param=None):
+        result = self._fetchModuleList('engine', param=param)
+        return result
+
+    def fetchRadioList(self, schema=None, param=None):
+        result = self._fetchModuleList('radio', param=param)
+        return result
+
+    def fetchGunList(self, schema=None, param=None):
+        result = self._fetchModuleList('gun', param=param)
+        return result
+
+    def fetchShellList(self, schema=None, param=None):
+        result = self._fetchModuleList('shell', param=param)
+        return result
+

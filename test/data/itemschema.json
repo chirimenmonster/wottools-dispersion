@@ -44,7 +44,7 @@
     "vehicle:totalWeight": {
         "resources": [
             {
-                "func":     "sum",
+                "func":     "sum()",
                 "args":     [ "hull:weight", "chassis:weight", "turret:weight",
                                 "engine:weight", "fueltank:weight", "radio:weight", "gun:weight" ]
             }
@@ -53,7 +53,7 @@
     "vehicle:totalHealth": {
         "resources": [
             {
-                "func":     "sum",
+                "func":     "sum()",
                 "args":     [ "hull:health", "turret:health" ]
             }
         ]
@@ -61,7 +61,7 @@
     "vehicle:powerWeightRatio": {
         "resources": [
             {
-                "func":     "div",
+                "func":     "div()",
                 "args":     [ "engine:power", "vehicle:totalWeight" ]
             }
         ]
@@ -69,7 +69,7 @@
     "vehicle:powerWeightRatioSI": {
         "resources": [
             {
-                "func":     "mul",
+                "func":     "mul()",
                 "args":     [ "vehicle:powerWeightRatio", "physics:hpToWatts" ]
             }
         ]
@@ -78,7 +78,7 @@
         "value":    "list",
         "resources": [
             {
-                "func":     "join",
+                "func":     "join()",
                 "args":     [ "vehicle:maxSpeed_hard", "vehicle:maxSpeed_medium", "vehicle:maxSpeed_soft" ]
             }
         ]
@@ -86,7 +86,7 @@
     "vehicle:maxSpeed_hard": {
         "resources": [
             {
-                "func":     "div",
+                "func":     "div()",
                 "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance[0]", "physics:specificFriction" ]
             }
         ]
@@ -94,7 +94,7 @@
     "vehicle:maxSpeed_medium": {
         "resources": [
             {
-                "func":     "div",
+                "func":     "div()",
                 "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance[1]", "physics:specificFriction" ]
             }
         ]
@@ -102,7 +102,7 @@
     "vehicle:maxSpeed_soft": {
         "resources": [
             {
-                "func":     "div",
+                "func":     "div()",
                 "args":     [ "vehicle:powerWeightRatioSI", "chassis:terrainResistance[2]", "physics:specificFriction" ]
             }
         ]
@@ -162,7 +162,7 @@
         "map":      "gettext()",
         "resources": [
             {
-                "func":     "or",
+                "func":     "or()",
                 "args":     [ "vehicle:shortUserString", "vehicle:userString" ]
             }
         ]
@@ -265,7 +265,7 @@
     "vehicle:speedLimits": {
         "resources": [
             {
-                "func":     "join",
+                "func":     "join()",
                 "args":     [ "vehicle:speedLimits_forward", "vehicle:speedLimits_backward" ]
             }
         ]
@@ -558,7 +558,7 @@
     "engine:rpmRange": {
         "resources": [
             {
-                "func":     "join",
+                "func":     "join()",
                 "args":     [ "engine:rpmMax", "engine:rpmMin" ]
             }
         ]
@@ -852,7 +852,7 @@
     "shot:piercingPower": {
         "resources": [
             {
-                "func":     "join",
+                "func":     "join()",
                 "args":     [ "shot:piercingPower_1", "shot:piercingPower_2", "shot:piercingPower_3" ]
             }
         ]
@@ -890,7 +890,7 @@
     "shot:damage": {
         "resources": [
             {
-                "func":     "join",
+                "func":     "join()",
                 "args":     [ "shot:damage_1", "shot:damage_2", "shot:damage_3" ]
             }
         ]
@@ -944,6 +944,14 @@
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
                 "xpath":    "{shell}/userString"
+            }
+        ]
+    },
+    "shell:displayString": {
+        "resources": [
+            {
+                "func":     "format('{}: {}')",
+                "args":      [ "shell:kindShort", "shell:userString" ]
             }
         ]
     },

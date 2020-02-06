@@ -116,13 +116,15 @@ class ElementTestCase(unittest.TestCase):
 class ResourceTestCase(unittest.TestCase):
 
     def setUp(self):
+        from lib.vpath import Settings
+        from lib.translate import Gettext
         self.strage = vp.Strage()
         self.vpath = vp.VPath(scriptsdir='test/data/res', guidir='test/data/res')
-        with open('test/data/itemschema.json', 'r') as fp:
-            self.schema = json.load(fp)
+        self.schema = Settings(schema='test/data/itemschema.json').schema
         self.param = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
             'engine':'V-2-34', 'radio':'_9RM', 'gun':'_76mm_S-54'}
         self.resource = vp.Resource(self.strage, self.vpath, self.schema, self.param)
+        self.resource.gettext = Gettext(localedir='test/data/res')
 
     def test_resource_substitute(self):
         result = self.resource.substitute('vehicles/{nation}/list.xml', {'nation':'ussr'})

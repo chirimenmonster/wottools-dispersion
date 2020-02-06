@@ -54,7 +54,7 @@ class VehicleDatabase(object):
             if (secrets is None and x.secret) or (secrets and x.secret not in secrets):
                 return False
             return True
-        result = list(filter(dynfilter, self.__keys))
+        result = list(map(lambda x:x._asdict(), filter(dynfilter, self.__keys)))
         return result
 
     def getModuleList(self, module, ctx):
@@ -82,14 +82,25 @@ class VehicleDatabase(object):
             attr = getattr(moduleSpec, module) if moduleSpec is not None else None
             if attr is None:
                 index = None
+                name = None
             elif isinstance(attr, int):
                 index = attr
+                name = None
+            elif isinstance(attr, str):
+                index = None
+                name = attr
             else:
                 raise ValueError('bad module specified: {}, {}, {}'.format(module, attr, moduleSpec))
             newctxlist = []
             for ctx in ctxs:
                 moduleList = self.getModuleList(module, ctx)
-                moduleList = moduleList if index is None else [ moduleList[index] ]
+                if index is not None:
+                    moduleList = [ moduleList[index] ]
+                elif name is not None:
+                    if name in moduleList:
+                        moduleList = [ name ]
+                    else:
+                        moduleList = []
                 for moduleID in moduleList:
                     newctx = ctx.copy()
                     newctx[module] = moduleID
@@ -100,5 +111,6 @@ class VehicleDatabase(object):
     def getVehicleModuleCtx(self, vehicleSpec=None, moduleSpec=None):
         ctxs = []
         for ctx in self.getVehicleCtx(vehicleSpec):
-            ctxs.extend(self.getModuleCtx(ctx.vehicle, moduleSpec))
+            vehicle = ctx['vehicle']
+            ctxs.extend(self.getModuleCtx(vehicle, moduleSpec))
         return ctxs

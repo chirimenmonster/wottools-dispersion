@@ -24,3 +24,4 @@ class VehicleInfoTestCase(unittest.TestCase):
         self.assertEqual(26, len(result))
         self.assertEqual({'shell:gravity':'9.81'}, result[0])
         self.assertEqual({'shell:gravity':'190'}, result[-1])
+

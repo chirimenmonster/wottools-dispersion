@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from lib.vpath import Strage, VPath, Settings, Resource
 from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
-from lib.translate import g_gettext
+from lib.translate import Gettext
 
 class VehicleTestCase(unittest.TestCase):
 
@@ -16,11 +16,11 @@ class VehicleTestCase(unittest.TestCase):
         strage = Strage()
         vpath = VPath(scriptsdir='../wot.scripts', guidir='test/data/res')
         schema = Settings(schema='test/data/itemschema.json').schema
+        gettext = Gettext(localedir='test/data/res')
         resource = Resource(strage, vpath, schema)
+        resource.gettext = gettext
         self.vd = VehicleDatabase(resource)
         self.vd.prepare()
-        if g_gettext.localedir is None:
-            g_gettext.localedir = 'test/data/res'
 
     def test_getVehicleCtx(self):
         self.assertEqual(642, len(self.vd.getVehicleCtx()))
@@ -60,4 +60,14 @@ class VehicleTestCase(unittest.TestCase):
     def test_getVehicleModuleCtx(self):
         self.assertEqual(47076, len(self.vd.getVehicleModuleCtx()))
         self.assertEqual(5, len(self.vd.getVehicleModuleCtx(VehicleSpec(nations=['germany'], tiers=[1]))))
+        
+    def test_getModuleCtx_List(self):
+        moduleSpec = ModuleSpec(chassis='IS-3M', turret='Mod_T-10', engine='V-2-54IS', radio='R113',
+            gun='_122mm_BL-9', shell='_122mm_UBR-471P')
+        expect = {'nation': 'ussr', 'id': 21, 'vehicle': 'R19_IS-3', 'tier': 8, 'type': 'HT', 'secret': False,
+            'chassis': 'IS-3M', 'turret': 'Mod_T-10', 'engine': 'V-2-54IS', 'radio': 'R113',
+            'gun': '_122mm_BL-9', 'shell': '_122mm_UBR-471P'}
+        result = self.vd.getModuleCtx('R19_IS-3', moduleSpec)
+        self.assertEqual(expect, result[0])
+
     

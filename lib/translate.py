@@ -3,21 +3,20 @@ import gettext
 from lib.config import g_config as config
 
 class Translate(object):
-    gettext = None
+
+    def __init__(self):
+        self.__gettext = Gettext()
     
     def translate(self, text):
-        if g_gettext.localedir is None:
-            g_gettext.localedir = '/'.join([ config.BASE_DIR, config.LOCALE_RELPATH ])
-        return g_gettext.translate(text)
-
-g_translate = Translate().translate
-
+        if self.__gettext.localedir is None:
+            self.__gettext.localedir = '/'.join([ config.BASE_DIR, config.LOCALE_RELPATH ])
+        return self.__gettext.translate(text)
 
 
 class Gettext(object):
 
-    def __init__(self):
-        self.__localedir = None
+    def __init__(self, localedir=None):
+        self.__localedir = localedir
         self.__translation = {}
 
     @property
@@ -36,7 +35,7 @@ class Gettext(object):
         self.__translation[key] = translation
         return translation
 
-    def translate(self, text):   
+    def translate(self, text):
         if text is None or not text[0] == '#':
             return text
         domain, name = text[1:].split(':')
@@ -46,4 +45,4 @@ class Gettext(object):
         return text
 
 
-g_gettext = Gettext()
+g_translate = Translate().translate
