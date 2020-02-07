@@ -28,5 +28,6 @@ class Application(object):
         gettext = Gettext(localedir=config.localedir)
         self.gettext = gettext
         resource.gettext = gettext
+        self.dropdownlist = None
 
 g_application = Application()

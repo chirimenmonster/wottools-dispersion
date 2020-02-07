@@ -5,7 +5,7 @@ from collections import namedtuple
 from lib.resources import TIERS, TYPES
 
 
-VehicleTag = namedtuple('VehicleTag', 'nation id vehicle tier type secret')
+VehicleTag = namedtuple('VehicleTag', 'nation id vehicle tier type secret', defaults=(None, None, None, None, None, None))
 VehicleSpec = namedtuple('VehicleSpec', 'nations tiers types secrets', defaults=(None, None, None, None))
 ModuleSpec = namedtuple('ModuleSpec', 'chassis turret engine radio gun shell', defaults=(-1, -1, -1, -1, -1, 1))
 MODULE_SELECTABLE = [ 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]
@@ -37,7 +37,7 @@ class VehicleDatabase(object):
             self.__indexes[tag.vehicle] = tag
 
     def getCtx(self, vehicle):
-        result = self.__indexes[vehicle]
+        result = self.__indexes.get(vehicle, VehicleTag())
         return result._asdict()
 
     def getVehicleCtx(self, vehicleSpec=None):
