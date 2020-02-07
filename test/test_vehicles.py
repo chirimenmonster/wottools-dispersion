@@ -69,5 +69,10 @@ class VehicleTestCase(unittest.TestCase):
             'gun': '_122mm_BL-9', 'shell': '_122mm_UBR-471P'}
         result = self.vd.getModuleCtx('R19_IS-3', moduleSpec)
         self.assertEqual(expect, result[0])
+        
+        self.assertEqual({'shell:explosionRadius': None}, self.vd.getVehicleItems(['shell:explosionRadius'], result[0]))
+        moduleSpec = moduleSpec._replace(shell='_122mm_UOF-471')
+        result = self.vd.getModuleCtx('R19_IS-3', moduleSpec)
+        self.assertEqual({'shell:explosionRadius': '2.49'}, self.vd.getVehicleItems(['shell:explosionRadius'], result[0]))
 
     

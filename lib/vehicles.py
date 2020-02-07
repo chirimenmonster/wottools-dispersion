@@ -72,7 +72,7 @@ class VehicleDatabase(object):
     def getVehicleItems(self, tags, ctx):
         result = {}
         for tag in tags:
-            value = self.resource.getValue(tag, ctx)
+            value = self.resource.getRefValue(tag, ctx)
             result[tag] = value
         return result
 

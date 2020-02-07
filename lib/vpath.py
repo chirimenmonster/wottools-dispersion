@@ -341,9 +341,12 @@ class Resource(object):
         elif datatype == 'text':
             value = ' '.join(str(value))
         elif datatype == 'float':
-            if len(value) != 1:
+            if len(value) == 0:
+                value = None
+            elif len(value) == 1:
+                value = value[0]
+            else:
                 raise ValueError('data type "float" must one value: {}'.format(value))
-            value = value[0]
         elif datatype == 'list':
             pass
         else:

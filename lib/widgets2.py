@@ -183,8 +183,29 @@ class Application(tkinter.Frame):
         return result
 
     def getVehicleValue(self, schema):
-        param = self.getSelectedValues()
-        text = self.__strage.findText(schema, param)
+        tags = schema['value']
+        if isinstance(tags, str):
+            tags = [tags]
+        form = schema.get('format', None)
+        ctx = self.getSelectedValues()
+        print('schema={}, ctx={}'.format(schema, ctx))
+        result = app.vd.getVehicleItems(tags, ctx)
+        for k in tags:
+            if schema.get('consider', None) == 'float':
+                result[k] = float(result[k]) if result[k] is not None else ''
+        result = [ result[k] for k in tags ]
+        result = list(map(lambda x:x if x is not None else '', result))
+        print('tags={}, result={}'.format(tags, result))
+        if form:
+            try:
+                text = form.format(*result)
+            except ValueError:
+                text = ''
+        elif isinstance(result, list):
+            text = ' ' .join(result)
+        else:
+            text = result
+        print('text={}'.format(text))
         return text
 
     def changeVehicleFilter(self, param=None):
