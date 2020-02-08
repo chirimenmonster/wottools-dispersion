@@ -37,7 +37,7 @@ class DropdownList(object):
         nations = [ param['nation'] ]
         tiers = [ int(param['tier']) ]
         types = [ param['type'] ]
-        secret = [ True, False ] if param['secret'] == 'True' else None
+        secret = [ True, False ] if param.get('secret', None) == 'True' else None
         ctxs = app.vd.getVehicleCtx(VehicleSpec(nations, tiers, types, secret))
         tags = [ 'vehicle:index', 'vehicle:userString' ]
         result = [ list(app.vd.getVehicleItems(tags, c).values()) for c in ctxs ]
