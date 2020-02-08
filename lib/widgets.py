@@ -9,7 +9,6 @@ from lib.resources import g_resources
 from lib.config import parseArgument, g_config as config
 
 from lib.application import g_application as app
-from lib.dropdownlist import DropdownList as DropdownList2
 
 class Application(tkinter.Frame):
 
@@ -27,13 +26,6 @@ class Application(tkinter.Frame):
             'gun':              self.changeGun,
             'modules':          self.changeModules
         }
-        
-        config.GUI_DIR = 'test/data/res'
-        config.scriptspkg = 'test/data/res/packages/scripts.pkg'
-        config.schema = 'test/data/itemschema.json'
-        config.localedir = 'test/data/res'
-        app.setup(config)
-        app.dropdownlist = DropdownList2()
         
         tkinter.Frame.__init__(self, master)
         self.font = tkinter.font.Font(family='Arial', size=10, weight='normal')

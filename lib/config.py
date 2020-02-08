@@ -3,16 +3,14 @@ import os
 
 from lib.resources import g_resources
 
-BASE_DIRS = [ 'C:/Games/World_of_Tanks', 'C:/Games/World_of_Tanks_ASIA' ]
-
 class Config:
-    BASE_DIR = 'C:/Games/World_of_Tanks'
     PKG_RELPATH = 'res/packages'
     LOCALE_RELPATH = 'res'
     VEHICLES = 'vehicles'
     GUI_SETTINGS = 'gui'
     SCRIPTS_DIR = None
     GUI_DIR = None
+    basedir = None
     pkgdir = None
     scriptspkg = None
     guipkg = None
@@ -47,15 +45,11 @@ class Config:
 g_config = Config()
 
 def parseArgument(mode=None):
-    for d in BASE_DIRS:
-        if os.path.isdir(d):
-            g_config.BASE_DIR = d
-            break
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', dest='BASE_DIR', help='specify <WoT_game_folder>')
-    parser.add_argument('-s', dest='SCRIPTS_DIR', help='scripts folder extracted.  ex. "C:/git/wot.scripts/scripts"')
-    parser.add_argument('-g', dest='GUI_DIR', help='gui folder extracted.  ex. "./test/gui"')
+    parser.add_argument('-d', dest='basedir', help='specify <WoT_game_folder>')
+    parser.add_argument('-s', dest='scriptsdir', help='scripts folder extracted.  ex. "C:/git/wot.scripts/scripts"')
+    parser.add_argument('-g', dest='guidir', help='gui folder extracted.  ex. "./test/gui"')
     parser.add_argument('--secret', action='store_true', help='include secret tanks')
     parser.add_argument('--schema', dest='schema', help='change itemschema.json')
     parser.add_argument('--gui-items', dest='gui_items', help='change guisettings_items.json')
