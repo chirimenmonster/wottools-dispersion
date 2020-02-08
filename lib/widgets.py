@@ -147,6 +147,8 @@ class Application(tkinter.Frame):
             result = app.dropdownlist.fetchTierList(param=param)
         elif category == 'type':
             result = app.dropdownlist.fetchTypeList(param=param)
+        elif category == 'secret':
+            result = app.dropdownlist.fetchSecretList(param=param)
         elif category == 'vehicle':
             result = app.dropdownlist.fetchVehicleList(param=param)
         elif param['vehicle'] is None:
@@ -209,6 +211,7 @@ class Application(tkinter.Frame):
             self.__selector['nation'].select(param['nation'])
             self.__selector['tier'].select(param['tier'])
             self.__selector['type'].select(param['type'])
+            self.__selector['secret'].select(param['secret'])
         self.__selector['vehicle'].update()
         self.changeVehicle()
 

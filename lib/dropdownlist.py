@@ -27,11 +27,18 @@ class DropdownList(object):
         result = [ [ type, type ] for type in typesOrder ]
         return result
 
+    def fetchSecretList(self, schema=None, param=None):
+        return [
+            [ "False", "False" ],
+            [ "True", "True" ]
+        ]
+
     def fetchVehicleList(self, schema=None, param=None):
         nations = [ param['nation'] ]
         tiers = [ int(param['tier']) ]
         types = [ param['type'] ]
-        ctxs = app.vd.getVehicleCtx(VehicleSpec(nations, tiers, types))
+        secret = [ True, False ] if param['secret'] == 'True' else None
+        ctxs = app.vd.getVehicleCtx(VehicleSpec(nations, tiers, types, secret))
         tags = [ 'vehicle:index', 'vehicle:userString' ]
         result = [ list(app.vd.getVehicleItems(tags, c).values()) for c in ctxs ]
         return result
