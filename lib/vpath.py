@@ -115,8 +115,8 @@ class Strage(object):
             try:
                 with zip.open(file, 'r') as fp:
                     stream = io.BytesIO(fp.read())
-            except KeyError:
-                raise KeyError('file not found: {}, in pkgfile: {}'.format(file, pkg))
+            except KeyError as e:
+                raise KeyError('file not found: {}, in pkgfile: {}'.format(file, pkg)) from e
         else:
             try:
                 with open(file, 'rb') as fp:
