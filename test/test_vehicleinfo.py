@@ -14,7 +14,7 @@ class VehicleInfoTestCase(unittest.TestCase):
     def setUp(self):
         config.GUI_DIR = 'test/data/res'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
-        config.schema = 'test/data/itemschema.json'
+        config.schema = 'res/itemschema.json'
         config.outputjson = True
         application.setup(config)
 

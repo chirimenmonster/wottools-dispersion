@@ -7,7 +7,6 @@ import io
 import json
 
 from lib import csvoutput
-from lib.strage import Strage
 from lib.config import parseArgument, g_config as config 
 from lib.resources import g_resources
 
@@ -200,7 +199,7 @@ class Command:
     def listModule2(vehicles, modules, params):
         from lib.application import g_application as app
         from lib.vehicleinfo2 import listVehicleModule
-        config.schema = 'test/data/itemschema.json'
+        config.schema = 'res/itemschema.json'
         config.pkgdir = os.path.join(config.BASE_DIR, config.PKG_RELPATH)
         app.setup(config)
         result = listVehicleModule(vehicles, modules, params)

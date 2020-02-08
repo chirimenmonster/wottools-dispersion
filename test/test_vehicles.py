@@ -15,7 +15,7 @@ class VehicleTestCase(unittest.TestCase):
     def setUp(self):
         strage = Strage()
         vpath = VPath(scriptsdir='../wot.scripts', guidir='test/data/res')
-        schema = Settings(schema='test/data/itemschema.json').schema
+        schema = Settings(schema='res/itemschema.json').schema
         gettext = Gettext(localedir='test/data/res')
         resource = Resource(strage, vpath, schema)
         resource.gettext = gettext

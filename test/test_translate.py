@@ -37,7 +37,7 @@ class ApplicationTranslateTestCase(unittest.TestCase):
         from lib.application import g_application as app
         config.GUI_DIR = 'test/data/res'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
-        config.schema = 'test/data/itemschema.json'
+        config.schema = 'res/itemschema.json'
         config.localedir = 'test/data/res'
         app.setup(config)
         self.assertEqual('T-34', app.gettext.translate('#ussr_vehicles:T-34'))

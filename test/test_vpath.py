@@ -120,7 +120,7 @@ class ResourceTestCase(unittest.TestCase):
         from lib.translate import Gettext
         self.strage = vp.Strage()
         self.vpath = vp.VPath(scriptsdir='test/data/res', guidir='test/data/res')
-        self.schema = Settings(schema='test/data/itemschema.json').schema
+        self.schema = Settings(schema='res/itemschema.json').schema
         self.param = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
             'engine':'V-2-34', 'radio':'_9RM', 'gun':'_76mm_S-54'}
         self.resource = vp.Resource(self.strage, self.vpath, self.schema, self.param)
