@@ -195,12 +195,11 @@ class Element(object):
 
 class Resource(object):
 
-    def __init__(self, strage, vpath, schema, param=None):
+    def __init__(self, strage, vpath, schema, gettext=None):
         self.__strage = strage
         self.__vpath = vpath
         self.__schema = schema
-        self.__gettext = None
-        self.__param = param
+        self.__gettext = gettext
         self.__function = {
             'sum':  self.func_sum,
             'mul':  self.func_mul,
@@ -252,9 +251,10 @@ class Resource(object):
                 param = r.get('param', None)
                 try:
                     result = self.getFromFile(file, xpath, param, ctx)
-                except FileNotFoundError:
+                except FileNotFoundError or KeyError:
                     if r == resources[-1]:
-                        raise
+                        result = None
+                        break
                     continue
                 if len(result) > 0:
                     break

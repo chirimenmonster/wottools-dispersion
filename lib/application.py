@@ -23,22 +23,24 @@ class Application(object):
             config.basedir = guessBasedir()
         if config.localedir is None:
             config.localedir = os.path.join(config.basedir, config.LOCALE_RELPATH)
-        schemapath = config.schema
-        schema = Settings(schema=schemapath).schema
+        schema = self.setupItemschema(config)
         vpath = self.setupVPath(config)
         strage = Strage()
-        resource = Resource(strage, vpath, schema)
+        self.gettext = self.setupGettext(config)
+        resource = Resource(strage, vpath, schema, gettext=self.gettext)
         vd = VehicleDatabase(resource)
         vd.prepare()
         self.vd = vd
         self.resource = resource
         self.schema = schema
         self.config = config
-        gettext = Gettext(localedir=config.localedir)
-        self.gettext = gettext
-        resource.gettext = gettext
         self.dropdownlist = None
 
+    def setupItemschema(self, config):
+        schemapath = config.schema
+        schema = Settings(schema=schemapath).schema
+        return schema
+    
     def setupVPath(self, config):
         if config.pkgdir is None:
             if config.basedir:
@@ -52,6 +54,12 @@ class Application(object):
         scriptspkg = config.scriptspkg
         vpath = VPath(pkgdir=pkgdir, scriptsdir=scriptsdir, guidir=guidir, scriptspkg=scriptspkg)
         return vpath
+
+    def setupGettext(self, config):
+        if config.localedir is None:
+            pkgdir = '/'.join([config.basedir, config.LOCALE_RELPATH])
+        gettext = Gettext(localedir=config.localedir)
+        return gettext
 
 
 g_application = Application()
