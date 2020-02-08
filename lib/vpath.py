@@ -7,6 +7,7 @@ import json
 import zipfile
 from collections import namedtuple
 import xml.etree.ElementTree as ET
+import string
 
 import traceback
 
@@ -290,7 +291,7 @@ class Resource(object):
             result = self.getNodes(resources=resources, ctx=ctx)
             #print('getValue: result={}, ctx={}'.format(result, ctx))
         except KeyError as e:
-            raise KeyError(e, resources, ctx) from e
+            raise KeyError('{}, resources={}, ctx={}'.format(e.args, resources, ctx)) from e
         result = self.sort(result, order)
         result = self.convert(result, type)
         result = self.assignMap(result, map)
@@ -324,6 +325,13 @@ class Resource(object):
             value = list(map(lambda x,c=ctx:self.substitute(x, c), value))
         elif isinstance(value, str):
             try:
+                for p in list(string.Formatter().parse(value)):
+                    k = p[1]
+                    if k is not None:
+                        if k not in ctx:
+                            raise KeyError('no key "{}" in ctx={}'.format(k, ctx))
+                        elif ctx[k] is None:
+                            return None
                 value = value.format(**ctx)
             except KeyError as e:
                 raise KeyError(e, value, ctx) from e
