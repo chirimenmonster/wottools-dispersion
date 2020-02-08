@@ -173,13 +173,9 @@ class Application(tkinter.Frame):
                 raise NotImplementedError
         if result is None or result == []:
             result = [ [ None, '' ] ]
-        return result
-        
-    def getDropdownList(self, schema):
-        param = self.getSelectedValues()
-        result = self.__strage.getDropdownList(schema, param)
-        if result is None or result == []:
-            result = [ [ None, '' ] ]
+        #print('category={}'.format(category))
+        #print('param={}'.format(param))
+        #print('result={}'.format(result))
         return result
 
     def getVehicleValue(self, schema):
@@ -188,14 +184,14 @@ class Application(tkinter.Frame):
             tags = [tags]
         form = schema.get('format', None)
         ctx = self.getSelectedValues()
-        print('schema={}, ctx={}'.format(schema, ctx))
+        #print('schema={}, ctx={}'.format(schema, ctx))
         result = app.vd.getVehicleItems(tags, ctx)
         for k in tags:
             if schema.get('consider', None) == 'float':
                 result[k] = float(result[k]) if result[k] is not None else ''
         result = [ result[k] for k in tags ]
         result = list(map(lambda x:x if x is not None else '', result))
-        print('tags={}, result={}'.format(tags, result))
+        #print('tags={}, result={}'.format(tags, result))
         if form:
             try:
                 text = form.format(*result)
@@ -205,7 +201,7 @@ class Application(tkinter.Frame):
             text = ' ' .join(result)
         else:
             text = result
-        print('text={}'.format(text))
+        #print('text={}'.format(text))
         return text
 
     def changeVehicleFilter(self, param=None):

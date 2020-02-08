@@ -38,14 +38,20 @@ class DropdownList(object):
 
     def _fetchModuleList(self, module, param=None):
         vehicle = param['vehicle']
+        ctx = app.vd.getCtx(vehicle)
         param = { k:v for k,v in param.items() if k in ModuleSpec._fields}
-        moduleSpec = ModuleSpec(**param)
-        moduleSpec = moduleSpec._replace(**{module:None})
-        ctxs = app.vd.getModuleCtx(vehicle, moduleSpec)
+        ctx.update(param)
+        names = app.vd.getModuleList(module, ctx)
+        ctxs = []
+        for n in names:
+            c = ctx.copy()
+            c[module] = n
+            ctxs.append(c)
         result = [ list(app.vd.getVehicleItems(self.tags[module], c).values()) for c in ctxs ]
         return result
 
     def fetchChassisList(self, schema=None, param=None):
+        param = param.copy()
         result = self._fetchModuleList('chassis', param=param)
         return result
 

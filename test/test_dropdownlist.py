@@ -69,6 +69,7 @@ class DropdownListTestCase(unittest.TestCase):
             ['R113', 'R-113']]
         expect_gun = [
             ['_122-mm_D-25T_with_a_piston_shutter', '122 mm D-2-5T'],
+            ['_100mm_D10T', '100 mm D10T'],
             ['_122-mm_D-25T_with_wedges_shutter', '122 mm D-25T'],
             ['_122mm_BL-9', '122 mm BL-9']]
         expect_shell = [
@@ -82,6 +83,15 @@ class DropdownListTestCase(unittest.TestCase):
         self.assertEqual(expect_gun, self.dropdownlist.fetchGunList(param=ctx))
         self.assertEqual(expect_shell, self.dropdownlist.fetchShellList(param=ctx))
         result = self.dropdownlist.fetchGunList(param=ctx)
+    
+    def test_fetchChassisList(self):
+        ctx = {'vehicle':'R19_IS-3', 'chassis':'miss', 'turret':'miss', 'engine':'miss', 'radio':'miss',
+            'gun':'miss', 'shell':'miss'}
+        expect_chassis = [
+            ['IS-3', 'IS-3'],
+            ['IS-3M', 'IS-3M']]
+        self.assertEqual(expect_chassis, self.dropdownlist.fetchChassisList(param=ctx))
+        
 
     def test_application(self):
         self.assertEqual('T-34', app.gettext.translate('#ussr_vehicles:T-34'))

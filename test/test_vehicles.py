@@ -23,15 +23,19 @@ class VehicleTestCase(unittest.TestCase):
         self.vd.prepare()
 
     def test_getVehicleCtx(self):
-        self.assertEqual(642, len(self.vd.getVehicleCtx()))
-        self.assertEqual(778, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True, False]))))
-        self.assertEqual(136, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True]))))
+        self.assertEqual(646, len(self.vd.getVehicleCtx()))
+        self.assertEqual(789, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True, False]))))
+        self.assertEqual(143, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True]))))
         self.assertEqual(30, len(self.vd.getVehicleCtx(VehicleSpec(nations=['germany'], tiers=[8]))))
         self.assertEqual(8, len(self.vd.getVehicleCtx(VehicleSpec(nations=['germany'], tiers=[8], types=['TD']))))
 
     def test_getModuleList(self):
         ctx = self.vd.getCtx('R04_T-34')
         self.assertEqual(['T-34_mod_1940', 'T-34_mod_1942'], self.vd.getModuleList('turret', ctx))
+        ctx = {'nation':'ussr', 'id':21, 'vehicle':'R19_IS-3', 'tier':8, 'type':'HT', 'secret':False,
+            'chassis':'miss', 'turret':'miss', 'engine':'miss', 'radio':'miss', 'gun':'miss', 'shell':'miss'}
+        self.assertEqual(['IS-3', 'IS-3M'], self.vd.getModuleList('chassis', ctx))
+
 
     def test_getVehicleItems(self):
         ctx = self.vd.getCtx('R04_T-34')
@@ -58,7 +62,7 @@ class VehicleTestCase(unittest.TestCase):
         self.assertEqual(3, len(self.vd.getModuleCtx('R04_T-34', ModuleSpec(turret=1, gun=3, shell=None))))
 
     def test_getVehicleModuleCtx(self):
-        self.assertEqual(47076, len(self.vd.getVehicleModuleCtx()))
+        self.assertEqual(47298, len(self.vd.getVehicleModuleCtx()))
         self.assertEqual(5, len(self.vd.getVehicleModuleCtx(VehicleSpec(nations=['germany'], tiers=[1]))))
         
     def test_getModuleCtx_List(self):

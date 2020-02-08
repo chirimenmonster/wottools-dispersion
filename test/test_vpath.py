@@ -168,10 +168,20 @@ class ResourceTestCase(unittest.TestCase):
         self.assertEqual(735.5, self.resource.getValue('physics:hpToWatts', self.param))
 
     def test_resource_getNodes_func_sum(self):
+        weight = {'hull:weight': 15000, 'chassis:weight':8000, 'turret:weight':3900, 'engine:weight':750,
+            'fueltank:weight':250, 'radio:weight':100, 'gun:weight':1390 }
+        for m,w in weight.items():
+            result = self.resource.getValue(m, self.param)
+            self.assertEqual(str(w), result)
         result = self.resource.getValue('vehicle:totalWeight', self.param)
         self.assertEqual(29390.0, result)
 
     def test_resource_getNodes_func_div(self):
+        return
+        result = self.resource.getValue('engine:power', self.param)
+        print(result)
+        result = self.resource.getValue('vehicle:totalWeight', self.param)
+        print(result)
         self.assertEqual(0.01701258931609391, self.resource.getValue('vehicle:powerWeightRatio', self.param))
         self.assertEqual(14.016600510789694, self.resource.getValue('vehicle:maxSpeed_medium', self.param))
 

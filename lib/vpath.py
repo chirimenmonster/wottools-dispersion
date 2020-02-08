@@ -104,16 +104,17 @@ class Strage(object):
         else:
             file, pkg = path
         if pkg:
-            try:
-                if pkg in self.__cachedZip:
-                    zip = self.__cachedZip[pkg]
-                else:
+            if pkg in self.__cachedZip:
+                zip = self.__cachedZip[pkg]
+            else:
+                try:
                     zip = zipfile.ZipFile(pkg, 'r')
-                    self.__cachedZip[pkg] = zip
+                except FileNotFoundError:
+                    raise FileNotFoundError('pkgfile not found: {}'.format(pkg))
+                self.__cachedZip[pkg] = zip
+            try:
                 with zip.open(file, 'r') as fp:
                     stream = io.BytesIO(fp.read())
-            except FileNotFoundError:
-                raise FileNotFoundError('pkgfile not found: {}'.format(pkg))
             except KeyError:
                 raise KeyError('file not found: {}, in pkgfile: {}'.format(file, pkg))
         else:
@@ -287,9 +288,9 @@ class Resource(object):
                 map = schema.get('map', None)
         try:
             result = self.getNodes(resources=resources, ctx=ctx)
+            #print('getValue: result={}, ctx={}'.format(result, ctx))
         except KeyError as e:
             raise KeyError(e, resources, ctx) from e
-            #raise
         result = self.sort(result, order)
         result = self.convert(result, type)
         result = self.assignMap(result, map)
@@ -302,6 +303,8 @@ class Resource(object):
             tag = match.group(1)
             pos = int(match.group(2))
         result = self.getValue(tag, ctx)
+        if result is None:
+            return None
         if pos is not None:
             result = result[pos]
         return result
@@ -354,6 +357,8 @@ class Resource(object):
         return value
 
     def assignMap(self, value, rule):
+        if value is None:
+            return None
         if rule is None:
             return value
         if isinstance(rule, dict):
@@ -385,7 +390,10 @@ class Resource(object):
         return values
 
     def func_sum(self, arg0, args, ctx=None):
-        values = list(map(lambda x,c=ctx:float(self.getRefValue(x, c)), args))
+        values = list(map(lambda x,c=ctx:self.getRefValue(x, c), args))
+        if None in values:
+            return None
+        values = map(float, values)
         return sum(values)
 
     def func_div(self, arg0, args, ctx=None):
