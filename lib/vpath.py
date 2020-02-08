@@ -228,6 +228,8 @@ class Resource(object):
             ctx = newctx
         file = self.substitute(file, ctx)
         xpath = self.substitute(xpath, ctx)
+        if file is None or xpath is None:
+            return None
         path = self.__vpath.getPathInfo(file)
         root = self.__strage.readXml(path)
         self.element = Element(root)
@@ -253,11 +255,11 @@ class Resource(object):
                 try:
                     result = self.getFromFile(file, xpath, param, ctx)
                 except FileNotFoundError or KeyError:
+                    result = None
+                if result is None:
                     if r == resources[-1]:
-                        result = None
                         break
-                    continue
-                if len(result) > 0:
+                elif len(result) > 0:
                     break
             elif 'immediate' in r:
                 result = self.substitute(r['immediate'], ctx)
@@ -324,14 +326,14 @@ class Resource(object):
         if isinstance(value, list):
             value = list(map(lambda x,c=ctx:self.substitute(x, c), value))
         elif isinstance(value, str):
+            for p in list(string.Formatter().parse(value)):
+                k = p[1]
+                if k is not None:
+                    if k not in ctx:
+                        raise KeyError('no key "{}" in ctx={}'.format(k, ctx))
+                    elif ctx[k] is None:
+                        return None
             try:
-                for p in list(string.Formatter().parse(value)):
-                    k = p[1]
-                    if k is not None:
-                        if k not in ctx:
-                            raise KeyError('no key "{}" in ctx={}'.format(k, ctx))
-                        elif ctx[k] is None:
-                            return None
                 value = value.format(**ctx)
             except KeyError as e:
                 raise KeyError(e, value, ctx) from e
