@@ -8,6 +8,7 @@ import json
 
 from lib import csvoutput
 from lib.config import parseArgument, g_config as config 
+from lib.application import g_application as app
 
 
 def getListVehicle(strage, pattern):
@@ -68,68 +69,6 @@ def _getVehicleValues(vspecs, tags):
     result = [ strage.getVehicleItemsInfo(vs, tags) for vs in vspecs ]
     return result
 
-def _removeDuplicate(values):
-    if config.suppress_unique:
-        return values
-    result = []
-    data = {}
-    for v in values:
-        k = tuple(v.values())
-        if k not in data:
-            data[k] = True
-            result.append(v)
-    return result
-
-def _removeEmpty(records):
-    if not config.suppress_empty:
-        return records
-    records = [ r for r in records if None not in r.values() ]
-    return records
-
-def _sort(records, tags=None):
-    if config.sort is None and tags is None:
-        return records
-    if tags is not None:
-        sortKeys = tags
-    else:
-        sortKeys = config.sort.split(',')
-    keyFuncs = []
-    for k in sortKeys:
-        schema = g_resources.itemschema[k]
-        func = lambda x,key=k: x[key]
-        if 'sort' in schema:
-            if schema['sort'] == 'float':
-                func = lambda x,key=k: float(x[key])
-        keyFuncs.append(func)
-    records = sorted(records, key=lambda x: tuple([ f(x) for f in keyFuncs ]))
-    return records
-
-def _outputValues(records):
-    if config.csvoutput:
-        message = csvoutput.createMessageByArrayOfDict(records, not config.suppress_header)
-        print(message, end='')
-    elif config.outputjson:
-        print(json.dumps(records, ensure_ascii=False, indent=2))
-    else:
-        forms = []
-        widths = []
-        for k in records[0].keys():
-            if 'format' in g_resources.itemschema[k]:
-                f = '{!s:' + g_resources.itemschema[k]['format'] + '}'
-            else:
-                f = '{!s:>7}'
-            forms.append(f)
-            widths.append(len(f.format(None)))
-        if not config.suppress_header:
-            if config.show_headers:
-                tokens = [ f.format(k) for f,w,k in zip(forms, widths, config.show_headers.split(',')) ]
-                widths = [ len(t) for t in tokens ]
-            else:
-                tokens = [ f.format(k)[:w] for f,w,k in zip(forms, widths, records[0].keys()) ]
-            print(' '.join(tokens))
-        for r in records:
-            values = [ ('{!s:' + str(w) + '}').format(f.format(r[k])) for f,w,k in zip(forms, widths, r.keys()) ]
-            print(' '.join(values))
 
 
 class Command:
@@ -194,15 +133,6 @@ class Command:
         result = _sort(result)
         _outputValues(result)
 
-    @staticmethod
-    def listModule2(vehicles, modules, params):
-        from lib.application import g_application as app
-        from lib.vehicleinfo2 import listVehicleModule
-        config.schema = 'res/itemschema.json'
-        config.pkgdir = os.path.join(config.BASE_DIR, config.PKG_RELPATH)
-        app.setup(config)
-        result = listVehicleModule(vehicles, modules, params)
-        _outputValues(result)
         
     @staticmethod
     def infoVehicle(strage, arg, showParams):
@@ -255,12 +185,15 @@ if __name__ == '__main__':
     logger.addHandler(logging.StreamHandler())
     
     parseArgument(mode='cui')
-    
+
+    app.setup(config)    
     if config.new:
-        Command.listModule2(config.vehicle, config.list_module, config.show_params)
+        from lib.vehicleinfo2 import listVehicleModule, _outputValues
+        result = listVehicleModule(config.vehicle, config.list_module, config.show_params, sort=config.sort)
+        _outputValues(result, show=config.show_params)
         sys.exit()
     
-    strage = Strage()
+    strage = None
 
     if config.list_nation:
         Command.listNation(strage)

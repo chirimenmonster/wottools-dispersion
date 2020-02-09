@@ -7,7 +7,7 @@ from lib.config import TIERS, TYPES
 
 VehicleTag = namedtuple('VehicleTag', 'nation id vehicle tier type secret', defaults=(None, None, None, None, None, None))
 VehicleSpec = namedtuple('VehicleSpec', 'nations tiers types secrets', defaults=(None, None, None, None))
-ModuleSpec = namedtuple('ModuleSpec', 'chassis turret engine radio gun shell', defaults=(-1, -1, -1, -1, -1, 1))
+ModuleSpec = namedtuple('ModuleSpec', 'chassis turret engine radio gun shell', defaults=(-1, -1, -1, -1, -1, 0))
 MODULE_SELECTABLE = [ 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]
 
 
@@ -78,6 +78,8 @@ class VehicleDatabase(object):
 
     def getModuleCtx(self, vehicle, moduleSpec=None):
         ctxs = [ self.getCtx(vehicle) ]
+        if len(ctxs) == 0:
+            return ctxs
         for module in MODULE_SELECTABLE:
             attr = getattr(moduleSpec, module) if moduleSpec is not None else None
             if attr is None:
@@ -95,7 +97,10 @@ class VehicleDatabase(object):
             for ctx in ctxs:
                 moduleList = self.getModuleList(module, ctx)
                 if index is not None:
-                    moduleList = [ moduleList[index] ]
+                    try:
+                        moduleList = [ moduleList[index] ]
+                    except IndexError as e:
+                        raise IndexError('{}, moduleList={}, index={}'.format(e.args, moduleList, index))
                 elif name is not None:
                     if name in moduleList:
                         moduleList = [ name ]

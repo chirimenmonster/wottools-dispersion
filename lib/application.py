@@ -23,6 +23,8 @@ class Application(object):
             config.basedir = guessBasedir()
         if config.localedir is None:
             config.localedir = os.path.join(config.basedir, config.LOCALE_RELPATH)
+        if config.schema is None:
+            config.schema = 'res/itemschema.json'
         settings = self.setupSettings(config)
         schema = settings.schema
         vpath = self.setupVPath(config)
@@ -39,7 +41,11 @@ class Application(object):
         self.dropdownlist = None
 
     def setupSettings(self, config):
-        settings = Settings(schema=config.schema)
+        if config.schema is None:
+            schemapath = 'res/itemschema.json'
+        else:
+            schemapath = config.schema
+        settings = Settings(schema=schemapath)
         if config.gui:
             settings.add('guiitems', 'res/guisettings_items.json')
             settings.add('guititles', 'res/guisettings_titles.json')

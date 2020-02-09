@@ -64,6 +64,9 @@ class VehicleTestCase(unittest.TestCase):
     def test_getVehicleModuleCtx(self):
         self.assertEqual(47298, len(self.vd.getVehicleModuleCtx()))
         self.assertEqual(5, len(self.vd.getVehicleModuleCtx(VehicleSpec(nations=['germany'], tiers=[1]))))
+        vehicleSpec = VehicleSpec(nations=['germany'], types=['LT'], secrets=[True])
+        moduleSpec= ModuleSpec()
+        self.assertEqual(7, len(self.vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)))
         
     def test_getModuleCtx_List(self):
         moduleSpec = ModuleSpec(chassis='IS-3M', turret='Mod_T-10', engine='V-2-54IS', radio='R113',

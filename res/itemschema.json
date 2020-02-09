@@ -126,6 +126,7 @@
         ]
     },
     "vehicle:id": {
+        "value":    "int",
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
@@ -215,6 +216,7 @@
         ]
     },
     "vehicle:tier": {
+        "value":    "int",
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",

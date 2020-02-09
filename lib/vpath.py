@@ -360,13 +360,13 @@ class Resource(object):
                 value = ' '.join(map(str, value))
         elif datatype == 'text':
             value = ' '.join(str(value))
-        elif datatype == 'float':
+        elif datatype in ['float', 'int']:
             if len(value) == 0:
                 value = None
             elif len(value) == 1:
                 value = value[0]
             else:
-                raise ValueError('data type "float" must one value: {}'.format(value))
+                raise ValueError('data type "float" or "int" must one value: {}'.format(value))
         elif datatype == 'list':
             pass
         else:
