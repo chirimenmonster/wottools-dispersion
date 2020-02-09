@@ -17,6 +17,8 @@ def listVehicleModule(vehicles, modules, params, sort=None):
             secrets = [True]
         elif secrets == 'all':
             secrets = [True, False]
+        elif secrets == '':
+            secrets = [False]
         else:
             raise ValueError('invalid parameter secret, {}'.format(secrets))
     else:
@@ -76,7 +78,13 @@ def _sort(records, tags=None):
     for k in tags:
         schema = app.settings.schema[k]
         func = lambda x,key=k: x[key]
-        if 'value' in schema:
+        if 'sort' in schema:
+            if schema['sort'] in ('settings:nationsOrder', 'settings:typesOrder'):
+                indexes = app.resource.getValue(schema['sort'])
+                func = lambda x,key=k,ref=indexes: ref.index(x[key])
+            else:
+                raise NotImplementedError('sort={}'.format(schema['sort']))
+        elif 'value' in schema:
             if schema['value'] == 'int':
                 func = lambda x,key=k: int(x[key])
             elif schema['value'] == 'float':
