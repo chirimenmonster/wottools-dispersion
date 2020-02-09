@@ -11,7 +11,7 @@ import string
 
 import traceback
 
-from lib.resources import TIERS_LABEL
+from lib.config import TIERS_LABEL
 from lib.XmlUnpacker import XmlUnpacker
 
 logger = logging.getLogger(__name__)
@@ -77,11 +77,8 @@ class VPath(object):
 class Settings(object):
 
     def __init__(self, dir=None, schema=None):
-        self.__dir = dir
         if schema:
             self.__path_schema = schema
-        else:
-            self.__path_schema = os.path.join(self.__dir, 'itemschema.json')
         self.__schema = None
 
     @property
@@ -90,6 +87,16 @@ class Settings(object):
             with open(self.__path_schema, 'r') as fp:
                 self.__schema = json.load(fp)
         return self.__schema
+
+    def load(self, path):
+        with open(path, 'r') as fp:
+            result = json.load(fp)
+        return result
+
+    def add(self, name, path):
+        with open(path, 'r') as fp:
+            result = json.load(fp)
+        setattr(self, name, result)
 
 
 class Strage(object):

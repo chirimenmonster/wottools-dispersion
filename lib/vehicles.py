@@ -2,7 +2,7 @@
 import json
 from collections import namedtuple
 
-from lib.resources import TIERS, TYPES
+from lib.config import TIERS, TYPES
 
 
 VehicleTag = namedtuple('VehicleTag', 'nation id vehicle tier type secret', defaults=(None, None, None, None, None, None))

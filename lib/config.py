@@ -1,9 +1,18 @@
+
 import argparse
 import os
 
-from lib.resources import g_resources
+TIERS = [ str(tier) for tier in range(1, 10 + 1) ]
+TIERS_LABEL = { '1':'I', '2':'II', '3':'III', '4':'IV', '5':'V', '6':'VI', '7':'VII', '8':'VIII', '9':'IX', '10':'X'}
+TIERS_LIST = [ TIERS_LABEL[t] for t in TIERS ]
+
+WG_TYPES = [ 'lightTank', 'mediumTank', 'heavyTank', 'AT-SPG', 'SPG' ]
+TYPES_MAP = { 'lightTank':'LT', 'mediumTank':'MT', 'heavyTank':'HT', 'AT-SPG':'TD', 'SPG':'SPG' }
+TYPES = [ TYPES_MAP[t] for t in WG_TYPES ]
+
 
 class Config:
+    gui = False
     PKG_RELPATH = 'res/packages'
     LOCALE_RELPATH = 'res'
     VEHICLES = 'vehicles'
@@ -81,8 +90,3 @@ def parseArgument(mode=None):
         g_config.DATA[g_config.VEHICLES]['extracted'] = g_config.SCRIPTS_DIR
     if g_config.GUI_DIR:
         g_config.DATA[g_config.GUI_SETTINGS]['extracted'] = g_config.GUI_DIR
-
-    if g_config.gui_items:
-        g_resources.guisettings_items = g_config.gui_items
-    g_resources.load()
-

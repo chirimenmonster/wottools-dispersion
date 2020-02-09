@@ -5,7 +5,6 @@ import tkinter.ttk
 import tkinter.font
 
 from lib import csvoutput
-from lib.resources import g_resources
 from lib.config import parseArgument, g_config as config
 
 from lib.application import g_application as app
@@ -15,9 +14,9 @@ class Application(tkinter.Frame):
     def __init__(self, master=None, strage=None):
         self.__strage = strage
 
-        self.__itemgroup = g_resources.itemgroup
-        self.__titlesdesc = g_resources.titlesdesc
-        self.__selectorsdesc = g_resources.selectorsdesc
+        self.__itemgroup = app.settings.guiitems
+        self.__titlesdesc = app.settings.guititles
+        self.__selectorsdesc = app.settings.guiselectors
 
         self.__handlerChangeSelected = {
             'vehicleFilter':    self.changeVehicleFilter,

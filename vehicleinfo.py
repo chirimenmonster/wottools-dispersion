@@ -8,7 +8,6 @@ import json
 
 from lib import csvoutput
 from lib.config import parseArgument, g_config as config 
-from lib.resources import g_resources
 
 
 def getListVehicle(strage, pattern):

@@ -1,5 +1,5 @@
 
-from lib.resources import TIERS, TIERS_LABEL
+from lib.config import TIERS, TIERS_LABEL
 from lib.application import g_application as app
 from lib.vehicles import VehicleSpec, ModuleSpec
 

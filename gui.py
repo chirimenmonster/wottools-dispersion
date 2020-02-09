@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
 
     config.schema = 'res/itemschema.json'
+    config.gui = True
 
     parseArgument()
 
