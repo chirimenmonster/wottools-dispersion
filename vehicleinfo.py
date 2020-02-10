@@ -87,6 +87,24 @@ if __name__ == '__main__':
                     sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
                 if headers is None:
                     headers = 'Nation,Tier,Type,Secret,Id,Index,UserString'
+            elif config.list_module == 'chassis':
+                showtag = 'vehicle:index,chassis:index'
+                if sorttag is None:
+                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
+                if headers is None:
+                    headers = 'Vehicle,Chassis'
+            elif config.list_module == 'engine':
+                showtag = 'vehicle:index,engine:index'
+                if sorttag is None:
+                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
+                if headers is None:
+                    headers = 'Vehicle,Engine'
+            elif config.list_module == 'radio':
+                showtag = 'vehicle:index,radio:index'
+                if sorttag is None:
+                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
+                if headers is None:
+                    headers = 'Vehicle,Radio'
             elif config.list_module == 'turret':
                 showtag = 'vehicle:index,turret:index'
                 if sorttag is None:

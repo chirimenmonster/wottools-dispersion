@@ -397,6 +397,7 @@
         ]
     },
     "chassis:index": {
+        "format":   "40s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -536,6 +537,7 @@
         ]
     },
     "engine:index": {
+        "format":   "48s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/engines.xml",
@@ -649,6 +651,7 @@
         ]
     },
     "radio:index": {
+        "format":   "25s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/radios.xml",
