@@ -14,12 +14,14 @@
 ## commandline tool
 ### usage
 
-vehicleinfo.py [-h] [-d BASE_DIR] [-s SCRIPTS_DIR] [-g GUI_DIR]
-                      [--secret] [--gui-items GUI_ITEMS] [--vehicle VEHICLE]
-                      [--csv] [--list-nation] [--list-tier] [--list-type]
-                      [--list-module LIST_MODULE] [--params SHOW_PARAMS]
-                      [--suppress-unique] [--suppress-header]
-                      [--prefer-userstring]
+vehicleinfo.py [-h] [-d BASEDIR] [-s SCRIPTSDIR] [-g GUIDIR]
+                      [--schema SCHEMA] [--gui-items GUI_ITEMS]
+                      [--nation | --tier | --type | --vehicle LIST_VEHICLE]
+                      [--csv | --json] [--list-module LIST_MODULE]
+                      [--show SHOW_PARAMS] [--headers SHOW_HEADERS]
+                      [--sort SORT] [--suppress-unique] [--suppress-header]
+                      [--suppress-empty] [--prefer-userstring]
+
 
 ### example
 
@@ -27,37 +29,40 @@ vehicleinfo.py [-h] [-d BASE_DIR] [-s SCRIPTS_DIR] [-g GUI_DIR]
 `::` for all vehicles.
 
 ```
-$ ./vehicleinfo.py --vehicle ussr:8:mt
-{'vehicle:index': 'R20_T-44'}
-{'vehicle:index': 'R60_Object416'}
-{'vehicle:index': 'R112_T54_45_FL'}
-{'vehicle:index': 'R20_T-44_FL'}
-{'vehicle:index': 'R127_T44_100_U'}
-{'vehicle:index': 'R146_STG_Tday'}
-{'vehicle:index': 'R146_STG'}
-{'vehicle:index': 'R122_T44_100B'}
-{'vehicle:index': 'R112_T54_45'}
-{'vehicle:index': 'R122_T44_100'}
-{'vehicle:index': 'R127_T44_100_P'}
+$ ./vehicleinfo.py --vehicle ussr:8:mt:all
+ Nation    Tier    Type  Secret      Id Index                           UserString
+   ussr       8      MT              17 R20_T-44                        T-44
+   ussr       8      MT              52 R60_Object416                   Object 416
+   ussr       8      MT  secret     152 R20_T-44_IGR                    T-44
+   ussr       8      MT             171 R112_T54_45_FL                  T-54 first prototype FL
+   ussr       8      MT             172 R20_T-44_FL                     T-44 FL
+   ussr       8      MT  secret     180 R127_T44_100_K                  Т-44-100 (К)
+   ussr       8      MT             181 R127_T44_100_U                  Т-44-100 (У)
+   ussr       8      MT             185 R146_STG_Tday                   STG Guard
+   ussr       8      MT             186 R146_STG                        STG
+   ussr       8      MT             191 R122_T44_100B                   T-44-100 (B)
+   ussr       8      MT             234 R112_T54_45                     T-54 first prototype
+   ussr       8      MT             242 R122_T44_100                    Т-44-100
+   ussr       8      MT             246 R127_T44_100_P                  T-44-100 (R)
 ```
 
 + list available module pattern.  arg of option `--list-module` may be chassis, turret, engine, radio, gun, shell.
 
 ```
-$ ./vehicleinfo.py --vehicle R20_T-44 --list-module gun
-{'vehicle:index': 'R20_T-44', 'turret:index': 'T-44', 'gun:index': '_85mm_ZiS_S-53'}
-{'vehicle:index': 'R20_T-44', 'turret:index': 'T-44', 'gun:index': '_85mm_D5T-85BM'}
-{'vehicle:index': 'R20_T-44', 'turret:index': 'T-44-100', 'gun:index': '_85mm_ZiS_S-53'}
-{'vehicle:index': 'R20_T-44', 'turret:index': 'T-44-100', 'gun:index': '_85mm_D5T-85BM'}
-{'vehicle:index': 'R20_T-44', 'turret:index': 'T-44-100', 'gun:index': '_100mm_D10T'}
-{'vehicle:index': 'R20_T-44', 'turret:index': 'T-44-100', 'gun:index': '_100mm_LB-1'}
-{'vehicle:index': 'R20_T-44', 'turret:index': 'T-44-100', 'gun:index': '_122mm_D-25-44'}
+$ ./vehicleinfo.py --vehicle G16_PzVIB_Tiger_II --list-module gun
+Vehicle                         Turret                                 Gun
+G16_PzVIB_Tiger_II              PzVIB_Porsche_Turm                     _88mm_KwK_43_L71
+G16_PzVIB_Tiger_II              PzVIB_Porsche_Turm                     _105mm_KwK45_L52
+G16_PzVIB_Tiger_II              PzVIB_Porsche_Turm                     _105mm_KwK46_L68
+G16_PzVIB_Tiger_II              PzVIB_Heinschel_Turm                   _88mm_KwK_43_L71
+G16_PzVIB_Tiger_II              PzVIB_Heinschel_Turm                   _105mm_KwK45_L52
+G16_PzVIB_Tiger_II              PzVIB_Heinschel_Turm                   _105mm_KwK46_L68
 ```
 
 + show shell gravity without spg.  removed duplicate lines.
 
 ```
-$ ./vehicleinfo.py --vehicle ::lt,mt,td,ht --list-module shell --params shell:gravity --csv
+$ ./vehicleinfo.py --vehicle ::lt,mt,td,ht --list-module shell --show shell:gravity --csv
 shell:gravity
 9.81
 ```
