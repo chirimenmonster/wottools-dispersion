@@ -234,6 +234,24 @@
             }
         ]
     },
+    "vehicle:premiumXPFactor": {
+        "value":    "float",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "premiumVehicleXPFactor[1]"
+            }
+        ]
+    },
+    "vehicle:crewXPFactor": {
+        "value":    "float",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "crewXpFactor[1]"
+            }
+        ]
+    },
     "vehicle:invisibilityMoving": {
         "resources": [
             {

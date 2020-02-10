@@ -111,9 +111,9 @@ def _sort(records, tags=None):
                 raise NotImplementedError('sort={}'.format(schema['sort']))
         elif 'value' in schema:
             if schema['value'] == 'int':
-                func = lambda x,key=k,f=factor: int(x[key]) * f
+                func = lambda x,key=k,f=factor: int(x[key]) * f if x[key] is not None else float('+inf')
             elif schema['value'] == 'float':
-                func = lambda x,key=k,f=factor: float(x[key]) * f
+                func = lambda x,key=k,f=factor: float(x[key]) * f if x[key] is not None else float('+inf')
         keyFuncs.append(func)
     records = sorted(records, key=lambda x: tuple([ f(x) for f in keyFuncs ]))
     return records
