@@ -41,8 +41,10 @@ def listVehicleModule(vehicles, modules, params, sort=None):
                 moduleSpec = moduleSpec._replace(**d)
 
     showtags = params.split(',') if params is not None else []
+    showtags = list(filter(None, showtags))
     sorttags = sort.split(',') if sort is not None else []
-    tags = set(showtags + sorttags)
+    sorttags = list(filter(None, sorttags))
+    tags = set(showtags + list(map(lambda x:x.strip('-'), sorttags)))
 
     ctxs = app.vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)
     result = []    
@@ -76,23 +78,33 @@ def _removeEmpty(records):
 
 
 def _sort(records, tags=None):
+    class rStr(str):
+        def __lt__(self, other):
+            return False if super(rStr, self).__lt__(other) else True
     if tags is None:
         return records
     keyFuncs = []
     for k in tags:
+        factor = 1
+        if k[0] == '-':
+            factor = -1
+            k = k[1:]
         schema = app.settings.schema[k]
-        func = lambda x,key=k: x[key]
+        if factor == 1:
+            func = lambda x,key=k: x[key]
+        else:
+            func = lambda x,key=k: rStr(x[key])
         if 'sort' in schema:
             if schema['sort'] in ('settings:nationsOrder', 'settings:typesOrder'):
                 indexes = app.resource.getValue(schema['sort'])
-                func = lambda x,key=k,ref=indexes: ref.index(x[key])
+                func = lambda x,key=k,ref=indexes,f=factor: ref.index(x[key]) * f
             else:
                 raise NotImplementedError('sort={}'.format(schema['sort']))
         elif 'value' in schema:
             if schema['value'] == 'int':
-                func = lambda x,key=k: int(x[key])
+                func = lambda x,key=k,f=factor: int(x[key]) * f
             elif schema['value'] == 'float':
-                func = lambda x,key=k: float(x[key])
+                func = lambda x,key=k,f=factor: float(x[key]) * f
         keyFuncs.append(func)
     records = sorted(records, key=lambda x: tuple([ f(x) for f in keyFuncs ]))
     return records
