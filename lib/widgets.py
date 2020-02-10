@@ -5,17 +5,18 @@ import tkinter.ttk
 import tkinter.font
 
 from lib import csvoutput
-from lib.resources import g_resources
 from lib.config import parseArgument, g_config as config
+
+from lib.application import g_application as app
 
 class Application(tkinter.Frame):
 
     def __init__(self, master=None, strage=None):
         self.__strage = strage
 
-        self.__itemgroup = g_resources.itemgroup
-        self.__titlesdesc = g_resources.titlesdesc
-        self.__selectorsdesc = g_resources.selectorsdesc
+        self.__itemgroup = app.settings.guiitems
+        self.__titlesdesc = app.settings.guititles
+        self.__selectorsdesc = app.settings.guiselectors
 
         self.__handlerChangeSelected = {
             'vehicleFilter':    self.changeVehicleFilter,
@@ -43,7 +44,7 @@ class Application(tkinter.Frame):
             param = self.__strage.getParamFromVehicle(config.vehicle)
         else:
             param = None
-    
+
         self.packTitleDesc()
         self.changeVehicleFilter(param)
 
@@ -58,7 +59,8 @@ class Application(tkinter.Frame):
                 option = entry['option']
                 name = entry['id'] + 'Selector'
                 selected = entry['selected'] if 'selected' in entry else None
-                selector = DropdownList(bar, name=name, entry=entry, method=self.getDropdownList, option=option, selected=selected)
+                #selector = DropdownList(bar, name=name, entry=entry, method=self.getDropdownList, option=option, selected=selected)
+                selector = DropdownList(bar, name=name, entry=entry, method=self.getDropdownList2, option=option, selected=selected)
                 if 'attr' in entry and entry['attr'] == 'const':
                     selector.update()
                 callback = lambda self, id, event : self.__handlerChangeSelected[id]()
@@ -127,16 +129,72 @@ class Application(tkinter.Frame):
             param[id] = selector.getSelected()
         return param
  
-    def getDropdownList(self, schema):
+    def getDropdownList2(self, schema):
         param = self.getSelectedValues()
-        result = self.__strage.getDropdownList(schema, param)
+        category = schema['id']
+        if category == 'nation':
+            result = app.dropdownlist.fetchNationList(param=param)
+        elif category == 'tier':
+            result = app.dropdownlist.fetchTierList(param=param)
+        elif category == 'type':
+            result = app.dropdownlist.fetchTypeList(param=param)
+        elif category == 'secret':
+            result = app.dropdownlist.fetchSecretList(param=param)
+        elif category == 'vehicle':
+            result = app.dropdownlist.fetchVehicleList(param=param)
+        elif param['vehicle'] is None:
+            result = None
+        else:
+            for k,v in {'chassis':-1, 'turret':-1, 'engine':-1, 'radio':-1, 'gun':-1, 'shell':1 }.items():
+                if param.get(k, None) is None:
+                    param[k] = v
+            if category == 'chassis':
+                result = app.dropdownlist.fetchChassisList(param=param)
+            elif category == 'turret':
+                result = app.dropdownlist.fetchTurretList(param=param)
+            elif category == 'engine':
+                result = app.dropdownlist.fetchEngineList(param=param)
+            elif category == 'radio':
+                result = app.dropdownlist.fetchRadioList(param=param)
+            elif category == 'gun':
+                result = app.dropdownlist.fetchGunList(param=param)
+            elif category == 'shell':
+                result = app.dropdownlist.fetchShellList(param=param)
+            elif category == 'siege':
+                result = [['', ''], ['siege', 'siege']]
+            else:
+                raise NotImplementedError
         if result is None or result == []:
             result = [ [ None, '' ] ]
+        #print('category={}'.format(category))
+        #print('param={}'.format(param))
+        #print('result={}'.format(result))
         return result
 
     def getVehicleValue(self, schema):
-        param = self.getSelectedValues()
-        text = self.__strage.findText(schema, param)
+        tags = schema['value']
+        if isinstance(tags, str):
+            tags = [tags]
+        form = schema.get('format', None)
+        ctx = self.getSelectedValues()
+        #print('schema={}, ctx={}'.format(schema, ctx))
+        result = app.vd.getVehicleItems(tags, ctx)
+        for k in tags:
+            if schema.get('consider', None) == 'float':
+                result[k] = float(result[k]) if result[k] is not None else ''
+        result = [ result[k] for k in tags ]
+        result = list(map(lambda x:x if x is not None else '', result))
+        #print('tags={}, result={}'.format(tags, result))
+        if form:
+            try:
+                text = form.format(*result)
+            except ValueError:
+                text = ''
+        elif isinstance(result, list):
+            text = ' ' .join(result)
+        else:
+            text = result
+        #print('text={}'.format(text))
         return text
 
     def changeVehicleFilter(self, param=None):
@@ -144,6 +202,7 @@ class Application(tkinter.Frame):
             self.__selector['nation'].select(param['nation'])
             self.__selector['tier'].select(param['tier'])
             self.__selector['type'].select(param['type'])
+            self.__selector['secret'].select(param['secret'])
         self.__selector['vehicle'].update()
         self.changeVehicle()
 

@@ -1,197 +1,19 @@
 #! /usr/bin/python3
 
 import logging
+import os
 import sys
 import io
 import json
 
 from lib import csvoutput
-from lib.strage import Strage
 from lib.config import parseArgument, g_config as config 
-from lib.resources import g_resources
-
-
-def getListVehicle(strage, pattern):
-    if ':' not in pattern:
-        return [ pattern ]
-    nation, tier, vtype = pattern.split(':')
-    vspec = {}
-    if nation == '' or nation == '*':
-        vspec['nation'] = None
-    else:
-        vspec['nation'] = nation.lower().split(',')
-    if tier == '' or tier == '*':
-        vspec['tier'] = None
-    else:
-        vspec['tier'] = tier.split(',')
-    if vtype == '' or vtype == '*':
-        vspec['type'] = None
-    else:
-        vspec['type'] = vtype.upper().split(',')
-    vehicles = strage.getVehicleList(vspec)
-    return vehicles
-
-
-def getVehicleSpec(strage, vid):
-    nation = strage.getVehicleNation(vid)
-    vspec = {'nation':nation, 'vehicle':vid}
-    return vspec
-
-def getVehicleModuleSpecs(strage, vfilter, mfilter):
-    vehicles = getListVehicle(strage, vfilter)
-    vspecs = [ getVehicleSpec(strage, vid) for vid in vehicles ]
-    if mfilter is None:
-        mfilter = config.moduleSpecified
-    for module in ('chassis', 'turret', 'engine', 'radio', 'gun', 'shell'):
-        if module not in mfilter or mfilter[module] is None or mfilter[module] == '*':
-            index = None
-        elif isinstance(mfilter[module], int):
-            index = mfilter[module]
-        elif mfilter[module].isdigit() or (mfilter[module][0] == '-' and mfilter[module][1:].isdigit()):
-            index = int(mfilter[module])
-        else:
-            logger.error('bad specified: {}'.format(mspec))
-            raise
-        newvspecs = []
-        for vs in vspecs:
-            mlist = strage.getModuleList(vs, module)
-            if index is not None:
-                mlist = [ mlist[index] ]
-            for mid in mlist:
-                newvs = vs.copy()
-                newvs[module] = mid
-                newvspecs.append(newvs)
-        vspecs = newvspecs
-    return vspecs
-
-
-def _getVehicleValues(vspecs, tags):
-    result = [ strage.getVehicleItemsInfo(vs, tags) for vs in vspecs ]
-    return result
-
-def _removeDuplicate(values):
-    if config.suppress_unique:
-        return values
-    result = []
-    data = {}
-    for v in values:
-        k = tuple(v.values())
-        if k not in data:
-            data[k] = True
-            result.append(v)
-    return result
-
-def _removeEmpty(records):
-    if not config.suppress_empty:
-        return records
-    records = [ r for r in records if None not in r.values() ]
-    return records
-
-def _sort(records):
-    if not config.sort:
-        return records
-    sortKeys = config.sort.split(',')
-    keyFuncs = []
-    for k in sortKeys:
-        schema = g_resources.itemschema[k]
-        func = lambda x,key=k: x[key]
-        if 'sort' in schema:
-            if schema['sort'] == 'float':
-                func = lambda x,key=k: float(x[key])
-        keyFuncs.append(func)
-    records = sorted(records, key=lambda x: tuple([ f(x) for f in keyFuncs ]))
-    return records
-
-def _outputValues(records):
-    if config.csvoutput:
-        message = csvoutput.createMessageByArrayOfDict(records, not config.suppress_header)
-        print(message, end='')
-    elif config.outputjson:
-        print(json.dumps(records, ensure_ascii=False, indent=2))
-    else:
-        forms = []
-        widths = []
-        for k in records[0].keys():
-            if 'format' in g_resources.itemschema[k]:
-                f = '{!s:' + g_resources.itemschema[k]['format'] + '}'
-            else:
-                f = '{!s:>7}'
-            forms.append(f)
-            widths.append(len(f.format(None)))
-        if not config.suppress_header:
-            if config.show_headers:
-                tokens = [ f.format(k) for f,w,k in zip(forms, widths, config.show_headers.split(',')) ]
-                widths = [ len(t) for t in tokens ]
-            else:
-                tokens = [ f.format(k)[:w] for f,w,k in zip(forms, widths, records[0].keys()) ]
-            print(' '.join(tokens))
-        for r in records:
-            values = [ ('{!s:' + str(w) + '}').format(f.format(r[k])) for f,w,k in zip(forms, widths, r.keys()) ]
-            print(' '.join(values))
+from lib.application import g_application as app
+from lib.vehicleinfo2 import listVehicleModule, _outputValues
 
 
 class Command:
-
-    @staticmethod
-    def listVehicle(strage, pattern):
-        for vehicle in getListVehicle(strage, pattern):
-            nation = strage.getVehicleNation(vehicle)
-            info = strage.getVehicleItemsInfo({'nation':nation, 'vehicle':vehicle}, ['vehicle:index', 'vehicle:userString'])
-            print('{:<32} : {}'.format(info['vehicle:index'], info['vehicle:userString']))
-
-    @staticmethod
-    def listNation(strage):
-        print(', '.join([ v[0] for v in strage.fetchNationList(None, None) ]))
-
-    @staticmethod
-    def listTier(strage):
-        print(', '.join([ v[0] for v in strage.fetchTierList(None, None) ]))
-
-    @staticmethod
-    def listType(strage):
-        print(', '.join([ v[0] for v in strage.fetchTypeList(None, None) ]))
-
-    @staticmethod
-    def listModule(strage, vfilter, modules, params):
-        defaultModule = {
-            'chassis':  [ 'chassis' ],
-            'turret':   [ 'turret' ],
-            'engine':   [ 'engine' ],
-            'radio':    [ 'radio' ],
-            'gun':      [ 'turret', 'gun' ],
-            'shell':    [ 'turret', 'gun', 'shell' ]
-        }
-        defaultTag = {
-            'chassis':  'chassis:' + config.indextag,
-            'turret':   'turret:' + config.indextag,
-            'engine':   'engine:' + config.indextag,
-            'radio':    'radio:' + config.indextag,
-            'gun':      'gun:' + config.indextag,
-            'shell':    'shell:' + config.indextag
-        }
-        mfilter = config.moduleSpecified.copy()
-        tags = [ 'vehicle:' + config.indextag ]
-        if modules is None:
-            pass
-        elif ',' not in modules:
-            for mname in defaultModule[modules]:
-                mfilter[mname] = None
-                tags.append(defaultTag[mname])
-        else:
-            for mname in modules.split(','):
-                if mname == '':
-                    continue
-                mfilter[mname] = None
-                tags.append(defaultTag[mname])
-        if params is not None:
-            tags = params.split(',')
-        vspecs = getVehicleModuleSpecs(strage, vfilter, mfilter)
-        result = _getVehicleValues(vspecs, tags)
-        result = _removeDuplicate(result)
-        result = _removeEmpty(result)
-        result = _sort(result)
-        _outputValues(result)
-
+        
     @staticmethod
     def infoVehicle(strage, arg, showParams):
         p = arg.split(':')
@@ -243,21 +65,28 @@ if __name__ == '__main__':
     logger.addHandler(logging.StreamHandler())
     
     parseArgument(mode='cui')
-    strage = Strage()
 
+    app.setup(config)
     if config.list_nation:
-        Command.listNation(strage)
-    if config.list_tier:
-        Command.listTier(strage)
-    if config.list_type:
-        Command.listType(strage)
-    #if config.pattern:
-    #    Command.listVehicle(strage, config.pattern)
-
-    if config.list_module:
-        Command.listModule(strage, config.vehicle, config.list_module, config.show_params)
+        result = app.resource.getValue('settings:nationsOrder')
+        print(result)
+    elif config.list_tier:
+        result = app.resource.getValue('settings:tiersOrder')
+        print(result)
+    elif config.list_type:
+        result = app.resource.getValue('settings:typesOrder')
+        print(result)    
+    elif config.list_vehicle:
+        showtag = config.show_params
+        headers = config.show_headers
+        sorttag = config.sort
+        if showtag is None:
+            showtag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:secret,vehicle:id,vehicle:index,vehicle:userString'
+            if sorttag is None:
+                sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
+            if headers is None:
+                headers = 'Nation,Tier,Type,Secret,Id,Index,UserString'
+        result = listVehicleModule(config.list_vehicle, config.list_module, showtag, sort=sorttag)
+        _outputValues(result, show=showtag, headers=headers)
     else:
-        Command.listModule(strage, config.vehicle, None, config.show_params)
-
-    #if config.vehicle:
-    #    Command.infoVehicle(strage, config.vehicle, config.show_params)
+        raise ValueError

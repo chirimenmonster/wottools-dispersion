@@ -1,0 +1,25 @@
+<root>
+  <settings>
+  </settings>
+  <settings>
+  </settings>
+  <settings>
+    <name>nations_order</name>
+    <type>list</type>
+    <value>
+      <item>germany</item>
+      <item>ussr</item>
+      <item>usa</item>
+      <item>japan</item>
+      <item>china</item>
+      <item>uk</item>
+      <item>france</item>
+      <item>czech</item>
+      <item>poland</item>
+      <item>italy</item>
+      <item>sweden</item>
+    </value>
+  </settings>
+  <settings>
+  </settings>
+</root>

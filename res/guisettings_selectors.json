@@ -26,6 +26,12 @@
                 "format":   "{}",
                 "value":    [ "vehicle:displayString" ]
             }
+        },
+        {
+            "id":       "secret",
+            "callback": "vehicleFilter",
+            "attr":     "const",
+            "option":   { "label": { "text": "Secret" }, "combobox": { "width": 8 } }
         }
     ],
     [
