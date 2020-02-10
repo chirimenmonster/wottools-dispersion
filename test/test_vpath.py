@@ -216,28 +216,6 @@ class ResourceTestCase(unittest.TestCase):
         self.assertEqual(['1.1', '1.3', '2.3'], self.resource.assignMap('1.1 1.3 2.3', 'split()'))
             
 
-class ConvertTestCase(unittest.TestCase):
-
-    def test_convert_gettext(self):
-        return
-        self.assertEqual('T-34', vp.Convert.gettext('#ussr_vehicles:T-34'))
-        
-    def test_convert_map(self):
-        return
-        self.assertEqual('APCR', vp.Convert.map({'ARMOR_PIERCING':'AP', 'ARMOR_PIERCING_CR':'APCR'}, 'ARMOR_PIERCING_CR'))
-        self.assertEqual('12', vp.Convert.map('[0]', '12 34'))
-
-
-class VehicleDescriptorTestCase(unittest.TestCase):
-
-    def setUp(self):
-        return
-        vdesc = vp.VehicleDescriptor(nation='ussr', vehicle='R04_T34')
-
-    def test_property_get(self):
-        return
-        self.assertEqual('T-34', vdesc.get('vehicle:userString'))
-
 if __name__ == '__main__':
     unittest.main()
     
