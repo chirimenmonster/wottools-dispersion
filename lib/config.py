@@ -30,18 +30,6 @@ class Config:
     csvoutput = False
     outputjson = False
     sort = None
-    DATA = {
-        VEHICLES: {
-            'vpath':        'scripts/item_defs/vehicles',
-            'packed':       'scripts.pkg',
-            'extracted':    None
-        },
-        GUI_SETTINGS: {
-            'vpath':        'gui',
-            'packed':       'gui.pkg',
-            'extracted':    None
-        }
-    }
     moduleSpecified = {
         'chassis':  -1,
         'turret':   -1,
@@ -59,22 +47,22 @@ def parseArgument(mode=None):
     parser.add_argument('-d', dest='basedir', help='specify <WoT_game_folder>')
     parser.add_argument('-s', dest='scriptsdir', help='scripts folder extracted.  ex. "C:/git/wot.scripts/scripts"')
     parser.add_argument('-g', dest='guidir', help='gui folder extracted.  ex. "./test/gui"')
-    parser.add_argument('--secret', action='store_true', help='include secret tanks')
     parser.add_argument('--schema', dest='schema', help='change itemschema.json')
     parser.add_argument('--gui-items', dest='gui_items', help='change guisettings_items.json')
 
     if mode != 'cui':
         parser.add_argument('--vehicle', dest='vehicle', help='vehicle name.  ex. "R80_KV1"')
     else:
-        parser.add_argument('--vehicle', dest='vehicle', help='vehicle name or filter NATION:TIER:TYPE.  ex. "R80_KV1" or "germany:9:HT"')
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument('--nation', action='store_true', dest='list_nation', help='show nations')
+        group.add_argument('--tier', action='store_true', dest='list_tier', help='show tiers')
+        group.add_argument('--type', action='store_true', dest='list_type', help='show vehicle types')
+        group.add_argument('--vehicle', dest='list_vehicle', help='vehicle name or filter NATION:TIER:TYPE.  ex. "R80_KV1" or "germany:9:HT"')
 
-    if mode == 'cui':
         group = parser.add_mutually_exclusive_group()
         group.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
         group.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
-        parser.add_argument('--list-nation', action='store_true', help='show nations')
-        parser.add_argument('--list-tier', action='store_true', help='show tiers')
-        parser.add_argument('--list-type', action='store_true', help='show vehicle types')
+
         parser.add_argument('--list-module', dest='list_module', help='list modules.  ex. "gun" or "engine,radio')
         parser.add_argument('--params', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')
         parser.add_argument('--headers', dest='show_headers', help='header names to show.')

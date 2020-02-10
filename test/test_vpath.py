@@ -177,11 +177,8 @@ class ResourceTestCase(unittest.TestCase):
         self.assertEqual(29390.0, result)
 
     def test_resource_getNodes_func_div(self):
-        return
         result = self.resource.getValue('engine:power', self.param)
-        print(result)
         result = self.resource.getValue('vehicle:totalWeight', self.param)
-        print(result)
         self.assertEqual(0.01701258931609391, self.resource.getValue('vehicle:powerWeightRatio', self.param))
         self.assertEqual(14.016600510789694, self.resource.getValue('vehicle:maxSpeed_medium', self.param))
 

@@ -24,6 +24,7 @@ def listVehicleModule(vehicles, modules, params, sort=None):
     else:
         secrets = None
     vehicleSpec = VehicleSpec(nations=nations, tiers=tiers, types=types, secrets=secrets)
+
     defaultModule = {
         'chassis':  [ 'chassis' ],
         'turret':   [ 'turret' ],
@@ -38,29 +39,32 @@ def listVehicleModule(vehicles, modules, params, sort=None):
             for m in defaultModule[mname]:
                 d = {m: None}
                 moduleSpec = moduleSpec._replace(**d)
-    ctxs = app.vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)
+
     showtags = params.split(',') if params is not None else []
     sorttags = sort.split(',') if sort is not None else []
     tags = set(showtags + sorttags)
+
+    ctxs = app.vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)
     result = []    
     for ctx in ctxs:
         result.append(app.vd.getVehicleItems(list(tags), ctx))
-    result = _removeDuplicate(result)
+    result = _removeDuplicate(result, showtags=showtags, sorttags=sorttags)
     result = _removeEmpty(result)
     result = _sort(result, tags=sorttags)
     return result
 
 
-def _removeDuplicate(values):
+def _removeDuplicate(values, showtags=None, sorttags=None):
     if app.config.suppress_unique:
         return values
     result = []
     data = {}
-    for v in values:
-        k = tuple(map(lambda x:repr(x) if isinstance(x, list) else x, v.values()))
+    values = _sort(values, tags=sorttags)
+    for value in values:
+        k = tuple(map(lambda x,v=value:repr(v[x]) if isinstance(v[x], list) else v[x], showtags))
         if k not in data:
             data[k] = True
-            result.append(v)
+            result.append(value)
     return result
 
 
@@ -94,7 +98,7 @@ def _sort(records, tags=None):
     return records
 
 
-def _outputValues(records, show=None):
+def _outputValues(records, show=None, headers=None):
     showtags = show.split(',') if show is not None else []
     if app.config.csvoutput:
         message = csvoutput.createMessageByArrayOfDict(records, not config.suppress_header)
@@ -114,8 +118,8 @@ def _outputValues(records, show=None):
             forms.append(f)
             widths.append(len(f.format(None)))
         if not app.config.suppress_header:
-            if app.config.show_headers:
-                tokens = [ f.format(k) for f,w,k in zip(forms, widths, app.config.show_headers.split(',')) ]
+            if headers:
+                tokens = [ f.format(k) for f,w,k in zip(forms, widths, headers.split(',')) ]
                 widths = [ len(t) for t in tokens ]
             else:
                 tokens = [ f.format(k)[:w] for f,w,k in zip(forms, widths, showtags) ]
