@@ -78,9 +78,9 @@ def _removeEmpty(records):
 
 
 def _sort(records, tags=None):
-    class rStr(str):
+    class _rstr(str):
         def __lt__(self, other):
-            return False if super(rStr, self).__lt__(other) else True
+            return not super(_rstr, self).__lt__(other)
     if tags is None:
         return records
     keyFuncs = []
@@ -93,7 +93,7 @@ def _sort(records, tags=None):
         if factor == 1:
             func = lambda x,key=k: x[key]
         else:
-            func = lambda x,key=k: rStr(x[key])
+            func = lambda x,key=k: _rstr(x[key])
         if 'sort' in schema:
             if schema['sort'] in ('settings:nationsOrder', 'settings:typesOrder'):
                 indexes = app.resource.getValue(schema['sort'])
