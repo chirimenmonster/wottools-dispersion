@@ -64,14 +64,13 @@ def parseArgument(mode=None):
         group.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
 
         parser.add_argument('--list-module', dest='list_module', help='list modules.  ex. "gun" or "engine,radio')
-        parser.add_argument('--params', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')
+        parser.add_argument('--show', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')
         parser.add_argument('--headers', dest='show_headers', help='header names to show.')
         parser.add_argument('--sort', dest='sort', help='parameter names to sort.')
         parser.add_argument('--suppress-unique', action='store_true', dest='suppress_unique', help='suppress remove duplicate')
         parser.add_argument('--suppress-header', action='store_true', dest='suppress_header', help='suppress output csv header')
         parser.add_argument('--suppress-empty', action='store_true', dest='suppress_empty', help='suppress output recodes with empty parameter')
         parser.add_argument('--prefer-userstring', action='store_const', const='userString', default='index', dest='indextag', help='prefer userString')
-        parser.add_argument('--new', dest='new', action='store_true', help='new process')
 
     parser.parse_args(namespace=g_config)
     if g_config.SCRIPTS_DIR:

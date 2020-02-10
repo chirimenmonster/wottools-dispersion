@@ -1,4 +1,5 @@
 
+import sys
 import json
 
 from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
@@ -42,17 +43,25 @@ def listVehicleModule(vehicles, modules, params, sort=None):
 
     showtags = params.split(',') if params is not None else []
     showtags = list(filter(None, showtags))
-    sorttags = sort.split(',') if sort is not None else []
-    sorttags = list(filter(None, sorttags))
-    tags = set(showtags + list(map(lambda x:x.strip('-'), sorttags)))
-
+    unknowntag = list(filter(lambda x: x not in app.schema, showtags))
+    if len(unknowntag) > 0:
+        sys.stderr.write('unknwon show tags: {}\n'.format(', '.join(map(repr, unknowntag))))
+        sys.exit(1)
+    sortkeys = sort.split(',') if sort is not None else []
+    sortkeys = list(filter(None, sortkeys))
+    sorttags = list(map(lambda x:x.strip('-'), sortkeys))
+    unknowntag = list(filter(lambda x: x not in app.schema, sorttags))
+    if len(unknowntag) > 0:
+        sys.stderr.write('unknwon sort tags: {}\n'.format(', '.join(map(repr, unknowntag))))
+        sys.exit(1)
+    tags = set(showtags + sorttags)
     ctxs = app.vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)
     result = []    
     for ctx in ctxs:
         result.append(app.vd.getVehicleItems(list(tags), ctx))
-    result = _removeDuplicate(result, showtags=showtags, sorttags=sorttags)
+    result = _removeDuplicate(result, showtags=showtags, sorttags=sortkeys)
     result = _removeEmpty(result)
-    result = _sort(result, tags=sorttags)
+    result = _sort(result, tags=sortkeys)
     return result
 
 
@@ -113,7 +122,8 @@ def _sort(records, tags=None):
 def _outputValues(records, show=None, headers=None):
     showtags = show.split(',') if show is not None else []
     if app.config.csvoutput:
-        message = csvoutput.createMessageByArrayOfDict(records, not config.suppress_header)
+        from lib import csvoutput
+        message = csvoutput.createMessageByArrayOfDict(records, not app.config.suppress_header)
         print(message, end='')
     elif app.config.outputjson:
         print(json.dumps(records, ensure_ascii=False, indent=2))

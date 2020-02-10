@@ -53,4 +53,12 @@ class VehicleInfoTestCase(unittest.TestCase):
             '_45mm_20K'
         ]
         self.assertEqual(expect, [ v['gun:index'] for v in result ])
-    
+        result = listVehicleModule('ussr:4:lt', None, 'vehicle:userString', sort='vehicle:userString')
+        expect = [
+            'A-20',
+            'T-80',
+            'Valentine II'
+        ]
+        self.assertEqual(expect, [ v['vehicle:userString'] for v in result ])
+        result = listVehicleModule('ussr:4:lt', None, 'vehicle:userString', sort=',-vehicle:userString')
+        self.assertEqual(list(reversed(expect)), [ v['vehicle:userString'] for v in result ])
