@@ -174,7 +174,8 @@ def _outputValues(records, show=None, headers=None):
             if r.type == 'str':
                 form = titleform
             elif r.type == 'float':
-                form = '{:' + str(r.width) + '.1f}'
+                form = r.form.strip('{:}')
+                form = '{:' + str(r.width) + form + '}'
             rows[i] = r._replace(form=form, titleform=titleform)
         result = []
         if not app.config.suppress_header:
