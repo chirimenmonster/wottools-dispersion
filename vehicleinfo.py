@@ -12,6 +12,11 @@ from lib.vehicleinfo2 import listVehicleModule, _outputValues
 
 defaultargs = {
     'empty': {
+        'show':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id,vehicle:index,vehicle:userString',
+        'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
+        'header':   'Nation,Tier,Type,Id,Index,UserString'
+    },
+    'secret': {
         'show':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:secret,vehicle:id,vehicle:index,vehicle:userString',
         'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
         'header':   'Nation,Tier,Type,Secret,Id,Index,UserString'
@@ -78,7 +83,10 @@ if __name__ == '__main__':
         headers = config.show_headers
         sorttags = config.sort
         if showtags is None:
-            default = defaultargs.get(modules, defaultargs['empty'])
+            if len(vehicles.split(':')) == 4:
+                default = defaultargs.get(modules, defaultargs['secret'])
+            else:
+                default = defaultargs.get(modules, defaultargs['empty'])                
             showtags = default['show']
             if sorttags is None:
                 sorttags = default['sort']
