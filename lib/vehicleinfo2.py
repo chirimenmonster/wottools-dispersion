@@ -7,24 +7,28 @@ from lib.application import g_application as app
 
 
 def listVehicleModule(vehicles, modules, params, sort=None):
-    args = vehicles.split(':')
-    nations, tiers, types = list(map(lambda x:x.split(','), args[:3]))
-    nations = nations if nations != [''] else None 
-    tiers = list(map(int, tiers)) if tiers != [''] else None
-    types = list(map(lambda x:x.upper(), types)) if types != [''] else None
-    if len(args) > 3:
-        secrets = args[3]
-        if secrets == 'secret':
-            secrets = [True]
-        elif secrets == 'all':
-            secrets = [True, False]
-        elif secrets == '':
-            secrets = [False]
+    if ':' in vehicles:
+        args = vehicles.split(':')
+        nations, tiers, types = list(map(lambda x:x.split(','), args[:3]))
+        nations = nations if nations != [''] else None 
+        tiers = list(map(int, tiers)) if tiers != [''] else None
+        types = list(map(lambda x:x.upper(), types)) if types != [''] else None
+        if len(args) > 3:
+            secrets = args[3]
+            if secrets == 'secret':
+                secrets = [True]
+            elif secrets == 'all':
+                secrets = [True, False]
+            elif secrets == '':
+                secrets = [False]
+            else:
+                raise ValueError('invalid parameter secret, {}'.format(secrets))
         else:
-            raise ValueError('invalid parameter secret, {}'.format(secrets))
+            secrets = None
+        vehicleSpec = VehicleSpec(nations=nations, tiers=tiers, types=types, secrets=secrets)
     else:
-        secrets = None
-    vehicleSpec = VehicleSpec(nations=nations, tiers=tiers, types=types, secrets=secrets)
+        vehicles = vehicles.split(',')
+        vehicleSpec = None
 
     defaultModule = {
         'chassis':  [ 'chassis' ],
@@ -55,7 +59,11 @@ def listVehicleModule(vehicles, modules, params, sort=None):
         sys.stderr.write('unknwon sort tags: {}\n'.format(', '.join(map(repr, unknowntag))))
         sys.exit(1)
     tags = set(showtags + sorttags)
-    ctxs = app.vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)
+
+    if vehicleSpec is not None:
+        ctxs = app.vd.getVehicleModuleCtx(vehicleSpec, moduleSpec)
+    else:
+        ctxs = app.vd.getVehicleModuleCtx(vehicles, moduleSpec)
     result = []    
     for ctx in ctxs:
         result.append(app.vd.getVehicleItems(list(tags), ctx))

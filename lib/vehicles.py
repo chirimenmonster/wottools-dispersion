@@ -41,6 +41,9 @@ class VehicleDatabase(object):
         return result._asdict()
 
     def getVehicleCtx(self, vehicleSpec=None):
+        if isinstance(vehicleSpec, list):
+            result = [ self.getCtx(v) for v in vehicleSpec ]
+            return result
         if vehicleSpec is None:
             vehicleSpec = VehicleSpec()
         nations, tiers, types, secrets = vehicleSpec

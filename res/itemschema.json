@@ -465,6 +465,7 @@
         ]
     },
     "turret:index": {
+        "format":   "38s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",

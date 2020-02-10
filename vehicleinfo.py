@@ -81,11 +81,31 @@ if __name__ == '__main__':
         headers = config.show_headers
         sorttag = config.sort
         if showtag is None:
-            showtag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:secret,vehicle:id,vehicle:index,vehicle:userString'
-            if sorttag is None:
-                sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
-            if headers is None:
-                headers = 'Nation,Tier,Type,Secret,Id,Index,UserString'
+            if config.list_module is None:
+                showtag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:secret,vehicle:id,vehicle:index,vehicle:userString'
+                if sorttag is None:
+                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
+                if headers is None:
+                    headers = 'Nation,Tier,Type,Secret,Id,Index,UserString'
+            elif config.list_module == 'turret':
+                showtag = 'vehicle:index,turret:index'
+                if sorttag is None:
+                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
+                if headers is None:
+                    headers = 'Vehicle,Turret'
+            elif config.list_module == 'gun':
+                showtag = 'vehicle:index,turret:index,gun:index'
+                if sorttag is None:
+                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
+                if headers is None:
+                    headers = 'Vehicle,Turret,Gun'
+            elif config.list_module == 'shell':
+                showtag = 'vehicle:index,turret:index,gun:index,shell:index'
+                if sorttag is None:
+                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
+                if headers is None:
+                    headers = 'Vehicle,Turret,Gun,Shell'
+        
         result = listVehicleModule(config.list_vehicle, config.list_module, showtag, sort=sorttag)
         _outputValues(result, show=showtag, headers=headers)
     else:
