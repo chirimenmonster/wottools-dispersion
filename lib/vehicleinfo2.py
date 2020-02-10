@@ -68,18 +68,17 @@ def listVehicleModule(vehicles, modules, params, sort=None):
     result = []    
     for ctx in ctxs:
         result.append(app.vd.getVehicleItems(list(tags), ctx))
-    result = _removeDuplicate(result, showtags=showtags, sorttags=sortkeys)
-    result = _removeEmpty(result)
     result = _sort(result, tags=sortkeys)
+    result = _removeDuplicate(result, showtags=showtags)
+    result = _removeEmpty(result)
     return result
 
 
-def _removeDuplicate(values, showtags=None, sorttags=None):
+def _removeDuplicate(values, showtags=None):
     if app.config.suppress_unique:
         return values
     result = []
     data = {}
-    values = _sort(values, tags=sorttags)
     for value in values:
         k = tuple(map(lambda x,v=value:repr(v[x]) if isinstance(v[x], list) else v[x], showtags))
         if k not in data:
