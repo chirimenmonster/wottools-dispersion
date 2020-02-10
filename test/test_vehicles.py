@@ -24,8 +24,8 @@ class VehicleTestCase(unittest.TestCase):
 
     def test_getVehicleCtx(self):
         self.assertEqual(646, len(self.vd.getVehicleCtx()))
-        self.assertEqual(789, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True, False]))))
-        self.assertEqual(143, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True]))))
+        self.assertEqual(786, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True, False]))))
+        self.assertEqual(140, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True]))))
         self.assertEqual(30, len(self.vd.getVehicleCtx(VehicleSpec(nations=['germany'], tiers=[8]))))
         self.assertEqual(8, len(self.vd.getVehicleCtx(VehicleSpec(nations=['germany'], tiers=[8], types=['TD']))))
 

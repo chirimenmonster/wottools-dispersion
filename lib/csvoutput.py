@@ -13,12 +13,11 @@ def createMessage(strage, values):
     return output.getvalue()
 
 
-def createMessageByArrayOfDict(values, header=True):
+def createMessageByArrayOfDict(values, showtags=None, headers=None):
     output = io.StringIO(newline='')
     writer = csv.writer(output, dialect='excel', lineterminator='\n')
-    ks = values[0].keys()
-    if header:
-        writer.writerow(ks)
+    if headers:
+        writer.writerow(headers)
     for v in values:
-        writer.writerow([ v[k] for k in ks ])
+        writer.writerow([ v[k] for k in showtags ])
     return output.getvalue()

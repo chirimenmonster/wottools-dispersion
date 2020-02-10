@@ -129,9 +129,14 @@ def _sort(records, tags=None):
 
 def _outputValues(records, show=None, headers=None):
     showtags = show.split(',') if show is not None else []
+    headers = headers.split(',') if headers is not None else None
     if app.config.csvoutput:
         from lib import csvoutput
-        message = csvoutput.createMessageByArrayOfDict(records, not app.config.suppress_header)
+        if headers is None:
+            headers = showtags
+        if app.config.suppress_header:
+            headers = None
+        message = csvoutput.createMessageByArrayOfDict(records, showtags, headers)
         print(message, end='')
     elif app.config.outputjson:
         print(json.dumps(records, ensure_ascii=False, indent=2))
