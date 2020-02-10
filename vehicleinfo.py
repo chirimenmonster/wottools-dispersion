@@ -4,56 +4,51 @@ import logging
 import os
 import sys
 import io
-import json
 
-from lib import csvoutput
 from lib.config import parseArgument, g_config as config 
 from lib.application import g_application as app
 from lib.vehicleinfo2 import listVehicleModule, _outputValues
 
 
-class Command:
-        
-    @staticmethod
-    def infoVehicle(strage, arg, showParams):
-        p = arg.split(':')
-        nation = strage.getVehicleNation(p[0])
-        if len(p) == 7:
-            param = { 'nation': nation, 'vehicle': p[0], 'chassis': p[1], 'turret': p[2],
-                'engine': p[3], 'radio': p[4], 'gun': p[5], 'shell': p[6] }
-        else:
-            vehicle = p[0]
-            param = { 'nation':nation, 'vehicle':vehicle }
-            param['chassis'] = strage.fetchChassisList(None, param)[-1][0]
-            param['turret'] = strage.fetchTurretList(None, param)[-1][0]
-            param['engine'] = strage.fetchEngineList(None, param)[-1][0]
-            param['radio'] = strage.fetchRadioList(None, param)[-1][0]
-            param['gun'] = strage.fetchGunList(None, param)[-1][0]
-            param['shell'] = strage.fetchShellList(None, param)[0][0]
-        if 'siege' not in param:
-            param['siege'] = None
-        titles, values = strage.getDescription(param)
-        if showParams:
-            tagList = showParams.split(',')
-            result = [ v for v in values if v[0] in tagList ]
-        else:
-            result = values
-        if config.csvoutput:
-            if showParams:
-                message = csvoutput.createMessage(strage, [titles[0][:2] + sum(result, [])])
-            else:
-                message = csvoutput.createMessage(strage, titles + result)
-            print(message)
-        else:
-            if showParams:
-                for r in result:
-                    print('{0[1]:>32}:{0[2]:>6}: {0[3]}'.format(r))
-            else:
-                for r in titles:
-                    print('{0:>33} {1}'.format(r[0], ', '.join(r[1:])))
-                for r in result:
-                    print('{0[1]:>32}:{0[2]:>6}: {0[3]}'.format(r))
-        print(strage.getVehicleItemsInfo(param, tagList))
+defaultargs = {
+    'empty': {
+        'show':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:secret,vehicle:id,vehicle:index,vehicle:userString',
+        'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
+        'header':   'Nation,Tier,Type,Secret,Id,Index,UserString'
+    },
+    'chassis': {
+        'show':     'vehicle:index,chassis:index',
+        'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
+        'header':   'Vehicle,Chassis'
+    },
+    'engine': {
+        'show':     'vehicle:index,engine:index',
+        'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
+        'header':   'Vehicle,Engine'
+    },
+    'radio': {
+        'show':     'vehicle:index,radio:index',
+        'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
+        'header':   'Vehicle,Radio'
+    },
+    'turret': {
+        'show':     'vehicle:index,turret:index',
+        'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
+        'header':   'Vehicle,Turret'
+    },
+    'gun': {
+        'show':     'vehicle:index,turret:index,gun:index',
+        'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
+        'header':   'Vehicle,Turret,Gun'
+    },
+    'shell': {
+        'show':     'vehicle:index,turret:index,gun:index,shell:index',
+        'sort':     'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id',
+        'header':   'Vehicle,Turret,Gun,Shell'
+    }
+}
+
+
 
 if __name__ == '__main__':
     sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
@@ -77,54 +72,19 @@ if __name__ == '__main__':
         result = app.resource.getValue('settings:typesOrder')
         print(result)    
     elif config.list_vehicle:
-        showtag = config.show_params
+        vehicles = config.list_vehicle
+        modules = config.list_module
+        showtags = config.show_params
         headers = config.show_headers
-        sorttag = config.sort
-        if showtag is None:
-            if config.list_module is None:
-                showtag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:secret,vehicle:id,vehicle:index,vehicle:userString'
-                if sorttag is None:
-                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
-                if headers is None:
-                    headers = 'Nation,Tier,Type,Secret,Id,Index,UserString'
-            elif config.list_module == 'chassis':
-                showtag = 'vehicle:index,chassis:index'
-                if sorttag is None:
-                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
-                if headers is None:
-                    headers = 'Vehicle,Chassis'
-            elif config.list_module == 'engine':
-                showtag = 'vehicle:index,engine:index'
-                if sorttag is None:
-                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
-                if headers is None:
-                    headers = 'Vehicle,Engine'
-            elif config.list_module == 'radio':
-                showtag = 'vehicle:index,radio:index'
-                if sorttag is None:
-                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
-                if headers is None:
-                    headers = 'Vehicle,Radio'
-            elif config.list_module == 'turret':
-                showtag = 'vehicle:index,turret:index'
-                if sorttag is None:
-                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
-                if headers is None:
-                    headers = 'Vehicle,Turret'
-            elif config.list_module == 'gun':
-                showtag = 'vehicle:index,turret:index,gun:index'
-                if sorttag is None:
-                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
-                if headers is None:
-                    headers = 'Vehicle,Turret,Gun'
-            elif config.list_module == 'shell':
-                showtag = 'vehicle:index,turret:index,gun:index,shell:index'
-                if sorttag is None:
-                    sorttag = 'vehicle:nation,vehicle:tier,vehicle:type,vehicle:id'
-                if headers is None:
-                    headers = 'Vehicle,Turret,Gun,Shell'
-        
-        result = listVehicleModule(config.list_vehicle, config.list_module, showtag, sort=sorttag)
-        _outputValues(result, show=showtag, headers=headers)
+        sorttags = config.sort
+        if showtags is None:
+            default = defaultargs.get(modules, defaultargs['empty'])
+            showtags = default['show']
+            if sorttags is None:
+                sorttags = default['sort']
+            if headers is None:
+                headers = default['header']
+        result = listVehicleModule(vehicles, modules, showtags, sort=sorttags)
+        _outputValues(result, show=showtags, headers=headers)
     else:
         raise ValueError

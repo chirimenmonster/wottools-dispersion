@@ -1,6 +1,7 @@
 
 import sys
 import json
+from collections import namedtuple
 
 from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
 from lib.application import g_application as app
@@ -67,18 +68,17 @@ def listVehicleModule(vehicles, modules, params, sort=None):
     result = []    
     for ctx in ctxs:
         result.append(app.vd.getVehicleItems(list(tags), ctx))
-    result = _removeDuplicate(result, showtags=showtags, sorttags=sortkeys)
-    result = _removeEmpty(result)
     result = _sort(result, tags=sortkeys)
+    result = _removeDuplicate(result, showtags=showtags)
+    result = _removeEmpty(result)
     return result
 
 
-def _removeDuplicate(values, showtags=None, sorttags=None):
+def _removeDuplicate(values, showtags=None):
     if app.config.suppress_unique:
         return values
     result = []
     data = {}
-    values = _sort(values, tags=sorttags)
     for value in values:
         k = tuple(map(lambda x,v=value:repr(v[x]) if isinstance(v[x], list) else v[x], showtags))
         if k not in data:
@@ -143,23 +143,44 @@ def _outputValues(records, show=None, headers=None):
     else:
         if len(records) == 0:
             return
-        forms = []
-        widths = []
-        for k in showtags:
-            if 'format' in app.settings.schema[k]:
-                f = '{!s:' + app.settings.schema[k]['format'] + '}'
-            else:
-                f = '{!s:>7}'
-            forms.append(f)
-            widths.append(len(f.format(None)))
+        if headers is None:
+            headers = showtags
+        RowSchema = namedtuple('RowSchema', 'key type form titleform width func')
+        rows = [ None for k in showtags ]
+        for i, k in enumerate(showtags):
+            form = app.settings.schema[k].get('format', None)
+            if form is None:
+                type = app.settings.schema[k].get('value', None)
+                if type == 'float':
+                    form = '.1f'
+                elif type == 'int':
+                    form = '.0f'
+                else:
+                    form = 's'
+            if 's' in form:
+                type = 'str'
+                form = '{:' + 's' + '}'
+                func = lambda x:x
+            elif 'f' in form:
+                type = 'float'
+                form = '{:' + form + '}'
+                func = lambda x:float(x)
+            width = max([ len(form.format(func(r[k]))) for r in records ])
+            if not app.config.suppress_header:
+                width = max(width, len(headers[i]))
+            rows[i] = RowSchema(k, type, form, None, width, func)
+        for i, r in enumerate(rows):
+            titleform = '{:' + str(r.width) + 's}'
+            if r.type == 'str':
+                form = titleform
+            elif r.type == 'float':
+                form = '{:' + str(r.width) + '.1f}'
+            rows[i] = r._replace(form=form, titleform=titleform)
+        result = []
         if not app.config.suppress_header:
-            if headers:
-                tokens = [ f.format(k) for f,w,k in zip(forms, widths, headers.split(',')) ]
-                widths = [ len(t) for t in tokens ]
-            else:
-                tokens = [ f.format(k)[:w] for f,w,k in zip(forms, widths, showtags) ]
-            print(' '.join(tokens))
-        for r in records:
-            values = [ ('{!s:' + str(w) + '}').format(f.format(r[k])) for f,w,k in zip(forms, widths, showtags) ]
-            print(' '.join(values))
-
+            tokens = [ r.titleform.format(h) for r,h in zip(rows, headers) ]
+            result.append('  '.join(tokens))
+        for values in records:
+            tokens = [ r.form.format(r.func(values[r.key])) for r in rows ]
+            result.append('  '.join(tokens))
+        list(map(print, result))

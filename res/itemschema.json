@@ -126,7 +126,6 @@
         ]
     },
     "vehicle:index": {
-        "format":   "31s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
@@ -144,7 +143,6 @@
         ]
     },
     "vehicle:userString": {
-        "format":   "27s",
         "map":      "gettext()",
         "resources": [
             {
@@ -154,7 +152,6 @@
         ]
     },
     "vehicle:shortUserString": {
-        "format":   "15s",
         "map":      "gettext()",
         "resources": [
             {
@@ -397,7 +394,6 @@
         ]
     },
     "chassis:index": {
-        "format":   "40s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -466,7 +462,6 @@
         ]
     },
     "turret:index": {
-        "format":   "38s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -537,7 +532,6 @@
         ]
     },
     "engine:index": {
-        "format":   "48s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/engines.xml",
@@ -651,7 +645,6 @@
         ]
     },
     "radio:index": {
-        "format":   "25s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/radios.xml",
@@ -695,7 +688,6 @@
         ]
     },
     "gun:index": {
-        "format":   "36s",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -712,7 +704,6 @@
         ]
     },
     "gun:userString": {
-        "format":   "24s",
         "map":      "gettext()",
         "resources": [
             {
@@ -833,8 +824,6 @@
         ]
     },
     "gun:afterShot": {
-        "label":    "... factor after shot:",
-        "unit":     "",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -998,7 +987,6 @@
         ]
     },
     "shell:kindShort": {
-        "format":   "4s",
         "map": {
             "ARMOR_PIERCING": "AP", "ARMOR_PIERCING_CR": "APCR",
             "HIGH_EXPLOSIVE": "HE", "HOLLOW_CHARGE": "HEAT"
