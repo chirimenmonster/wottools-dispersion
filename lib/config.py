@@ -58,6 +58,8 @@ def parseArgument(mode=None):
         group.add_argument('--tier', action='store_true', dest='list_tier', help='show tiers')
         group.add_argument('--type', action='store_true', dest='list_type', help='show vehicle types')
         group.add_argument('--vehicle', dest='list_vehicle', help='vehicle name or filter NATION:TIER:TYPE.  ex. "R80_KV1" or "germany:9:HT"')
+        group.add_argument('--tag', action='store_const', const='.', dest='list_tag', help='show all tags')
+        group.add_argument('--tag-pattern', dest='list_tag', help='show tags matched regex')
 
         group = parser.add_mutually_exclusive_group()
         group.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')

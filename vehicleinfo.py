@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import io
+import re
 
 from lib.config import parseArgument, g_config as config 
 from lib.application import g_application as app
@@ -94,5 +95,13 @@ if __name__ == '__main__':
                 headers = default['header']
         result = listVehicleModule(vehicles, modules, showtags, sort=sorttags)
         _outputValues(result, show=showtags, headers=headers)
+    elif config.list_tag:
+        result = app.schema.keys()
+        def f(pattern, string):
+            match = re.search(pattern, string)
+            return match
+        result = filter(lambda x,p=config.list_tag: f(p, x), result)
+        for r in result:
+            print(r)
     else:
         raise ValueError

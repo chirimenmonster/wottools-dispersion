@@ -1027,6 +1027,7 @@
     },
     "shell:damage_armor": {
         "value":    "float",
+        "format":   ".0f",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1036,6 +1037,7 @@
     },
     "shell:damage_devices": {
         "value":    "float",
+        "format":   ".0f",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -1045,6 +1047,7 @@
     },
     "shell:speed": {
         "value":    "float",
+        "format":   ".0f",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -1054,6 +1057,7 @@
     },
     "shell:gravity": {
         "value":    "float",
+        "format":   ".1f",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
@@ -1072,6 +1076,7 @@
     },
     "shell:piercingPower": {
         "value":    "float",
+        "format":   ".0f",
         "map":      "split()[0]",
         "resources": [
             {
