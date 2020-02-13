@@ -128,60 +128,33 @@ def _sort(records, tags=None):
 
 
 def _outputValues(records, show=None, headers=None):
+    from lib.element import Element
     showtags = show.split(',') if show is not None else []
     headers = headers.split(',') if headers is not None else None
+    records = [ { k:Element(r[k], app.settings.schema[k]) for k in showtags } for r in records ]
     if app.config.csvoutput:
         from lib import csvoutput
         if headers is None:
             headers = showtags
         if app.config.suppress_header:
             headers = None
-        message = csvoutput.createMessageByArrayOfDict(records, showtags, headers)
+        result = [ { k:v.value for k,v in r.items() } for r in records ]
+        message = csvoutput.createMessageByArrayOfDict(result, showtags, headers)
         print(message, end='')
     elif app.config.outputjson:
-        print(json.dumps(records, ensure_ascii=False, indent=2))
-    else:
+        result = [ { k:v.value for k,v in r.items() } for r in records ]
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    elif True:
         if len(records) == 0:
             return
         if headers is None:
             headers = showtags
-        RowSchema = namedtuple('RowSchema', 'key type form titleform width func')
-        rows = [ None for k in showtags ]
-        for i, k in enumerate(showtags):
-            form = app.settings.schema[k].get('format', None)
-            if form is None:
-                type = app.settings.schema[k].get('value', None)
-                if type == 'float':
-                    form = '.1f'
-                elif type == 'int':
-                    form = '.0f'
-                else:
-                    form = 's'
-            if 's' in form:
-                type = 'str'
-                form = '{:' + 's' + '}'
-                func = lambda x:x
-            elif 'f' in form:
-                type = 'float'
-                form = '{:' + form + '}'
-                func = lambda x:float(x)
-            width = max([ len(form.format(func(r[k]))) for r in records ])
-            if not app.config.suppress_header:
-                width = max(width, len(headers[i]))
-            rows[i] = RowSchema(k, type, form, None, width, func)
-        for i, r in enumerate(rows):
-            titleform = '{:' + str(r.width) + 's}'
-            if r.type == 'str':
-                form = titleform
-            elif r.type == 'float':
-                form = r.form.strip('{:}')
-                form = '{:' + str(r.width) + form + '}'
-            rows[i] = r._replace(form=form, titleform=titleform)
+        headers = { k:h for k,h in zip(showtags, headers) }
+        rowlen = { k:max([ len(r[k].getFormattedString()) for r in records ]) for k in showtags }
         result = []
         if not app.config.suppress_header:
-            tokens = [ r.titleform.format(h) for r,h in zip(rows, headers) ]
-            result.append('  '.join(tokens))
-        for values in records:
-            tokens = [ r.form.format(r.func(values[r.key])) for r in rows ]
-            result.append('  '.join(tokens))
+            rowlen = { k:max(rowlen[k], len(headers[k])) for k in showtags }
+            result.append('  '.join([ headers[k].ljust(rowlen[k]) for k in showtags ]))
+        for r in records:
+            result.append('  '.join([ r[k].getFormattedString(width=rowlen[k]) for k in showtags ]))
         list(map(print, result))
