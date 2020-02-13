@@ -40,6 +40,10 @@ class Element(object):
         return self.value.__lt__(other.value)
 
     @property
+    def orig(self):
+        return self.__orig
+
+    @property
     def value(self):
         if self.__value is None:
             self.__value = self.__getValue()

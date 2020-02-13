@@ -1,10 +1,15 @@
 
 import sys
 import json
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
 from lib.application import g_application as app
+from lib.element import Element
+
+
+def serialize(records):
+    return [ { k:v.orig for k,v in r.items() } for r in records ]
 
 
 def listVehicleModule(vehicles, modules, params, sort=None):
@@ -69,28 +74,29 @@ def listVehicleModule(vehicles, modules, params, sort=None):
     for ctx in ctxs:
         result.append(app.vd.getVehicleItems(list(tags), ctx))
     result = _sort(result, tags=sortkeys)
+    result = [ { k:Element(r[k], app.settings.schema[k]) for k in tags } for r in result ]
     result = _removeDuplicate(result, showtags=showtags)
     result = _removeEmpty(result)
     return result
 
 
-def _removeDuplicate(values, showtags=None):
+def _removeDuplicate(records, showtags=None):
     if app.config.suppress_unique:
-        return values
-    result = []
-    data = {}
-    for value in values:
-        k = tuple(map(lambda x,v=value:repr(v[x]) if isinstance(v[x], list) else v[x], showtags))
-        if k not in data:
-            data[k] = True
-            result.append(value)
-    return result
+        return records
+    uniqset = OrderedDict()
+    for r in records:
+        key = tuple(map(lambda x:r[x].value, showtags))
+        if key not in uniqset:
+            uniqset[key] = r
+    return uniqset.values()
 
 
 def _removeEmpty(records):
     if not app.config.suppress_empty:
         return records
-    records = [ r for r in records if None not in r.values() ]
+    f = lambda x: x.orig is not None
+    g = lambda y: None not in map(f, y.values())
+    records = list(filter(g, records))
     return records
 
 
@@ -128,22 +134,18 @@ def _sort(records, tags=None):
 
 
 def _outputValues(records, show=None, headers=None):
-    from lib.element import Element
     showtags = show.split(',') if show is not None else []
     headers = headers.split(',') if headers is not None else None
-    records = [ { k:Element(r[k], app.settings.schema[k]) for k in showtags } for r in records ]
     if app.config.csvoutput:
         from lib import csvoutput
         if headers is None:
             headers = showtags
         if app.config.suppress_header:
             headers = None
-        result = [ { k:v.value for k,v in r.items() } for r in records ]
-        message = csvoutput.createMessageByArrayOfDict(result, showtags, headers)
+        message = csvoutput.createMessageByArrayOfDict(serialize(records), showtags, headers)
         print(message, end='')
     elif app.config.outputjson:
-        result = [ { k:v.value for k,v in r.items() } for r in records ]
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print(json.dumps(serialize(records), ensure_ascii=False, indent=2))
     elif True:
         if len(records) == 0:
             return
