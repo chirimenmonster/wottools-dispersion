@@ -58,20 +58,6 @@ class Element(object):
         if self.__type != other.__type:
             raise TypeError('not same type, {} and {}'.format(self, other))    
         
-    def __lt2__(self, other, reverse=False):
-        self.__assertType(other)
-        if self.order is None:
-            if other.order is None:
-                return False
-            return True
-        if reverse:
-            if self.order.__eq__(other.order):
-                return False
-            elif self.order.__lt__(other.order):
-                return False
-            return True
-        return self.order.__lt__(other.order)
-
     @property
     def orig(self):
         return self.__orig
