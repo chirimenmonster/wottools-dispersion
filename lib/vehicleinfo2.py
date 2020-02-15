@@ -73,8 +73,8 @@ def listVehicleModule(vehicles, modules, params, sort=None):
     result = []    
     for ctx in ctxs:
         result.append(app.vd.getVehicleItems(list(tags), ctx))
+    result = [ { k:Element(r[k], app.settings.schema[k], app.resource) for k in tags } for r in result ]
     result = _sort(result, tags=sortkeys)
-    result = [ { k:Element(r[k], app.settings.schema[k]) for k in tags } for r in result ]
     result = _removeDuplicate(result, showtags=showtags)
     result = _removeEmpty(result)
     return result
@@ -101,35 +101,16 @@ def _removeEmpty(records):
 
 
 def _sort(records, tags=None):
-    class _rstr(str):
-        def __lt__(self, other):
-            return not super(_rstr, self).__lt__(other)
     if tags is None:
         return records
-    keyFuncs = []
-    for k in tags:
-        factor = 1
-        if k[0] == '-':
-            factor = -1
-            k = k[1:]
-        schema = app.settings.schema[k]
-        if factor == 1:
-            func = lambda x,key=k: x[key]
+    for tag in reversed(tags):
+        if tag.startswith('-'):
+            key = tag[1:]
+            reverse = True
         else:
-            func = lambda x,key=k: _rstr(x[key])
-        if 'sort' in schema:
-            if schema['sort'] in ('settings:nationsOrder', 'settings:typesOrder'):
-                indexes = app.resource.getValue(schema['sort'])
-                func = lambda x,key=k,ref=indexes,f=factor: ref.index(x[key]) * f
-            else:
-                raise NotImplementedError('sort={}'.format(schema['sort']))
-        elif 'value' in schema:
-            if schema['value'] == 'int':
-                func = lambda x,key=k,f=factor: int(x[key]) * f if x[key] is not None else float('+inf')
-            elif schema['value'] == 'float':
-                func = lambda x,key=k,f=factor: float(x[key]) * f if x[key] is not None else float('+inf')
-        keyFuncs.append(func)
-    records = sorted(records, key=lambda x: tuple([ f(x) for f in keyFuncs ]))
+            key = tag
+            reverse = False
+        records = sorted(records, key=lambda x: x[key].order, reverse=reverse)
     return records
 
 

@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from operator import attrgetter
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from lib.element import Element
@@ -39,7 +40,7 @@ class ElementTestCase(unittest.TestCase):
             Element('10.3', schema),
             Element('8.324', schema),
         ]
-        result = sorted(objs)
+        result = sorted(objs, key=attrgetter('order'))
         self.assertEqual(['8.324', '10.3'], list(map(lambda x:x.str, result)))
 
     def test_element_sort_str(self):
@@ -49,5 +50,5 @@ class ElementTestCase(unittest.TestCase):
             Element('10.3', schema),
             Element('8.324', schema),
         ]
-        result = sorted(objs)
+        result = sorted(objs, key=attrgetter('order'))
         self.assertEqual(['10.3', '8.324'], list(map(lambda x:x.str, result)))

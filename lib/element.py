@@ -1,15 +1,24 @@
 
 class Element(object):
 
-    def __init__(self, value=None, schema=None):
-        self.set(value, schema)
+    def __init__(self, value=None, schema=None, resource=None):
+        if isinstance(value, Element):
+            if schema is not None or resource is not None:
+                raise NotImplementedError
+            other = value
+            value = other.orig
+            schema = other.schema
+            resource = other.resource
+        self.set(value, schema, resource)
 
-    def set(self, value, schema):
+    def set(self, value, schema, resource):
         self.__orig = value
         self.__schema = schema
+        self.__resource = resource
         self.__type = schema.get('value', 'str')
         self.__value = None
         self.__str = None
+        self.__order = None
         
     def __getValue(self):
         if self.__orig is None:
@@ -31,23 +40,57 @@ class Element(object):
             return None
         self.__str = str(self.__orig)
         return self.__str
-        
-    def __lt__(self, other):
+
+    def __getOrder(self):
+        orderType = self.__schema.get('sort', None)
+        if orderType in ('settings:nationsOrder', 'settings:typesOrder'):
+            order = self.__resource.getValue(orderType)
+            return order.index(self.value)
+        return self.value
+
+    def __assertType(self, other):
         if not isinstance(other, type(self)):
             raise TypeError
         if self.__type != other.__type:
-            raise TypeError('not same type, {} and {}'.format(self, other))
-        return self.value.__lt__(other.value)
+            raise TypeError('not same type, {} and {}'.format(self, other))    
+        
+    def __lt2__(self, other, reverse=False):
+        self.__assertType(other)
+        if self.order is None:
+            if other.order is None:
+                return False
+            return True
+        if reverse:
+            if self.order.__eq__(other.order):
+                return False
+            elif self.order.__lt__(other.order):
+                return False
+            return True
+        return self.order.__lt__(other.order)
 
     @property
     def orig(self):
         return self.__orig
 
     @property
+    def schema(self):
+        return self.__schema
+
+    @property
+    def resource(self):
+        return self.__resource
+
+    @property
     def value(self):
         if self.__value is None:
             self.__value = self.__getValue()
         return self.__value
+
+    @property
+    def order(self):
+        if self.__order is None:
+            self.__order = self.__getOrder()
+        return self.__order
 
     @property
     def str(self):
