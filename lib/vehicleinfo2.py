@@ -73,7 +73,7 @@ def listVehicleModule(vehicles, modules, params, sort=None):
     result = []    
     for ctx in ctxs:
         result.append(app.vd.getVehicleItems(list(tags), ctx))
-    result = [ { k:Element(r[k], app.settings.schema[k], app.resource) for k in tags } for r in result ]
+    result = [ { k:Element(r[k], app.settings.schema[k], app.settings.orders) for k in tags } for r in result ]
     result = _sort(result, tags=sortkeys)
     result = _removeDuplicate(result, showtags=showtags)
     result = _removeEmpty(result)

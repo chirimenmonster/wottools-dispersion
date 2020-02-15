@@ -39,6 +39,7 @@ class Application(object):
         self.schema = schema
         self.config = config
         self.dropdownlist = None
+        self.settings.orders = { k:resource.getValue(k) for k in ('settings:nationsOrder', 'settings:typesOrder') }
 
     def setupSettings(self, config):
         if config.schema is None:

@@ -1,20 +1,20 @@
 
 class Element(object):
 
-    def __init__(self, value=None, schema=None, resource=None):
+    def __init__(self, value=None, schema=None, orderType=None):
         if isinstance(value, Element):
             if schema is not None or resource is not None:
                 raise NotImplementedError
             other = value
             value = other.orig
             schema = other.schema
-            resource = other.resource
-        self.set(value, schema, resource)
+            orderType = other.orderType
+        self.set(value, schema, orderType)
 
-    def set(self, value, schema, resource):
+    def set(self, value, schema, orderType):
         self.__orig = value
         self.__schema = schema
-        self.__resource = resource
+        self.__orderType = orderType
         self.__type = schema.get('value', 'str')
         self.__value = None
         self.__str = None
@@ -42,10 +42,14 @@ class Element(object):
         return self.__str
 
     def __getOrder(self):
-        orderType = self.__schema.get('sort', None)
-        if orderType in ('settings:nationsOrder', 'settings:typesOrder'):
-            order = self.__resource.getValue(orderType)
+        type = self.__schema.get('sort', None)
+        if type is None:
+            pass
+        elif type in self.orderType:
+            order = self.orderType[type]
             return order.index(self.value)
+        else:
+            raise NotImplementedError('unknwon sort type: {}'.format(type))
         return self.value
 
     def __assertType(self, other):
@@ -79,6 +83,10 @@ class Element(object):
     @property
     def resource(self):
         return self.__resource
+
+    @property
+    def orderType(self):
+        return self.__orderType
 
     @property
     def value(self):
