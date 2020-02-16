@@ -54,19 +54,35 @@ class Resource(object):
             return None
         path = self.__vpath.getPathInfo(file)
         root = self.__strage.readXml(path)
-        #self.element = Element(root)
-        self.element = root
-        xpath, n = re.subn(r'/name\(\)$', '', xpath)
-        try:
-            result = self.element.findall(xpath)
-            result = list(filter(lambda x:x.tag != 'xmlns:xmlref', result))
-        except:
-            raise ValueError('xpath={}'.format(xpath))
-        if len(result) > 0:
-            if n == 1:
-                result = list(map(lambda x:x.tag, result))
-            else:
+        match = re.fullmatch(r'([^()]*)(/(\w+)\(\))?', xpath)
+        if match is None:
+            raise ValueError('bad xpath, xpath="{}"'.format(xpath))
+        xpath = match.group(1)
+        if match.group(3) is None:
+            try:
+                result = root.findall(xpath)
+                result = filter(lambda x:x.tag != 'xmlns:xmlref', result)
                 result = list(map(lambda x:x.text, result))
+            except:
+                raise ValueError('xpath="{}"'.format(xpath))
+        elif match.group(3) == 'name':
+            try:
+                result = root.findall(xpath)
+                result = filter(lambda x:x.tag != 'xmlns:xmlref', result)
+                result = list(map(lambda x:x.tag, result))
+            except:
+                raise ValueError('xpath="{}"'.format(xpath))
+        elif match.group(3) == 'position':
+            submatch = re.fullmatch(r'(.*)/([^/]+)', xpath)
+            try:
+                result = root.findall(submatch.group(1) + '/*')
+                result = filter(lambda x:x.tag != 'xmlns:xmlref', result)
+            except:
+                raise ValueError('xpath="{}"'.format(xpath))
+            result = [ r.tag for r in result ]
+            result = [ result.index(submatch.group(2)) + 1 ]
+        else:
+            raise NotImplementedError('bad xpath="{}", function="{}"'.format(xpath, match.group(3)))
         return result
 
     def getNodes(self, resources=None, ctx=None):

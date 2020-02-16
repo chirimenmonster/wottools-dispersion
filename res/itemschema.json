@@ -402,6 +402,14 @@
             }
         ]
     },
+    "chassis:position": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "chassis/{chassis}/position()"
+            }
+        ]
+    },
     "chassis:index": {
         "resources": [
             {
@@ -467,6 +475,14 @@
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
                 "xpath":    "chassis/{chassis}/maxHealth"
+            }
+        ]
+    },
+    "turret:position": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "turret0/{turret}/position()"
             }
         ]
     },
@@ -537,6 +553,14 @@
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
                 "xpath":    "turrets0/{turret}/guns/*/name()"
+            }
+        ]
+    },
+    "engine:position": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "engines/{engine}/position()"
             }
         ]
     },
@@ -615,6 +639,15 @@
             }
         ]
     },
+    "fueltank:position": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "fuelTanks/{fueltank}/position()",
+                "param":    { "fueltank": "vehicle:fueltank" }
+            }
+        ]
+    },
     "fueltank:index": {
         "resources": [
             {
@@ -650,6 +683,14 @@
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
                 "xpath":    "shared/{fueltank}/maxHealth",
                 "param":    { "fueltank": "vehicle:fueltank" }
+            }
+        ]
+    },
+    "radio:position": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "radios/{radio}/position()"
             }
         ]
     },
@@ -693,6 +734,14 @@
             {
                 "file":     "vehicles/{nation}/components/radios.xml",
                 "xpath":    "shared/{radio}/maxHealth"
+            }
+        ]
+    },
+    "gun:position": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "turrets0/{turret}/guns/{gun}/position()"
             }
         ]
     },
@@ -951,6 +1000,14 @@
                 "file":     "vehicles/{nation}/components/shells.xml",
                 "xpath":    "{shot}/damage/armor",
                 "param":    { "shot": "gun:shots[2]" }
+            }
+        ]
+    },
+    "shell:position": {
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/components/guns.xml",
+                "xpath":    "shared/{gun}/shots/{shell}/position()"
             }
         ]
     },
