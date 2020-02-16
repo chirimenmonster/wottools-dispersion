@@ -1,7 +1,8 @@
 
 from lib.config import TIERS, TIERS_LABEL
 from lib.application import g_application as app
-from lib.vehicles import VehicleSpec, ModuleSpec
+from lib.query import VehicleSpec, ModuleSpec
+
 
 class DropdownList(object):
 

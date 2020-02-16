@@ -3,9 +3,7 @@ import os
 import sys
 import unittest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-from lib.vpath import Settings
+from lib.application import Settings
 
 class SettingssTestCase(unittest.TestCase):
 
@@ -16,7 +14,8 @@ class SettingssTestCase(unittest.TestCase):
         self.guisettings_titles = 'res/guisettings_titles.json'
         
     def test_settings_itemschema(self):
-        settings = Settings(schema=self.itemschema)
+        settings = Settings()
+        settings.add('schema', self.itemschema)
         result = settings.schema
         self.assertIsInstance(result, dict)
         self.assertIn('settings:nationsOrder', result)

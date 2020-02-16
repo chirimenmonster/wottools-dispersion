@@ -1,8 +1,10 @@
 
 import os
+import json
 
-from lib.vpath import Strage, VPath, Settings, Resource
-from lib.vehicles import VehicleDatabase
+from lib.vpath import Strage, VPath
+from lib.resource import Resource
+from lib.database import VehicleDatabase
 from lib.translate import Gettext
 
 
@@ -39,14 +41,15 @@ class Application(object):
         self.schema = schema
         self.config = config
         self.dropdownlist = None
-        self.settings.orders = { k:resource.getValue(k) for k in ('settings:nationsOrder', 'settings:typesOrder') }
+        self.settings.addDict('orders', { k:resource.getValue(k) for k in ('settings:nationsOrder', 'settings:typesOrder') })
 
     def setupSettings(self, config):
         if config.schema is None:
             schemapath = 'res/itemschema.json'
         else:
             schemapath = config.schema
-        settings = Settings(schema=schemapath)
+        settings = Settings()
+        settings.add('schema', schemapath)
         if config.gui:
             settings.add('guiitems', 'res/guisettings_items.json')
             settings.add('guititles', 'res/guisettings_titles.json')
@@ -80,5 +83,24 @@ class Application(object):
             self.titlesdesc = json.load(fp)
         with open('res/guisettings_selectors.json', 'r') as fp:
             self.selectorsdesc = json.load(fp)
+
+
+class Settings(object):
+
+    def load(self, path):
+        with open(path, 'r') as fp:
+            result = json.load(fp)
+        return result
+
+    def add(self, name, path):
+        with open(path, 'r') as fp:
+            result = json.load(fp)
+        setattr(self, name, result)
+        return self
+
+    def addDict(self, name, dict):
+        setattr(self, name, dict)
+        return self
+
 
 g_application = Application()

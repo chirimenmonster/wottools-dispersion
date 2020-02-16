@@ -47,16 +47,16 @@ class VehicleStats(dict):
     def __init__(self, *args, schema=None, orderType=None, **kwargs):
         super(VehicleStats, self).__init__(*args, **kwargs)
         for k, v in self.items():
-            self[k] = Element(v, schema=schema[k], orderType=orderType)
+            self[k] = VehicleStatsElement(v, schema=schema[k], orderType=orderType)
     
     def asDict(self):
         return { k:v.orig for k,v in self.items() }
 
 
-class Element(object):
+class VehicleStatsElement(object):
 
     def __init__(self, value=None, schema=None, orderType=None):
-        if isinstance(value, Element):
+        if isinstance(value, VehicleStatsElement):
             if schema is not None or resource is not None:
                 raise NotImplementedError
             other = value

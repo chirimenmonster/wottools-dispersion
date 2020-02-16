@@ -6,8 +6,10 @@ import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from lib.vpath import Strage, VPath, Settings, Resource
-from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
+from lib.application import Settings
+from lib.vpath import Strage, VPath
+from lib.resource import Resource
+from lib.database import VehicleDatabase, VehicleSpec, ModuleSpec
 from lib.translate import Gettext
 
 class VehicleTestCase(unittest.TestCase):
@@ -15,7 +17,7 @@ class VehicleTestCase(unittest.TestCase):
     def setUp(self):
         strage = Strage()
         vpath = VPath(scriptsdir='../wot.scripts', guidir='test/data/res')
-        schema = Settings(schema='res/itemschema.json').schema
+        schema = Settings().add('schema', 'res/itemschema.json').schema
         gettext = Gettext(localedir='test/data/res')
         resource = Resource(strage, vpath, schema)
         resource.gettext = gettext

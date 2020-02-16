@@ -3,13 +3,12 @@ import sys
 import json
 from collections import namedtuple, OrderedDict
 
-from lib.vehicles import VehicleDatabase, VehicleSpec, ModuleSpec
+from lib.database import VehicleDatabase, VehicleSpec, ModuleSpec
 from lib.application import g_application as app
-from lib.element import VehicleStatsCollection
+from lib.stats import VehicleStatsCollection
 
 
-
-def listVehicleModule(vehicles, modules, params, sort=None):
+def queryVehicleModule(vehicles, modules, params, sort=None):
     if ':' in vehicles:
         args = vehicles.split(':')
         nations, tiers, types = list(map(lambda x:x.split(','), args[:3]))

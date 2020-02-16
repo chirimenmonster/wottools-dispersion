@@ -1,6 +1,9 @@
 
+import io
+import csv
 import json
-from lib import csvoutput
+
+from lib.stats import VehicleStatsCollection
 
 
 def outputValues(records, shows=None, headers=None, option=None):
@@ -43,7 +46,17 @@ def getOutputJson(records, shows=None, headers=None, option=None):
 def getOutputCsv(records, shows=None, headers=None, option=None):
     if headers is None:
         headers = shows
-    if option and not option.suppress_header:
+    if option and option.suppress_header:
         headers = None
-    result = csvoutput.createMessageByArrayOfDict(serialize(records), shows, headers)
+    output = io.StringIO(newline='')
+    writer = csv.writer(output, dialect='excel', lineterminator='\n')
+    if headers:
+        writer.writerow(headers)
+    if isinstance(records, VehicleStatsCollection):
+        for r in records:
+            writer.writerow(list(map(lambda k: r[k].orig, shows)))
+    else:
+        for r in records:
+            writer.writerow(list(map(lambda k: r[k], shows)))    
+    result = output.getvalue()
     return result

@@ -4,10 +4,10 @@ import tkinter
 import tkinter.ttk
 import tkinter.font
 
-from lib import csvoutput
 from lib.config import parseArgument, g_config as config
-
 from lib.application import g_application as app
+from lib.output import getOutputCsv
+
 
 class Application(tkinter.Frame):
 
@@ -230,7 +230,7 @@ class Application(tkinter.Frame):
     def createMessage(self):
         param = self.getSelectedValues()
         values = self.__strage.getDescription(param)
-        message = csvoutput.createMessage(self.__strage, values)
+        message = getOutputCsv(values)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
 

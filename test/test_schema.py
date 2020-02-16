@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from lib import vpath as vp
 from lib import translate as tr
+from lib.resource import Resource
 
 class SchemaTestCase(unittest.TestCase):
 
@@ -19,7 +20,7 @@ class SchemaTestCase(unittest.TestCase):
             self.schema = json.load(fp)
         self.ctx = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
             'engine':'V-2-34', 'fueltank':'Average', 'radio':'_9RM', 'gun':'_76mm_S-54', 'shell':'_76mm_UBR-354MP'}
-        self.resource = vp.Resource(self.strage, self.vpath, self.schema)
+        self.resource = Resource(self.strage, self.vpath, self.schema)
         self.resource.gettext = tr.Gettext(localedir='test/data/res')
 
     def test_schema(self):
