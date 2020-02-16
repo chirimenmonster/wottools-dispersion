@@ -62,8 +62,8 @@ def parseArgument(mode=None):
         group.add_argument('--tag-pattern', dest='list_tag', help='show tags matched regex')
 
         group = parser.add_mutually_exclusive_group()
-        group.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
-        group.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
+        group.add_argument('--csv', dest='output_csv', action='store_true', help='output CSV')
+        group.add_argument('--json', dest='output_json', action='store_true', help='output JSON')
 
         parser.add_argument('--list-module', dest='list_module', help='list modules.  ex. "gun" or "engine,radio')
         parser.add_argument('--show', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')

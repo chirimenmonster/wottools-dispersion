@@ -3,7 +3,6 @@ import sys
 import unittest
 from operator import attrgetter
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from lib.element import Element
 
 

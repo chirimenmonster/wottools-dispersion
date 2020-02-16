@@ -1,4 +1,58 @@
 
+
+class VehicleStatsCollection(list):
+
+    def __init__(self, *args, schema=None, orderType=None, **kwargs):
+        super(VehicleStatsCollection, self).__init__(*args, **kwargs)
+        for i, v in enumerate(self):
+            self[i] = VehicleStats(v, schema=schema, orderType=orderType)
+
+    def sort(self, tags=None):
+        if tags is None:
+            return self
+        for tag in reversed(tags):
+            if tag.startswith('-'):
+                key = tag[1:]
+                reverse = True
+            else:
+                key = tag
+                reverse = False
+            super(VehicleStatsCollection, self).sort(key=lambda x: x[key].order, reverse=reverse)
+
+    def removeEmpty(self):
+        f = lambda x: x.orig is None or x.value == ''
+        g = lambda y: True in map(f, y.values())
+        emptyList = list(filter(g, self))
+        for emptyRecord in emptyList:
+            self.remove(emptyRecord)
+
+    def removeDuplicate(self, showtags=None):
+        removeRecords = {}
+        for r in self:
+            key = tuple(map(lambda x:r[x].value, showtags))
+            if key not in removeRecords:
+                removeRecords[key] = []
+            else:
+                removeRecords[key].append(r)
+        for removeList in removeRecords.values():
+            for r in removeList:
+                self.remove(r)
+
+    def asPrimitive(self):
+        return [ r.asDict() for r in self ]
+
+
+class VehicleStats(dict):
+
+    def __init__(self, *args, schema=None, orderType=None, **kwargs):
+        super(VehicleStats, self).__init__(*args, **kwargs)
+        for k, v in self.items():
+            self[k] = Element(v, schema=schema[k], orderType=orderType)
+    
+    def asDict(self):
+        return { k:v.orig for k,v in self.items() }
+
+
 class Element(object):
 
     def __init__(self, value=None, schema=None, orderType=None):
