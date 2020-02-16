@@ -130,7 +130,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
-                "xpath":    "*/name()"
+                "xpath":    "name(*)"
             }
         ]
     },
@@ -138,7 +138,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",
-                "xpath":    "{vehicle}/name()"
+                "xpath":    "name({vehicle})"
             }
         ]
     },
@@ -327,7 +327,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "chassis/*/name()"
+                "xpath":    "name(chassis/*)"
             }
         ]
     },
@@ -336,7 +336,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "turrets0/*/name()"
+                "xpath":    "name(turrets0/*)"
             }
         ]
     },
@@ -345,7 +345,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "engines/*/name()"
+                "xpath":    "name(engines/*)"
             }
         ]
     },
@@ -354,7 +354,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "fuelTanks/*/name()"
+                "xpath":    "name(fuelTanks/*)"
             }
         ]
     },
@@ -362,7 +362,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "fuelTanks/*[1]/name()"
+                "xpath":    "name(fuelTanks/*[1])"
             }
         ]
     },
@@ -371,7 +371,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "radios/*/name()"
+                "xpath":    "name(radios/*)"
             }
         ]
     },
@@ -406,7 +406,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "chassis/{chassis}/position()"
+                "xpath":    "position(chassis/{chassis})"
             }
         ]
     },
@@ -414,7 +414,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "chassis/{chassis}/name()"
+                "xpath":    "name(chassis/{chassis})"
             }
         ]
     },
@@ -482,7 +482,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "turret0/{turret}/position()"
+                "xpath":    "position(turrets0/{turret})"
             }
         ]
     },
@@ -490,7 +490,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "turrets0/{turret}/name()"
+                "xpath":    "name(turrets0/{turret})"
             }
         ]
     },
@@ -552,7 +552,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "turrets0/{turret}/guns/*/name()"
+                "xpath":    "name(turrets0/{turret}/guns/*)"
             }
         ]
     },
@@ -560,7 +560,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "engines/{engine}/position()"
+                "xpath":    "position(engines/{engine})"
             }
         ]
     },
@@ -568,7 +568,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/engines.xml",
-                "xpath":    "shared/{engine}/name()"
+                "xpath":    "name(shared/{engine})"
             }
         ]
     },
@@ -643,7 +643,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "fuelTanks/{fueltank}/position()",
+                "xpath":    "position(fuelTanks/{fueltank})",
                 "param":    { "fueltank": "vehicle:fueltank" }
             }
         ]
@@ -652,7 +652,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/fuelTanks.xml",
-                "xpath":    "shared/{fueltank}/name()",
+                "xpath":    "name(shared/{fueltank})",
                 "param":    { "fueltank": "vehicle:fueltank" }
             }
         ]
@@ -690,7 +690,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "radios/{radio}/position()"
+                "xpath":    "position(radios/{radio})"
             }
         ]
     },
@@ -698,7 +698,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/radios.xml",
-                "xpath":    "shared/{radio}/name()"
+                "xpath":    "name(shared/{radio})"
             }
         ]
     },
@@ -741,7 +741,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
-                "xpath":    "turrets0/{turret}/guns/{gun}/position()"
+                "xpath":    "position(turrets0/{turret}/guns/{gun})"
             }
         ]
     },
@@ -749,7 +749,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/name()"
+                "xpath":    "name(shared/{gun})"
             }
         ]
     },
@@ -926,7 +926,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots/*/name()"
+                "xpath":    "name(shared/{gun}/shots/*)"
             }
         ]
     },
@@ -1007,7 +1007,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/guns.xml",
-                "xpath":    "shared/{gun}/shots/{shell}/position()"
+                "xpath":    "position(shared/{gun}/shots/{shell})"
             }
         ]
     },
@@ -1015,7 +1015,7 @@
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
-                "xpath":    "{shell}/name()"
+                "xpath":    "name({shell})"
             }
         ]
     },

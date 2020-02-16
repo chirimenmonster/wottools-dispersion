@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
 
+
+
 class Resource(object):
 
     def __init__(self, strage, vpath, schema, gettext=None):
@@ -40,6 +42,40 @@ class Resource(object):
     def gettext(self, obj):
         self.__gettext = obj
 
+    def findNodes(self, root, xpath):
+        result = root.findall(xpath)
+        result = list(filter(lambda x:x.tag != 'xmlns:xmlref', result))
+        return result
+
+    def resolveXPath(self, root, xpath):
+        match = re.fullmatch(r'([^()]*)\((.*)\)', xpath)
+        if match:
+            fname = match.group(1)
+            xpath = match.group(2)
+            if fname == 'name':
+                result = self.findNodes(root, xpath)
+                result = [ r.tag for r in result ]
+            elif fname == 'position':
+                submatch = re.fullmatch(r'(.*/)([^/]+)', xpath)
+                if submatch:
+                    xpath = submatch.group(1) + '*'
+                    nname = submatch.group(2)
+                else:
+                    xpath, nname = '*', xpath
+                result = self.findNodes(root, xpath)
+                result = [ r.tag for r in result ]
+                try:
+                    result = [ result.index(nname) + 1 ]
+                except:
+                    print('xpath={}, nname={}'.format(xpath, nname))
+                    raise
+            else:
+                raise NotImplementedError('unknown function: {}, xpath={}'.format(fname, xpath))
+        else:
+            result = self.findNodes(root, xpath)
+            result = [ r.text for r in result ]
+        return result
+
     def getFromFile(self, file, xpath, param=None, ctx=None):
         if ctx is None:
             ctx = {}
@@ -54,36 +90,7 @@ class Resource(object):
             return None
         path = self.__vpath.getPathInfo(file)
         root = self.__strage.readXml(path)
-        match = re.fullmatch(r'([^()]*)(/(\w+)\(\))?', xpath)
-        if match is None:
-            raise ValueError('bad xpath, xpath="{}"'.format(xpath))
-        xpath = match.group(1)
-        if match.group(3) is None:
-            try:
-                result = root.findall(xpath)
-                result = filter(lambda x:x.tag != 'xmlns:xmlref', result)
-                result = list(map(lambda x:x.text, result))
-            except:
-                raise ValueError('xpath="{}"'.format(xpath))
-        elif match.group(3) == 'name':
-            try:
-                result = root.findall(xpath)
-                result = filter(lambda x:x.tag != 'xmlns:xmlref', result)
-                result = list(map(lambda x:x.tag, result))
-            except:
-                raise ValueError('xpath="{}"'.format(xpath))
-        elif match.group(3) == 'position':
-            submatch = re.fullmatch(r'(.*)/([^/]+)', xpath)
-            try:
-                result = root.findall(submatch.group(1) + '/*')
-                result = filter(lambda x:x.tag != 'xmlns:xmlref', result)
-            except:
-                raise ValueError('xpath="{}"'.format(xpath))
-            result = [ r.tag for r in result ]
-            result = [ result.index(submatch.group(2)) + 1 ]
-        else:
-            raise NotImplementedError('bad xpath="{}", function="{}"'.format(xpath, match.group(3)))
-        return result
+        return self.resolveXPath(root, xpath)
 
     def getNodes(self, resources=None, ctx=None):
         for r in resources:

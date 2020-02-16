@@ -83,15 +83,23 @@ class ResourceTestCase(unittest.TestCase):
 
     def test_resource_getValue_1(self):
         self.assertEqual('T-34', self.resource.getValue('vehicle:shortUserString', self.param))
-        resources = [{'file':'vehicles/{nation}/list.xml', 'xpath':'*/name()'}]
+
+    def test_resource_getValue_2(self):
+        resources = [{'file':'vehicles/{nation}/list.xml', 'xpath':'name(*)'}]
         result = self.resource.getValue(ctx=self.param, resources=resources, type='list')
         self.assertEqual(['Observer', 'R04_T-34', 'R02_SU-85', 'R01_IS', 'R03_BT-7'], result)
 
-    def test_resource_getValue_2(self):
+    def test_resource_getValue_3(self):
+        resources = [{'file':'vehicles/{nation}/list.xml', 'xpath':'position(R04_T-34)'}]
+        result = self.resource.getValue(ctx=self.param, resources=resources, type='int')
+        self.assertEqual(2, result)
+
+    def test_resource_getValue_4(self):
         result = self.resource.getValue('settings:tiersLabel')
         expect = {'1':'I', '2':'II', '3':'III', '4':'IV', '5': 'V',
                     '6':'VI', '7':'VII', '8':'VIII', '9':'IX', '10':'X' }
         self.assertEqual(expect, result)
+
 
     def test_resource_convert(self):
         value = ['Observer', 'R04_T-34', 'R02_SU-85']
