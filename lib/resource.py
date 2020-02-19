@@ -16,8 +16,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
 
-
-
 class Resource(object):
 
     def __init__(self, strage, vpath, schema, gettext=None):
@@ -42,10 +40,18 @@ class Resource(object):
     def gettext(self, obj):
         self.__gettext = obj
 
+    @property
+    def strage(self):
+        return self.__strage
+        
+    @property
+    def vpath(self):
+        return self.__vpath
+
     def findNodes(self, root, xpath):
-        result = root.findall(xpath)
-        result = list(filter(lambda x:x.tag != 'xmlns:xmlref', result))
-        return result
+        nodeset = root.findall(xpath)
+        nodeset = list(filter(lambda x:x.tag != 'xmlns:xmlref', nodeset))
+        return nodeset
 
     def resolveXPath(self, root, xpath):
         match = re.fullmatch(r'([^()]*)\((.*)\)', xpath)
