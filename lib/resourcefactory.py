@@ -1,19 +1,21 @@
 
 import re
 
-from lib.application import g_application as app
 from lib.utils import substitute
 
 
 class ResourceFactory(object):
 
+    def __init__(self, app):
+        self.app = app
+
     def create(self, desc):
         if 'file' in desc and 'xpath' in desc:
-            obj = ResourceXml(desc)
+            obj = ResourceXml(self.app, desc)
         elif 'immediate' in desc:
-            obj = ResourceImmediate(desc)
+            obj = ResourceImmediate(self.app, desc)
         elif 'func' in desc:
-            obj = ResourceFunction(desc)
+            obj = ResourceFunction(self.app, desc)
         else:
             NotImplementedError('bad resource description, {}'.format(desc))
         return obj
@@ -21,7 +23,8 @@ class ResourceFactory(object):
 
 class ResourceMeta(object):
 
-    def __init__(self, desc):
+    def __init__(self, app, desc):
+        self.app = app
         self.desc = desc
 
     def getValue(self, ctx=None):
@@ -30,8 +33,8 @@ class ResourceMeta(object):
 
 class ResourceXml(ResourceMeta):
 
-    def __init__(self, desc):
-        super(ResourceXml, self).__init__(desc)
+    def __init__(self, app, desc):
+        super(ResourceXml, self).__init__(app, desc)
         self.file = desc['file']
         self.xpath = desc['xpath']
         self.param = desc.get('param', None)
@@ -42,15 +45,15 @@ class ResourceXml(ResourceMeta):
         if self.param is not None:
             newctx = ctx.copy()
             for tag, rtag in self.param.items():
-                newctx[tag] = app.resource.getRefValue(rtag, ctx)
+                newctx[tag] = self.app.resource.getRefValue(rtag, ctx)
             ctx = newctx
         file = substitute(self.file, ctx)
         xpath = substitute(self.xpath, ctx)
         if file is None or xpath is None:
             return None
-        path = app.resource.vpath.getPathInfo(file)
+        path = self.app.resource.vpath.getPathInfo(file)
         try:
-            root = app.resource.strage.readXml(path)
+            root = self.app.resource.strage.readXml(path)
         except FileNotFoundError or KeyError:
             result = None
         result = self.resolveXPath(root, xpath)
@@ -93,8 +96,8 @@ class ResourceXml(ResourceMeta):
 
 class ResourceImmediate(ResourceMeta):
 
-    def __init__(self, desc):
-        super(ResourceImmediate, self).__init__(desc)
+    def __init__(self, app, desc):
+        super(ResourceImmediate, self).__init__(app, desc)
         self.immediate = desc['immediate']
 
     def getValue(self, ctx=None):
@@ -104,10 +107,10 @@ class ResourceImmediate(ResourceMeta):
 
 class ResourceFunction(ResourceMeta):
 
-    def __init__(self, desc):
+    def __init__(self, app, desc):
+        super(ResourceFunction, self).__init__(app, desc)
         table = { 'sum':FunctionSum, 'div':FunctionDiv, 'mul':FunctionMul,
             'join':FunctionJoin, 'or':FunctionOr, 'format':FunctionFormat }
-        super(ResourceFunction, self).__init__(desc)
         match = re.fullmatch(r'(.*)\((.*)\)', desc['func'])
         if match is None or match.group(1) is None:
             raise ValueError('func: {}'.format(desc['func']))
@@ -117,7 +120,7 @@ class ResourceFunction(ResourceMeta):
         self.param = desc.get('param', None)
         if self.func not in table:
             raise NotImplementedError('func: {}'.format(self.func))
-        self.function = table[self.func](self.arg0, self.args)
+        self.function = table[self.func](app, self.arg0, self.args)
 
     def getValue(self, ctx=None):
         result = self.function.getValue(ctx=ctx)
@@ -126,7 +129,8 @@ class ResourceFunction(ResourceMeta):
 
 class FunctionMeta(object):
 
-    def __init__(self, arg0, args):
+    def __init__(self, app, arg0, args):
+        self.app = app
         self.arg0 = arg0
         self.args = args
 
@@ -134,7 +138,7 @@ class FunctionMeta(object):
         if ctx is not None and arg in ctx:
             return ctx[arg]
         else:
-            return app.resource.getRefValue(arg, ctx)    
+            return self.app.resource.getRefValue(arg, ctx)    
 
     def getArgs(self, ctx=None):
         return list(map(lambda x: self._extractArg(x, ctx), self.args))

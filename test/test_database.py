@@ -6,7 +6,8 @@ import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from lib.application import Settings
+from lib.config import g_config as config
+from lib.application import g_application as app, Settings
 from lib.vpath import Strage, VPath
 from lib.resource import Resource
 from lib.database import VehicleDatabase, VehicleSpec, ModuleSpec
@@ -15,18 +16,17 @@ from lib.translate import Gettext
 class VehicleTestCase(unittest.TestCase):
 
     def setUp(self):
-        strage = Strage()
-        vpath = VPath(scriptsdir='../wot.scripts', guidir='test/data/res')
-        schema = Settings().add('schema', 'res/itemschema.json').schema
-        gettext = Gettext(localedir='test/data/res')
-        resource = Resource(strage, vpath, schema)
-        resource.gettext = gettext
-        self.vd = VehicleDatabase(resource)
-        self.vd.prepare()
+        config.GUI_DIR = 'test/data/res'
+        config.scriptsdir = 'test/data/res'
+        config.schema = 'res/itemschema.json'
+        config.localedir = 'test/data/res'
+        app.setup(config)
+        self.vd = app.vd
+        return
 
     def test_getVehicleCtx(self):
-        self.assertEqual(646, len(self.vd.getVehicleCtx()))
-        self.assertEqual(786, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True, False]))))
+        self.assertEqual(649, len(self.vd.getVehicleCtx()))
+        self.assertEqual(789, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True, False]))))
         self.assertEqual(140, len(self.vd.getVehicleCtx(VehicleSpec(secrets=[True]))))
         self.assertEqual(30, len(self.vd.getVehicleCtx(VehicleSpec(nations=['germany'], tiers=[8]))))
         self.assertEqual(8, len(self.vd.getVehicleCtx(VehicleSpec(nations=['germany'], tiers=[8], types=['TD']))))
@@ -64,7 +64,7 @@ class VehicleTestCase(unittest.TestCase):
         self.assertEqual(3, len(self.vd.getModuleCtx('R04_T-34', ModuleSpec(turret=1, gun=3, shell=None))))
 
     def test_getVehicleModuleCtx(self):
-        self.assertEqual(47298, len(self.vd.getVehicleModuleCtx()))
+        self.assertEqual(47307, len(self.vd.getVehicleModuleCtx()))
         self.assertEqual(5, len(self.vd.getVehicleModuleCtx(VehicleSpec(nations=['germany'], tiers=[1]))))
         vehicleSpec = VehicleSpec(nations=['germany'], types=['LT'], secrets=[True])
         moduleSpec= ModuleSpec()

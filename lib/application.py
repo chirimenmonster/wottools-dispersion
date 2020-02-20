@@ -27,21 +27,17 @@ class Application(object):
             config.localedir = os.path.join(config.basedir, config.LOCALE_RELPATH)
         if config.schema is None:
             config.schema = 'res/itemschema.json'
-        settings = self.setupSettings(config)
-        schema = settings.schema
+        self.settings = self.setupSettings(config)
+        self.config = config
+        self.schema = self.settings.schema
         vpath = self.setupVPath(config)
         strage = Strage()
         self.gettext = self.setupGettext(config)
-        resource = Resource(strage, vpath, schema, gettext=self.gettext)
-        vd = VehicleDatabase(resource)
-        vd.prepare()
-        self.settings = settings
-        self.vd = vd
-        self.resource = resource
-        self.schema = schema
-        self.config = config
+        self.resource = Resource(g_application, strage, vpath, self.schema, gettext=self.gettext)
+        self.vd = VehicleDatabase(self.resource)
+        self.vd.prepare()
         self.dropdownlist = None
-        self.settings.addDict('orders', { k:resource.getValue(k) for k in ('settings:nationsOrder', 'settings:typesOrder') })
+        self.settings.addDict('orders', { k:self.resource.getValue(k) for k in ('settings:nationsOrder', 'settings:typesOrder') })
 
     def setupSettings(self, config):
         if config.schema is None:
