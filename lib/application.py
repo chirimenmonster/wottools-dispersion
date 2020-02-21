@@ -33,7 +33,7 @@ class Application(object):
         vpath = self.setupVPath(config)
         strage = Strage()
         self.gettext = self.setupGettext(config)
-        self.resource = Resource(g_application, strage, vpath, self.schema, gettext=self.gettext)
+        self.resource = Resource(self, strage, vpath, self.schema, gettext=self.gettext)
         self.vd = VehicleDatabase(self.resource)
         self.vd.prepare()
         self.dropdownlist = None
@@ -59,7 +59,7 @@ class Application(object):
             else:
                 pkgdir = None
         else:
-            pkgdir = config.pkg
+            pkgdir = config.pkgdir
         scriptsdir = config.SCRIPTS_DIR
         guidir = config.GUI_DIR
         scriptspkg = config.scriptspkg

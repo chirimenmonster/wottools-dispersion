@@ -11,7 +11,7 @@ import string
 import traceback
 
 from lib.config import TIERS_LABEL
-from lib.resourcefactory import ResourceFactory
+from lib.itemresource import ResourceFactory
 from lib.itemmap import MapFactory
 
 logger = logging.getLogger(__name__)
