@@ -142,12 +142,12 @@ class Resource(object):
             raise NotImplementedError('value: {}'.format(datatype))
         return value
 
-    def assignMap2(self, value, rule):
-        obj = MapFactory(app).create(rule)
+    def assignMap(self, value, rule):
+        obj = MapFactory(self.__app).create(rule)
         result = obj.getValue(value)
         return result
 
-    def assignMap(self, value, rule):
+    def assignMap0(self, value, rule):
         if value is None:
             return None
         if rule is None:

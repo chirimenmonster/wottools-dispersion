@@ -8,7 +8,9 @@ class MapFactory(object):
         self.app = app
 
     def create(self, desc):
-        if isinstance(desc, dict):
+        if desc is None:
+            obj = MapNull(self.app, desc)
+        elif isinstance(desc, dict):
             obj = MapDict(self.app, desc)
         elif desc == 'roman()':
             obj = MapRoman(self.app, desc)
@@ -29,6 +31,10 @@ class MapMeta(object):
     def getValue(self, value):
         raise NotImplementedError
 
+
+class MapNull(MapMeta):
+    def getValue(self, value):
+        return value
 
 class MapDict(MapMeta):
     def getValue(self, value):
