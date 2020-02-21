@@ -17,7 +17,7 @@ class ResourceFactoryTestCase(unittest.TestCase):
     def test_ResourceXml_1(self):
         desc = {
             "file":     "gui/gui_settings.xml",
-            "xpath":    "settings/[name='nations_order']/value/item"
+            "xpath":    "setting/[name='nations_order']/value/item"
         }
         expect = ['germany', 'ussr', 'usa', 'japan', 'china', 'uk', 'france', 'czech', 'poland', 'italy', 'sweden']
         resource = ResourceFactory(app).create(desc)

@@ -25,16 +25,6 @@ class ResourceTestCase(unittest.TestCase):
             'engine':'V-2-34', 'radio':'_9RM', 'gun':'_76mm_S-54'}
         return
 
-    def test_resource_substitute(self):
-        result = self.resource.substitute('vehicles/{nation}/list.xml', {'nation':'ussr'})
-        self.assertEqual('vehicles/ussr/list.xml', result)
-        with self.assertRaises(KeyError):
-            result = self.resource.substitute('vehicles/{nation}/list.xml', {})
-        result = self.resource.substitute('vehicles/{nation}/list.xml', {'nation':'ussr'})
-        self.assertEqual('vehicles/ussr/list.xml', result)
-        result = self.resource.substitute('vehicles/{nation}/{vehicle}.xml', {'nation':'ussr', 'vehicle':'R04_T34'})
-        self.assertEqual('vehicles/ussr/R04_T34.xml', result)
-
     def test_resource_getFromFile(self):
         return
         result = self.resource.getFromFile('vehicles/ussr/list.xml', 'R04_T-34/userString')
@@ -45,7 +35,7 @@ class ResourceTestCase(unittest.TestCase):
             result = self.resource.getFromFile('vehicles/ussr/missing', 'R04_T-34/userString')
             
     def test_resource_getNodes_resources(self):
-        resources = [{'file':'gui/gui_settings.xml', 'xpath':'settings/[name="nations_order"]/value/item'}]
+        resources = [{'file':'gui/gui_settings.xml', 'xpath':'setting/[name="nations_order"]/value/item'}]
         result = self.resource.getNodes(resources=resources)
         self.assertIsInstance(result, list)
         self.assertIn('ussr', result)

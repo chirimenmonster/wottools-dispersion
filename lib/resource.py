@@ -96,27 +96,6 @@ class Resource(object):
             ctx = addparams
         return ctx
 
-    def substitute(self, value, ctx):
-        if ctx is None:
-            return value
-        if isinstance(value, list):
-            value = list(map(lambda x,c=ctx:self.substitute(x, c), value))
-        elif isinstance(value, str):
-            for p in list(string.Formatter().parse(value)):
-                k = p[1]
-                if k is not None:
-                    if k not in ctx:
-                        raise KeyError('no key "{}" in ctx={}'.format(k, ctx))
-                    elif ctx[k] is None:
-                        return None
-            try:
-                value = value.format(**ctx)
-            except KeyError as e:
-                raise KeyError(e, value, ctx) from e
-            except TypeError as e:
-                raise TypeError(e.args[0], value, ctx) from e
-        return value
-
     def convert(self, value, datatype=None):
         if not isinstance(value, list):
             return value
@@ -145,31 +124,6 @@ class Resource(object):
     def assignMap(self, value, rule):
         obj = MapFactory(self.__app).create(rule)
         result = obj.getValue(value)
-        return result
-
-    def assignMap0(self, value, rule):
-        if value is None:
-            return None
-        if rule is None:
-            return value
-        if isinstance(rule, dict):
-            result = ' '.join(filter(None, map(lambda x: rule.get(x, None), value.split())))
-        elif rule == 'roman()':
-            result = TIERS_LABEL.get(value, None)
-        elif rule == 'gettext()':
-            if self.gettext is None:
-                raise AttributeError('translate engine is not prepared.')
-            result = self.gettext.translate(value)
-        elif rule.startswith('split()'):
-            match = re.fullmatch(r'split\(\)(\[(\d+)\])?', rule)
-            if match is None:
-                raise NotImplementedError('map rule: {}'.format(rule))
-            result = value.split()
-            if match.group(2) is not None:
-                pos = int(match.group(2))
-                result = result[pos]
-        else:
-            raise NotImplementedError('map rule: {}'.format(rule))
         return result
 
     def sort(self, values, order):

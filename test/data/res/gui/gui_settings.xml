@@ -1,9 +1,9 @@
 <root>
-  <settings>
-  </settings>
-  <settings>
-  </settings>
-  <settings>
+  <setting>
+  </setting>
+  <setting>
+  </setting>
+  <setting>
     <name>nations_order</name>
     <type>list</type>
     <value>
@@ -19,7 +19,7 @@
       <item>italy</item>
       <item>sweden</item>
     </value>
-  </settings>
-  <settings>
-  </settings>
+  </setting>
+  <setting>
+  </setting>
 </root>

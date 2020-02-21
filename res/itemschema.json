@@ -4,7 +4,7 @@
         "resources": [
             {
                 "file":     "gui/gui_settings.xml",
-                "xpath":    "settings/[name='nations_order']/value/item"
+                "xpath":    "setting/[name='nations_order']/value/item"
             },
             {
                 "immediate": [ "germany", "ussr", "usa", "uk", "france", "china", "japan",

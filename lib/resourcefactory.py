@@ -56,6 +56,7 @@ class ResourceXml(ResourceMeta):
             root = self.app.resource.strage.readXml(path)
         except FileNotFoundError or KeyError:
             result = None
+            raise
         result = self.resolveXPath(root, xpath)
         return result
 
