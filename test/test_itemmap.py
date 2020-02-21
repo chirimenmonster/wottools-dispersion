@@ -41,3 +41,9 @@ class MapFactoryTestCase(unittest.TestCase):
         itemmap = self.factory.create(desc)
         result = itemmap.getValue('This sentence consists of several words')
         self.assertEqual('consists', result)
+
+    def test_MapRoman(self):
+        desc = "roman()"
+        itemmap = self.factory.create(desc)
+        result = itemmap.getValue('7')
+        self.assertEqual('VII', result)

@@ -10,6 +10,8 @@ class MapFactory(object):
     def create(self, desc):
         if isinstance(desc, dict):
             obj = MapDict(self.app, desc)
+        elif desc == 'roman()':
+            obj = MapRoman(self.app, desc)
         elif desc == 'gettext()':
             obj = MapGettext(self.app, desc)
         elif desc.startswith('split()'):
@@ -33,6 +35,12 @@ class MapDict(MapMeta):
         result = value.split()
         result = list(filter(None, map(lambda x: self.desc.get(x, None), result)))
         result = ' '.join(result)
+        return result
+
+class MapRoman(MapMeta):
+    def getValue(self, value):
+        dict = self.app.resource.getValue('settings:tiersLabel')
+        result = dict.get(value, None)
         return result
 
 class MapGettext(MapMeta):

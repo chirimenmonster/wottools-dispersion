@@ -46,7 +46,7 @@ class ResourceTestCase(unittest.TestCase):
             
     def test_resource_getNodes_resources(self):
         resources = [{'file':'gui/gui_settings.xml', 'xpath':'settings/[name="nations_order"]/value/item'}]
-        result = self.resource.getNodes2(resources=resources)
+        result = self.resource.getNodes(resources=resources)
         self.assertIsInstance(result, list)
         self.assertIn('ussr', result)
                    

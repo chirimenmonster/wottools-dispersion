@@ -12,7 +12,7 @@ import traceback
 
 from lib.config import TIERS_LABEL
 from lib.resourcefactory import ResourceFactory
-
+from lib.itemmap import MapFactory
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -51,7 +51,7 @@ class Resource(object):
         result = None
         for r in res:
             result = r.getValue(ctx)
-            if result is not None and len(result) > 0:
+            if result is not None and result is not []:
                 break
         return result
 
@@ -141,6 +141,11 @@ class Resource(object):
         else:
             raise NotImplementedError('value: {}'.format(datatype))
         return value
+
+    def assignMap2(self, value, rule):
+        obj = MapFactory(app).create(rule)
+        result = obj.getValue(value)
+        return result
 
     def assignMap(self, value, rule):
         if value is None:

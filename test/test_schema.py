@@ -7,6 +7,8 @@ import xml.etree.ElementTree as ET
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+from lib.config import g_config as config
+from lib.application import g_application as app
 from lib import vpath as vp
 from lib import translate as tr
 from lib.resource import Resource
@@ -14,14 +16,14 @@ from lib.resource import Resource
 class SchemaTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.strage = vp.Strage()
-        self.vpath = vp.VPath(scriptsdir='test/data/res', guidir='test/data/res')
-        with open('res/itemschema.json', 'r') as fp:
-            self.schema = json.load(fp)
+        config.GUI_DIR = 'test/data/res'
+        config.scriptsdir = 'test/data/res'
+        config.schema = 'res/itemschema.json'
+        config.localedir = 'test/data/res'
+        app.setup(config)
         self.ctx = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
             'engine':'V-2-34', 'fueltank':'Average', 'radio':'_9RM', 'gun':'_76mm_S-54', 'shell':'_76mm_UBR-354MP'}
-        self.resource = Resource(self.strage, self.vpath, self.schema)
-        self.resource.gettext = tr.Gettext(localedir='test/data/res')
+        self.resource = app.resource
 
     def test_schema(self):
         self.assertEqual(['germany', 'ussr', 'usa', 'japan', 'china', 'uk', 'france', 'czech', 'poland', 'italy', 'sweden'], self.resource.getValue('settings:nationsOrder'))
@@ -31,11 +33,11 @@ class SchemaTestCase(unittest.TestCase):
         self.assertEqual(12.51275944198707, self.resource.getValue('vehicle:powerWeightRatioSI', self.ctx))
         self.assertEqual(14.016600510789694, self.resource.getValue('vehicle:maxSpeed_medium', self.ctx))
         self.assertEqual([16.565073330933274, 14.016600510789694, 7.922426375663741], self.resource.getValue('vehicle:maxSpeed', self.ctx))
-        self.assertEqual(['Observer', 'R04_T-34', 'R02_SU-85', 'R01_IS', 'R03_BT-7'], self.resource.getValue('vehicle:list', self.ctx))
+        self.assertEqual(['Observer', 'R04_T-34', 'R02_SU-85', 'R01_IS', 'R03_BT-7'], self.resource.getValue('vehicle:list', self.ctx)[:5])
         self.assertEqual('R04_T-34', self.resource.getValue('vehicle:index', self.ctx))
         self.assertEqual('0', self.resource.getValue('vehicle:id', self.ctx))
         self.assertEqual('T-34', self.resource.getValue('vehicle:userString', self.ctx))
-        self.assertEqual('T-34', self.resource.getValue('vehicle:shortUserString', self.ctx))
+        self.assertEqual(None, self.resource.getValue('vehicle:shortUserString', self.ctx))
         self.assertEqual('T-34', self.resource.getValue('vehicle:displayString', self.ctx))
         self.assertEqual('', self.resource.getValue('vehicle:secret', self.ctx))
         self.assertEqual('', self.resource.getValue('vehicle:siegeMode', self.ctx))
