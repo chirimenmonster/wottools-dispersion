@@ -24,7 +24,7 @@ class DropdownList(object):
     def fetchTierList(self, schema=None, param=None):
         tiersOrder = self.app.resource.getValue('settings:tiersOrder')
         tiersLabel = self.app.resource.getValue('settings:tiersLabel')
-        return [ [ tier, tiersLabel[str(tier)] ] for tier in tiersOrder ]
+        return [ [ tier, tiersLabel[tier] ] for tier in map(str, tiersOrder) ]
 
     def fetchTypeList(self, schema=None, param=None):
         typesOrder = self.app.resource.getValue('settings:typesOrder')
