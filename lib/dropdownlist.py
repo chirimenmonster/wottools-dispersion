@@ -1,5 +1,4 @@
 
-from lib.config import TIERS, TIERS_LABEL
 from lib.query import VehicleSpec, ModuleSpec
 
 
@@ -23,7 +22,9 @@ class DropdownList(object):
         return result
 
     def fetchTierList(self, schema=None, param=None):
-        return [ [ tier, TIERS_LABEL[tier] ] for tier in TIERS ]
+        tiersOrder = self.app.resource.getValue('settings:tiersOrder')
+        tiersLabel = self.app.resource.getValue('settings:tiersLabel')
+        return [ [ tier, tiersLabel[str(tier)] ] for tier in tiersOrder ]
 
     def fetchTypeList(self, schema=None, param=None):
         typesOrder = self.app.resource.getValue('settings:typesOrder')

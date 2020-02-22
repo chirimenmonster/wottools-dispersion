@@ -1,9 +1,5 @@
 
-import json
 from collections import namedtuple
-
-from lib.config import TIERS, TYPES
-
 
 VehicleTag = namedtuple('VehicleTag', 'nation id vehicle tier type secret', defaults=(None, None, None, None, None, None))
 VehicleSpec = namedtuple('VehicleSpec', 'nations tiers types secrets', defaults=(None, None, None, None))
@@ -13,13 +9,11 @@ MODULE_SELECTABLE = [ 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell' ]
 
 class VehicleDatabase(object):
 
-    def __init__(self, resource):
+    def setup(self, resource):
         self.resource = resource
-    
-    def prepare(self):
         nationsOrder = self.resource.getValue('settings:nationsOrder')
-        tiers = TIERS
-        types = TYPES
+        tiers = self.resource.getValue('settings:tiersOrder')
+        types = self.resource.getValue('settings:typesOrder')
         vehicles = []
         for nation in nationsOrder:
             ctx = {'nation':nation}

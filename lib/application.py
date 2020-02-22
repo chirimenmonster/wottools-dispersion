@@ -35,10 +35,11 @@ class Application(object):
         strage = Strage()
         self.gettext = self.setupGettext(config)
         self.resource = Resource(self, strage, vpath, self.schema, gettext=self.gettext)
-        self.vd = VehicleDatabase(self.resource)
-        self.vd.prepare()
+        self.vd = VehicleDatabase()
+        self.vd.setup(self.resource)
         self.dropdownlist = None
-        self.settings.addDict('orders', { k:self.resource.getValue(k) for k in ('settings:nationsOrder', 'settings:typesOrder') })
+        orders = ('settings:nationsOrder', 'settings:tiersOrder', 'settings:typesOrder', 'settings:tiersLabel')
+        self.settings.addDict('orders', { k:self.resource.getValue(k) for k in orders })
 
     def setupSettings(self, config):
         if config.schema is None:

@@ -1,16 +1,8 @@
 
-import logging
-import os
-import io
 import re
-import json
-import zipfile
-from collections import namedtuple
-import string
-
+import logging
 import traceback
 
-from lib.config import TIERS_LABEL
 from lib.itemresource import ResourceFactory
 from lib.itemmap import MapFactory
 from lib.itemtype import TypeFactory

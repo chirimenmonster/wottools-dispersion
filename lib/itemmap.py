@@ -38,6 +38,8 @@ class MapNull(MapMeta):
 
 class MapDict(MapMeta):
     def getValue(self, value):
+        if value is None:
+            return None
         result = value.split()
         result = list(filter(None, map(lambda x: self.desc.get(x, None), result)))
         result = ' '.join(result)
@@ -45,6 +47,8 @@ class MapDict(MapMeta):
 
 class MapRoman(MapMeta):
     def getValue(self, value):
+        if value is None:
+            return None
         dict = self.app.resource.getValue('settings:tiersLabel')
         result = dict.get(value, None)
         return result
@@ -53,6 +57,8 @@ class MapGettext(MapMeta):
     def getValue(self, value):
         if self.app.gettext is None:
             raise AttributeError('translate engine is not prepared.')
+        if value is None:
+            return None
         result = self.app.gettext.translate(value)
         return result
 
@@ -68,6 +74,8 @@ class MapSplit(MapMeta):
             self.pos = None
 
     def getValue(self, value):
+        if value is None:
+            return None
         result = value.split()
         if self.pos is not None:
             result = result[self.pos]
