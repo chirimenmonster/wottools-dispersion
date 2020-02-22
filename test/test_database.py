@@ -1,17 +1,10 @@
 
-import os
-import sys
 import unittest
-import json
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from lib.config import Config
-from lib.application import Application, Settings
-from lib.vpath import Strage, VPath
-from lib.resource import Resource
-from lib.database import VehicleDatabase, VehicleSpec, ModuleSpec
-from lib.translate import Gettext
+from lib.application import Application
+from lib.database import VehicleSpec, ModuleSpec
+
 
 class VehicleTestCase(unittest.TestCase):
 

@@ -1,16 +1,5 @@
 
 import gettext
-from lib.config import g_config as config
-
-class Translate(object):
-
-    def __init__(self):
-        self.__gettext = Gettext()
-    
-    def translate(self, text):
-        if self.__gettext.localedir is None:
-            self.__gettext.localedir = '/'.join([ config.BASE_DIR, config.LOCALE_RELPATH ])
-        return self.__gettext.translate(text)
 
 
 class Gettext(object):
@@ -44,5 +33,3 @@ class Gettext(object):
             text = translation.gettext(name)
         return text
 
-
-g_translate = Translate().translate

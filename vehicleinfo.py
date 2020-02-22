@@ -94,7 +94,7 @@ if __name__ == '__main__':
                 sorttags = default['sort']
             if headers is None:
                 headers = default['header']
-        result = queryVehicleModule(vehicles, modules, showtags, sort=sorttags)
+        result = queryVehicleModule(app, vehicles, modules, showtags, sort=sorttags)
         outputValues(result, shows=showtags, headers=headers, option=config)
     elif config.list_tag:
         result = app.schema.keys()

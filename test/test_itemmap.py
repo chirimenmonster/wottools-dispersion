@@ -1,17 +1,19 @@
 
 import unittest
 
-from lib.application import g_application as app
-from lib.config import g_config as config
+from lib.config import Config
+from lib.application import Application
 from lib.itemmap import MapFactory
 
 
 class MapFactoryTestCase(unittest.TestCase):
 
     def setUp(self):
+        config = Config()
         config.guipkg = 'test/data/res/packages/gui.pkg'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
         config.schema = 'res/itemschema.json'
+        app = Application()
         app.setup(config)
         self.factory = MapFactory(app)
 

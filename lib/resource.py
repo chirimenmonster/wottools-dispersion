@@ -47,7 +47,7 @@ class Resource(object):
     def vpath(self):
         return self.__vpath
 
-    def getValue(self, tag=None, ctx=None, resources=None, order=None, type=None, map=None):
+    def getValue(self, tag=None, ctx=None, resources=None, type=None, map=None):
         typedesc, mapdesc = type, map
         if tag is not None:
             schema = self.__schema[tag]

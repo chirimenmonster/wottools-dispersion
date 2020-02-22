@@ -18,26 +18,18 @@ class GettextTestCase(unittest.TestCase):
         self.assertEqual('#ussr_vehicles:T-34', gettext.translate('#ussr_vehicles:T-34'))
 
 
-class TranslateTestCase(unittest.TestCase):
-
-    def test_transalte(self):
-        tr.config.BASE_DIR = 'test/data'
-        self.assertEqual('T-34', tr.g_translate('#ussr_vehicles:T-34'))
-        self.assertEqual('missing', tr.g_translate('#ussr_vehicles:missing'))
-        self.assertEqual('#missing:T-34', tr.g_translate('#missing:T-34'))
-
-
 class ApplicationTranslateTestCase(unittest.TestCase):
 
-    def test_transalte(self):
-        from lib.config import g_config as config
-        from lib.application import g_application as app
-        config.GUI_DIR = 'test/data/res'
-        config.scriptspkg = 'test/data/res/packages/scripts.pkg'
-        config.schema = 'res/itemschema.json'
+    def setUp(self):
+        from lib.config import Config
+        from lib.application import Application
+        config = Config()
         config.localedir = 'test/data/res'
-        app.setup(config)
-        self.assertEqual('T-34', app.gettext.translate('#ussr_vehicles:T-34'))
+        self.app = Application()
+        self.app.setup(config)
+
+    def test_transalte(self):
+        self.assertEqual('T-34', self.app.gettext.translate('#ussr_vehicles:T-34'))
 
 
 if __name__ == '__main__':

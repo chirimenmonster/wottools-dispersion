@@ -2,7 +2,8 @@
 import os
 import json
 
-from lib.vpath import Strage, VPath
+from lib.vpath import VPath
+from lib.strage import Strage
 from lib.resource import Resource
 from lib.database import VehicleDatabase
 from lib.translate import Gettext
