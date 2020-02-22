@@ -17,9 +17,9 @@ class Config:
     LOCALE_RELPATH = 'res'
     VEHICLES = 'vehicles'
     GUI_SETTINGS = 'gui'
-    SCRIPTS_DIR = None
-    GUI_DIR = None
     basedir = None
+    scriptsdir = None
+    guidir = None
     pkgdir = None
     scriptspkg = None
     guipkg = None
@@ -75,7 +75,4 @@ def parseArgument(mode=None):
         parser.add_argument('--prefer-userstring', action='store_const', const='userString', default='index', dest='indextag', help='prefer userString')
 
     parser.parse_args(namespace=g_config)
-    if g_config.SCRIPTS_DIR:
-        g_config.DATA[g_config.VEHICLES]['extracted'] = g_config.SCRIPTS_DIR
-    if g_config.GUI_DIR:
-        g_config.DATA[g_config.GUI_SETTINGS]['extracted'] = g_config.GUI_DIR
+

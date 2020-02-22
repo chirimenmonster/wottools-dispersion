@@ -13,6 +13,7 @@ import traceback
 from lib.config import TIERS_LABEL
 from lib.itemresource import ResourceFactory
 from lib.itemmap import MapFactory
+from lib.itemtype import TypeFactory
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -26,6 +27,9 @@ class Resource(object):
         self.__vpath = vpath
         self.__schema = schema
         self.__gettext = gettext
+        self.resourceFactory = ResourceFactory(app)
+        self.mapFactory = MapFactory(app)
+        self.typeFactory = TypeFactory(app)
 
     @property
     def gettext(self):
@@ -43,37 +47,31 @@ class Resource(object):
     def vpath(self):
         return self.__vpath
 
-    def getNodes(self, resources=None, ctx=None):
-        factory = ResourceFactory(self.__app)
-        res = []
-        for desc in resources:
-            res.append(factory.create(desc))
-        result = None
-        for r in res:
-            result = r.getValue(ctx)
-            if result is not None and result is not []:
-                break
-        return result
-
     def getValue(self, tag=None, ctx=None, resources=None, order=None, type=None, map=None):
+        typedesc, mapdesc = type, map
         if tag is not None:
             schema = self.__schema[tag]
             if resources is None:
                 resources = schema.get('resources', None)
-            if order is None:
-                order = schema.get('order', None)
-            if type is None:
-                type = schema.get('value', None)
-            if map is None:
-                map = schema.get('map', None)
-        try:
-            result = self.getNodes(resources=resources, ctx=ctx)
-        except KeyError as e:
-            raise KeyError('{}, resources={}, ctx={}'.format(e.args, resources, ctx)) from e
-        result = self.sort(result, order)
-        result = self.convert(result, type)
-        result = self.assignMap(result, map)
-        return result
+            if typedesc is None:
+                typedesc = schema.get('value', None)
+            if mapdesc is None:
+                mapdesc = schema.get('map', None)
+        sources = []
+        for desc in resources:
+            sources.append(self.resourceFactory.create(desc))
+        converter = self.typeFactory.create(typedesc)
+        mapper = self.mapFactory.create(mapdesc)
+        for src in sources:
+            try:
+                value = src.getValue(ctx)
+            except KeyError as e:
+                raise KeyError('{}, resources={}, ctx={}'.format(e.args, resources, ctx)) from e
+            if value is not None and value is not []:
+                break
+        value = converter.getValue(value)
+        value = mapper.getValue(value)
+        return value
 
     def getRefValue(self, tag, ctx=None):
         pos = None
@@ -87,50 +85,4 @@ class Resource(object):
         if pos is not None:
             result = result[pos]
         return result
-
-    def mergeparams(self, ctx, addparams=None):
-        if ctx is not None and addparams is not None:
-            ctx = ctx.copy()
-            ctx.update(addparams)
-        elif ctx is None:
-            ctx = addparams
-        return ctx
-
-    def convert(self, value, datatype=None):
-        if not isinstance(value, list):
-            return value
-        if datatype is None:
-            if len(value) == 0:
-                value = None
-            elif len(value) == 1:
-                value = value[0]
-            else:
-                value = ' '.join(map(str, value))
-        elif datatype == 'text':
-            value = ' '.join(str(value))
-        elif datatype in ['float', 'int']:
-            if len(value) == 0:
-                value = None
-            elif len(value) == 1:
-                value = value[0]
-            else:
-                raise ValueError('data type "float" or "int" must one value: {}'.format(value))
-        elif datatype in ['list', 'dict']:
-            pass
-        else:
-            raise NotImplementedError('value: {}'.format(datatype))
-        return value
-
-    def assignMap(self, value, rule):
-        obj = MapFactory(self.__app).create(rule)
-        result = obj.getValue(value)
-        return result
-
-    def sort(self, values, order):
-        if order is None:
-            return values
-        if not isinstance(values, list):
-            return values
-        values = sorted(values, key=lambda x:order.index(x) if x in order else float('inf'))
-        return values
 

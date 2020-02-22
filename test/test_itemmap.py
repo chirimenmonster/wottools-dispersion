@@ -9,7 +9,7 @@ from lib.itemmap import MapFactory
 class MapFactoryTestCase(unittest.TestCase):
 
     def setUp(self):
-        config.GUI_DIR = 'test/data/res'
+        config.guipkg = 'test/data/res/packages/gui.pkg'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
         config.schema = 'res/itemschema.json'
         app.setup(config)

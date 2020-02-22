@@ -21,7 +21,7 @@ if __name__ == '__main__':
     parseArgument()
 
     appenv.setup(config)
-    appenv.dropdownlist = DropdownList()
+    appenv.dropdownlist = DropdownList(appenv)
 
     app = Application()
     app.mainloop()

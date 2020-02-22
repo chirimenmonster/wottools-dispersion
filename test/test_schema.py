@@ -1,25 +1,19 @@
 
-import os
-import sys
 import unittest
-import json
-import xml.etree.ElementTree as ET
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from lib.config import Config
+from lib.application import Application
 
-from lib.config import g_config as config
-from lib.application import g_application as app
-from lib import vpath as vp
-from lib import translate as tr
-from lib.resource import Resource
 
 class SchemaTestCase(unittest.TestCase):
 
     def setUp(self):
-        config.GUI_DIR = 'test/data/res'
-        config.scriptsdir = 'test/data/res'
+        config = Config()
+        config.guipkg = 'test/data/res/packages/gui.pkg'
+        config.scriptspkg = 'test/data/res/packages/scripts.pkg'
         config.schema = 'res/itemschema.json'
         config.localedir = 'test/data/res'
+        app = Application()
         app.setup(config)
         self.ctx = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
             'engine':'V-2-34', 'fueltank':'Average', 'radio':'_9RM', 'gun':'_76mm_S-54', 'shell':'_76mm_UBR-354MP'}

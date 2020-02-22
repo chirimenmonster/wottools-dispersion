@@ -33,7 +33,7 @@ class ResourceFactoryTestCase_2(unittest.TestCase):
 
     def setUp(self):
         config = Config()
-        config.GUI_DIR = 'test/data/res'
+        config.guipkg = 'test/data/res/packages/gui.pkg'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
         config.schema = 'res/itemschema.json'
         self.app = Application()

@@ -1,6 +1,5 @@
 
 from lib.config import TIERS, TIERS_LABEL
-from lib.application import g_application as app
 from lib.query import VehicleSpec, ModuleSpec
 
 
@@ -15,8 +14,11 @@ class DropdownList(object):
         'shell':    [ 'shell:index', 'shell:displayString' ]
     }
 
+    def __init__(self, app):
+        self.app = app
+    
     def fetchNationList(self, schema=None, param=None):
-        self.nationsOrder = app.resource.getValue('settings:nationsOrder')
+        self.nationsOrder = self.app.resource.getValue('settings:nationsOrder')
         result = [ [s, s.upper()] for s in self.nationsOrder ]
         return result
 
@@ -24,7 +26,7 @@ class DropdownList(object):
         return [ [ tier, TIERS_LABEL[tier] ] for tier in TIERS ]
 
     def fetchTypeList(self, schema=None, param=None):
-        typesOrder = app.resource.getValue('settings:typesOrder')
+        typesOrder = self.app.resource.getValue('settings:typesOrder')
         result = [ [ type, type ] for type in typesOrder ]
         return result
 
@@ -39,23 +41,23 @@ class DropdownList(object):
         tiers = [ int(param['tier']) ]
         types = [ param['type'] ]
         secret = [ True, False ] if param.get('secret', None) == 'True' else None
-        ctxs = app.vd.getVehicleCtx(VehicleSpec(nations, tiers, types, secret))
+        ctxs = self.app.vd.getVehicleCtx(VehicleSpec(nations, tiers, types, secret))
         tags = [ 'vehicle:index', 'vehicle:userString' ]
-        result = [ list(app.vd.getVehicleItems(tags, c).values()) for c in ctxs ]
+        result = [ list(self.app.vd.getVehicleItems(tags, c).values()) for c in ctxs ]
         return result
 
     def _fetchModuleList(self, module, param=None):
         vehicle = param['vehicle']
-        ctx = app.vd.getCtx(vehicle)
+        ctx = self.app.vd.getCtx(vehicle)
         param = { k:v for k,v in param.items() if k in ModuleSpec._fields}
         ctx.update(param)
-        names = app.vd.getModuleList(module, ctx)
+        names = self.app.vd.getModuleList(module, ctx)
         ctxs = []
         for n in names:
             c = ctx.copy()
             c[module] = n
             ctxs.append(c)
-        result = [ list(app.vd.getVehicleItems(self.tags[module], c).values()) for c in ctxs ]
+        result = [ list(self.app.vd.getVehicleItems(self.tags[module], c).values()) for c in ctxs ]
         return result
 
     def fetchChassisList(self, schema=None, param=None):

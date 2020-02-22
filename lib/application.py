@@ -60,8 +60,8 @@ class Application(object):
                 pkgdir = None
         else:
             pkgdir = config.pkgdir
-        scriptsdir = config.SCRIPTS_DIR
-        guidir = config.GUI_DIR
+        scriptsdir = config.scriptsdir
+        guidir = config.guidir
         scriptspkg = config.scriptspkg
         vpath = VPath(pkgdir=pkgdir, scriptsdir=scriptsdir, guidir=guidir, scriptspkg=scriptspkg)
         return vpath
