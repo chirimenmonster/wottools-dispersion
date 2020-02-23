@@ -38,6 +38,11 @@ class VehicleTestCase(unittest.TestCase):
         ctx = self.vd.getCtx('R04_T-34')
         ctx['turret'] = 'T-34_mod_1942'
         self.assertEqual({'vehicle:userString':'T-34', 'turret:index':'T-34_mod_1942'}, self.vd.getVehicleItems(['vehicle:userString', 'turret:index'], ctx))
+        ctx = self.vd.getCtx('G12_Ltraktor')
+        ctx['chassis'] = 'LeichtertaktorkettenB'
+        expect = {'vehicle:userString':'Leichttraktor', 'chassis:index':'LeichtertaktorkettenB'}
+        self.assertEqual(expect, self.vd.getVehicleItems(['vehicle:userString', 'chassis:index'], ctx))
+
 
     def test_getModuleCtx(self):
         self.assertEqual(168, len(self.vd.getModuleCtx('R04_T-34')))
