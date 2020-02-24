@@ -34,6 +34,7 @@ class GuiApplication(tkinter.Frame):
         self.createCommandView(self.master)
 
         self.app.widgets['!vehicleselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!siegeselector'].onSelected.append(self.changeSpec)
         self.app.widgets['!chassisselector'].onSelected.append(self.changeSpec)
         self.app.widgets['!turretselector'].onSelected.append(self.changeSpec)
         self.app.widgets['!engineselector'].onSelected.append(self.changeSpec)
@@ -79,7 +80,6 @@ class GuiApplication(tkinter.Frame):
                     itemOption = item.get('guioption', rowOption)
                     widget = SpecViewItem(rowView, app=self.app, desc=item, option=itemOption)
                     self.specViewWidgets.append(widget)
-                    #widget.pack(side='top')
 
     def createCommandView(self, master):
         label = 'copy to clipboard'
@@ -98,6 +98,7 @@ class GuiApplication(tkinter.Frame):
         source = {
             'nation':   '!nationselector',
             'vehicle':  '!vehicleselector',
+            'siege':    '!siegeselector',
             'chassis':  '!chassisselector',
             'turret':   '!turretselector',
             'engine':   '!engineselector',
