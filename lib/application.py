@@ -40,7 +40,7 @@ class Application(object):
         self.dropdownlist = None
         orders = ('settings:nationsOrder', 'settings:tiersOrder', 'settings:typesOrder', 'settings:tiersLabel')
         self.settings.addDict('orders', { k:self.resource.getValue(k) for k in orders })
-        self.widgets = {}
+
 
     def setupSettings(self, config):
         if config.schema is None:
@@ -100,6 +100,3 @@ class Settings(object):
     def addDict(self, name, dict):
         setattr(self, name, dict)
         return self
-
-
-g_application = Application()

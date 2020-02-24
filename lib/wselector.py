@@ -17,6 +17,7 @@ class SelectorPanel(tkinter.Frame):
         label.pack(side='left')
         selector = SelectorFactory().create(desc['id'], master=self, app=app, **desc['option']['combobox'])
         selector.pack(side='left')
+        selector.preferredLast = desc.get('selected', 'first') == 'last'
         self.app.widgets[selector.winfo_name()] = selector
         self.selector = selector
 
@@ -50,7 +51,7 @@ class SelectorFactory(object):
 class Selector(tkinter.ttk.Combobox):
 
     def __init__(self, *args, app=None, **kwargs):
-        super(Selector, self).__init__(*args, **kwargs)
+        super(Selector, self).__init__(*args, **kwargs, height=20)
         self['state'] = 'disable'
         self.app = app
         self.__table = None

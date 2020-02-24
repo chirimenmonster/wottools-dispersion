@@ -6,8 +6,8 @@ import sys
 import io
 import re
 
-from lib.config import parseArgument, g_config as config 
-from lib.application import g_application as app
+from lib.config import parseArgument
+from lib.application import Application
 from lib.query import queryVehicleModule
 from lib.output import outputValues
 
@@ -66,8 +66,9 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     logger.addHandler(logging.StreamHandler())
     
-    parseArgument(mode='cui')
+    config = parseArgument(mode='cui')
 
+    app = Application()
     app.setup(config)
     if config.list_nation:
         result = app.resource.getValue('settings:nationsOrder')

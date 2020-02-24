@@ -2,7 +2,7 @@
 import sys
 import io
 
-from lib.config import Config, parseArgument
+from lib.config import parseArgument
 from lib.application import Application
 from lib.widgets import GuiApplication
 from lib.dropdownlist import DropdownList
@@ -13,11 +13,7 @@ if __name__ == '__main__':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-    config = Config()
-    config.schema = 'res/itemschema.json'
-    config.gui = True
-
-    parseArgument()
+    config = parseArgument(mode='gui')
 
     app = Application()
     app.setup(config)

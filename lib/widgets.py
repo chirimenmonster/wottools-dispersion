@@ -1,20 +1,20 @@
-from functools import partial
 
 import tkinter
-import tkinter.ttk
 import tkinter.font
 
 from lib.output import getOutputCsv
-from lib.stats import VehicleStats
 from lib.wselector import SelectorPanel
-from lib.wdescription import SpecViewItem, updateDisplayValue, g_vehicleStats
+from lib.wdescription import SpecViewItem, VehicleStatsPool
 
 
 class GuiApplication(tkinter.Frame):
 
     def __init__(self, app, master=None):
         super(GuiApplication, self).__init__(master)
-        self.__app = app
+        self.app = app
+        self.app.vehicleStatsPool = VehicleStatsPool(app)
+        self.app.widgets = {}
+        self.specViewWidgets = []
 
         self.__itemgroup = app.settings.guiitems
         self.__titlesdesc = app.settings.guititles
@@ -33,13 +33,14 @@ class GuiApplication(tkinter.Frame):
         self.createSpecView(self.master, self.__itemgroup, None)
         self.createCommandView(self.master)
 
-        self.__app.widgets['!vehicleselector'].onSelected.append(self.changeSpec)
-        self.__app.widgets['!chassisselector'].onSelected.append(self.changeSpec)
-        self.__app.widgets['!turretselector'].onSelected.append(self.changeSpec)
-        self.__app.widgets['!engineselector'].onSelected.append(self.changeSpec)
-        self.__app.widgets['!radioselector'].onSelected.append(self.changeSpec)
-        self.__app.widgets['!gunselector'].onSelected.append(self.changeSpec)
-        self.__app.widgets['!shellselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!vehicleselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!siegeselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!chassisselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!turretselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!engineselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!radioselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!gunselector'].onSelected.append(self.changeSpec)
+        self.app.widgets['!shellselector'].onSelected.append(self.changeSpec)
         self.changeSpec()
 
     def createSelectorBars(self, master):
@@ -48,7 +49,7 @@ class GuiApplication(tkinter.Frame):
             bar = tkinter.Frame(master)
             bar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
             for desc in row:
-                widget = SelectorPanel(bar, app=self.__app, desc=desc)
+                widget = SelectorPanel(bar, app=self.app, desc=desc)
                 widget.pack(side='left')
                 selectors.append(widget)
         for widget in selectors:
@@ -57,11 +58,11 @@ class GuiApplication(tkinter.Frame):
     def createDescriptionView(self, master):
         view = tkinter.Frame(master, highlightthickness=1, highlightbackground='gray')
         view.pack(side='top', expand=1, fill='x', padx=8, pady=4)
-        opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
+        opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100} }
         self.__vehicleDescs = []
         for entry in self.__titlesdesc:
-            widget = SpecViewItem(view, desc=entry, option=opts)
-            widget.pack(side='top')
+            widget = SpecViewItem(view, app=self.app, desc=entry, option=opts)
+            widget.pack(side='top', fill='x', expand=1)
 
     def createSpecView(self, master, desc, option):
         view = tkinter.Frame(master)
@@ -77,9 +78,8 @@ class GuiApplication(tkinter.Frame):
                 rowView.pack(side='top', expand=1, padx=8, pady=2, anchor='w')
                 for item in row.get('items', []):
                     itemOption = item.get('guioption', rowOption)
-                    widget = SpecViewItem(rowView, desc=item, option=itemOption)
-                    widget.pack(side='top')
-        return
+                    widget = SpecViewItem(rowView, app=self.app, desc=item, option=itemOption)
+                    self.specViewWidgets.append(widget)
 
     def createCommandView(self, master):
         label = 'copy to clipboard'
@@ -89,31 +89,32 @@ class GuiApplication(tkinter.Frame):
 
     def changeSpec(self):
         ctx = self.getSelectedValues()
-        tags = g_vehicleStats.keys()
-        result = self.__app.vd.getVehicleItems(g_vehicleStats.keys(), ctx)
-        result = VehicleStats(result, schema=self.__app.settings.schema)
-        for k, v in result.items():
-            if v is None:
-                v = ''
-            g_vehicleStats[k] = v.value
-        updateDisplayValue()
+        for widget in self.specViewWidgets:
+            widget.pack_forget()
+        self.app.vehicleStatsPool.fetchStats(ctx)
+        result = self.app.vehicleStatsPool.get()
 
     def getSelectedValues(self):
-        if len(self.__app.widgets) == 0:
+        source = {
+            'nation':   '!nationselector',
+            'vehicle':  '!vehicleselector',
+            'siege':    '!siegeselector',
+            'chassis':  '!chassisselector',
+            'turret':   '!turretselector',
+            'engine':   '!engineselector',
+            'radio':    '!radioselector',
+            'gun':      '!gunselector',
+            'shell':    '!shellselector'
+        }
+        if len(self.app.widgets) == 0:
             return None
-        param = {}
-        param['nation'] = self.__app.widgets['!nationselector'].getId()
-        param['vehicle'] = self.__app.widgets['!vehicleselector'].getId()
-        param['chassis'] = self.__app.widgets['!chassisselector'].getId()
-        param['turret'] = self.__app.widgets['!turretselector'].getId()
-        param['engine'] = self.__app.widgets['!engineselector'].getId()
-        param['radio'] = self.__app.widgets['!radioselector'].getId()
-        param['gun'] = self.__app.widgets['!gunselector'].getId()
-        param['shell'] = self.__app.widgets['!shellselector'].getId()
-        return param
+        ctx = {}
+        for k, v in source.items():
+            ctx[k] = self.app.widgets[v].getId()
+        return ctx
  
-
     def createMessage(self):
-        message = getOutputCsv(g_vehicleStats)
+        result = self.app.vehicleStatsPool.get()
+        message = getOutputCsv(result)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
