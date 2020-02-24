@@ -269,7 +269,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "invisibility/moving"
             }
         ]
@@ -278,7 +278,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "invisibility/still"
             }
         ]
@@ -287,7 +287,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "invisibility/camouflageBonus"
             }
         ]
@@ -296,7 +296,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "invisibility/camouflageNetBonus"
             }
         ]
@@ -305,7 +305,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "invisibility/firePenalty"
             }
         ]
@@ -323,7 +323,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "speedLimits/forward"
             }
         ]
@@ -332,7 +332,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "speedLimits/backward"
             }
         ]
@@ -455,7 +455,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "chassis/{chassis}/rotationSpeed"
             }
         ]
@@ -464,7 +464,7 @@
         "map":      "split()",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "chassis/{chassis}/terrainResistance"
             }
         ]
@@ -474,7 +474,7 @@
         "map":      "split()[0]",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "chassis/{chassis}/terrainResistance"
             }
         ]
@@ -484,7 +484,7 @@
         "map":      "split()[1]",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "chassis/{chassis}/terrainResistance"
             }
         ]
@@ -494,7 +494,7 @@
         "map":      "split()[2]",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "chassis/{chassis}/terrainResistance"
             }
         ]
@@ -503,7 +503,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "chassis/{chassis}/shotDispersionFactors/vehicleMovement"
             }
         ]
@@ -512,7 +512,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "chassis/{chassis}/shotDispersionFactors/vehicleRotation"
             }
         ]
@@ -591,7 +591,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/rotationSpeed"
             }
         ]
@@ -835,7 +835,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/reloadTime"
             },
             {
@@ -866,7 +866,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/clip/count"
             },
             {
@@ -879,7 +879,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/clip/rate"
             },
             {
@@ -892,7 +892,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/aimingTime"
             },
             {
@@ -905,7 +905,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/invisibilityFactorAtShot"
             },
             {
@@ -918,7 +918,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/shotDispersionRadius"
             },
             {
@@ -931,7 +931,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/shotDispersionFactors/turretRotation"
             },
             {
@@ -944,7 +944,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/shotDispersionFactors/afterShot"
             },
             {
@@ -957,7 +957,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/shotDispersionFactors/whileGunDamaged"
             },
             {
@@ -970,7 +970,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/dualGun/chargeTime"
             }
         ]
@@ -979,7 +979,7 @@
         "value":    "float",
         "resources": [
             {
-                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "file":     "vehicles/{nation}/{vehicle_siege}.xml",
                 "xpath":    "turrets0/{turret}/guns/{gun}/dualGun/reloadLockTime"
             }
         ]
