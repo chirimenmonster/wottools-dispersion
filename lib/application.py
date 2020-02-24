@@ -40,8 +40,6 @@ class Application(object):
         self.dropdownlist = None
         orders = ('settings:nationsOrder', 'settings:tiersOrder', 'settings:typesOrder', 'settings:tiersLabel')
         self.settings.addDict('orders', { k:self.resource.getValue(k) for k in orders })
-        if config.gui:
-            self.widgets = {}
 
 
     def setupSettings(self, config):
