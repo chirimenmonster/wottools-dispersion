@@ -2,28 +2,52 @@
 from collections import namedtuple
 import tkinter.ttk
 
+from lib.stats import VehicleStats
+
 VehicleDisplay = namedtuple('VehicleDisplay', 'tags template textvariable')
 
-g_vehicleStats = {}
-g_vehicleDisplays = []
 
+class VehicleStatsPool(object):
+    def __init__(self, app):
+        self.app = app
+        self.stats = {}
+        self.displays = []
 
-def updateDisplayValue():
-    for d in g_vehicleDisplays:
-        values = [ g_vehicleStats[k] for k in d.tags ]
-        if None in values:
-            text = ''
+    def add(self, tags, template, stringvar):
+        if isinstance(tags, list):
+            tags = tuple(tags)
         else:
-            try:
-                text = d.template.format(*values)
-            except:
-                print(d.tags, d.template, repr(values))
-                raise
-        d.textvariable.set(text)
+            tags = tuple([tags])
+        self.displays.append(VehicleDisplay(tags, template, stringvar))
+        for t in tags:
+            self.stats[t] = ''
+
+    def fetchStats(self, ctx):
+        tags = self.stats.keys()
+        result = self.app.vd.getVehicleItems(tags, ctx)
+        result = VehicleStats(result, schema=self.app.settings.schema)
+        for k, v in result.items():
+            if v is None:
+                v = ''
+            self.stats[k] = v.value
+        self.updateDisplay()
+
+    def updateDisplay(self):
+        for d in self.displays:
+            values = [ self.stats[k] for k in d.tags ]
+            if None in values:
+                text = ''
+            else:
+                try:
+                    text = d.template.format(*values)
+                except:
+                    print(d.tags, d.template, repr(values))
+                    raise
+            d.textvariable.set(text)
 
 
 class SpecViewItem(tkinter.Frame):
-    def __init__(self, *args, desc=None, option={}, **kwargs):
+    def __init__(self, *args, app=None, desc=None, option={}, **kwargs):
         super(SpecViewItem, self).__init__(*args, **kwargs, borderwidth=0)
         label = desc.get('label', None)
         value = desc.get('value', None)
@@ -33,7 +57,7 @@ class SpecViewItem(tkinter.Frame):
         widget = LabelItem(self, text=label, **option['label'])
         widget.pack(side='left')
         
-        widget = ValueItem(self, **option['value'])
+        widget = ValueItem(self, app=app, **option['value'])
         widget.pack(side='left')
         widget.setValue(desc)
 
@@ -54,20 +78,18 @@ class LabelItem(tkinter.Label):
 
     
 class ValueItem(tkinter.Label):
+    def __init__(self, *args, app=None, **kwargs):
+        super(ValueItem, self).__init__(*args, **kwargs)
+        self.app = app
+
     def setValue(self, desc):
         value = desc['value']
-        if isinstance(value, list):
-            tags = tuple(value)
-        else:
-            tags = tuple([value])
         template = desc.get('format', '{}')
         stringvar = tkinter.StringVar(value='')
         stringvar.trace('w', self.callback)
         self['textvariable'] = stringvar
         self.__stringvar = stringvar
-        g_vehicleDisplays.append(VehicleDisplay(tags, template, stringvar))
-        for t in tags:
-            g_vehicleStats[t] = ''
+        self.app.vehicleStatsPool.add(value, template, stringvar)
 
     def callback(self, *args):
         value = self.__stringvar.get()

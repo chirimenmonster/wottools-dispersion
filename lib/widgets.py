@@ -5,9 +5,8 @@ import tkinter.ttk
 import tkinter.font
 
 from lib.output import getOutputCsv
-from lib.stats import VehicleStats
 from lib.wselector import SelectorPanel
-from lib.wdescription import SpecViewItem, updateDisplayValue, g_vehicleStats
+from lib.wdescription import SpecViewItem, VehicleStatsPool
 
 
 class GuiApplication(tkinter.Frame):
@@ -15,6 +14,7 @@ class GuiApplication(tkinter.Frame):
     def __init__(self, app, master=None):
         super(GuiApplication, self).__init__(master)
         self.__app = app
+        self.__app.vehicleStatsPool = VehicleStatsPool(app)
 
         self.__itemgroup = app.settings.guiitems
         self.__titlesdesc = app.settings.guititles
@@ -60,7 +60,7 @@ class GuiApplication(tkinter.Frame):
         opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
         self.__vehicleDescs = []
         for entry in self.__titlesdesc:
-            widget = SpecViewItem(view, desc=entry, option=opts)
+            widget = SpecViewItem(view, app=self.__app, desc=entry, option=opts)
             widget.pack(side='top')
 
     def createSpecView(self, master, desc, option):
@@ -77,7 +77,7 @@ class GuiApplication(tkinter.Frame):
                 rowView.pack(side='top', expand=1, padx=8, pady=2, anchor='w')
                 for item in row.get('items', []):
                     itemOption = item.get('guioption', rowOption)
-                    widget = SpecViewItem(rowView, desc=item, option=itemOption)
+                    widget = SpecViewItem(rowView, app=self.__app, desc=item, option=itemOption)
                     widget.pack(side='top')
         return
 
@@ -89,14 +89,7 @@ class GuiApplication(tkinter.Frame):
 
     def changeSpec(self):
         ctx = self.getSelectedValues()
-        tags = g_vehicleStats.keys()
-        result = self.__app.vd.getVehicleItems(g_vehicleStats.keys(), ctx)
-        result = VehicleStats(result, schema=self.__app.settings.schema)
-        for k, v in result.items():
-            if v is None:
-                v = ''
-            g_vehicleStats[k] = v.value
-        updateDisplayValue()
+        self.__app.vehicleStatsPool.fetchStats(ctx)
 
     def getSelectedValues(self):
         if len(self.__app.widgets) == 0:
