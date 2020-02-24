@@ -17,6 +17,7 @@ class SelectorPanel(tkinter.Frame):
         label.pack(side='left')
         selector = SelectorFactory().create(desc['id'], master=self, app=app, **desc['option']['combobox'])
         selector.pack(side='left')
+        selector.preferredLast = desc.get('selected', 'first') == 'last'
         self.app.widgets[selector.winfo_name()] = selector
         self.selector = selector
 
