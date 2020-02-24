@@ -35,7 +35,7 @@ class VehicleStatsPool(object):
                 v = ''
             self.stats[k] = v.value
         self.updateDisplay()
-
+    
     def updateDisplay(self):
         formatter = string.Formatter()
         for d in self.displays:
@@ -93,7 +93,7 @@ class SpecViewItem(tkinter.Frame):
             if self.isPhantom:
                 self.pack_forget()
         else:
-            self.pack()            
+            self.pack()
 
 
 class LabelItem(tkinter.Label):
@@ -142,8 +142,6 @@ class ValueTextItem(tkinter.Text):
         if first == 0.0 and last == 1.0:
             return
         nrows = self['height'] / (last - first)
-        #text = self.get('0.0', 'end')
-        #if nrows == 16 and nrows > len(text) / 60:
         if nrows > 8:
             return
         self.lock = True

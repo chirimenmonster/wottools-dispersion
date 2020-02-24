@@ -51,7 +51,7 @@ class SelectorFactory(object):
 class Selector(tkinter.ttk.Combobox):
 
     def __init__(self, *args, app=None, **kwargs):
-        super(Selector, self).__init__(*args, **kwargs)
+        super(Selector, self).__init__(*args, **kwargs, height=20)
         self['state'] = 'disable'
         self.app = app
         self.__table = None

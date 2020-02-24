@@ -14,6 +14,7 @@ class GuiApplication(tkinter.Frame):
         self.app = app
         self.app.vehicleStatsPool = VehicleStatsPool(app)
         self.app.widgets = {}
+        self.specViewWidgets = []
 
         self.__itemgroup = app.settings.guiitems
         self.__titlesdesc = app.settings.guititles
@@ -77,7 +78,8 @@ class GuiApplication(tkinter.Frame):
                 for item in row.get('items', []):
                     itemOption = item.get('guioption', rowOption)
                     widget = SpecViewItem(rowView, app=self.app, desc=item, option=itemOption)
-                    widget.pack(side='top')
+                    self.specViewWidgets.append(widget)
+                    #widget.pack(side='top')
 
     def createCommandView(self, master):
         label = 'copy to clipboard'
@@ -87,6 +89,8 @@ class GuiApplication(tkinter.Frame):
 
     def changeSpec(self):
         ctx = self.getSelectedValues()
+        for widget in self.specViewWidgets:
+            widget.pack_forget()
         self.app.vehicleStatsPool.fetchStats(ctx)
         result = self.app.vehicleStatsPool.get()
 

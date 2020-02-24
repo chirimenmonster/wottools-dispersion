@@ -41,7 +41,7 @@
     },
     {
         "label":    "Shell:",
-        "format":   "{} ({}): {} ({})",
+        "format":   "{} ({}), {} ({})",
         "value":    [ "shell:userString", "shell:index", "shell:kind", "shell:kindShort" ]
     },
     {

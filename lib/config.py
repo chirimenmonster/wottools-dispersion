@@ -1,9 +1,10 @@
 
 import argparse
-import os
+import sys
 
 
 class Config:
+    version = '3.0'
     gui = False
     PKG_RELPATH = 'res/packages'
     LOCALE_RELPATH = 'res'
@@ -31,7 +32,6 @@ class Config:
         'shell':    0
     }
 
-g_config = Config()
 
 def parseArgument(mode=None):
 
@@ -41,6 +41,7 @@ def parseArgument(mode=None):
     parser.add_argument('-g', dest='guidir', help='gui folder extracted.  ex. "./test/gui"')
     parser.add_argument('--schema', dest='schema', help='change itemschema.json')
     parser.add_argument('--gui-items', dest='gui_items', help='change guisettings_items.json')
+    parser.add_argument('-v', action='store_true', dest='show_version', help='show version')
 
     if mode != 'cui':
         parser.add_argument('--vehicle', dest='vehicle', help='vehicle name.  ex. "R80_KV1"')
@@ -66,5 +67,12 @@ def parseArgument(mode=None):
         parser.add_argument('--suppress-empty', action='store_true', dest='suppress_empty', help='suppress output recodes with empty parameter')
         parser.add_argument('--prefer-userstring', action='store_const', const='userString', default='index', dest='indextag', help='prefer userString')
 
-    parser.parse_args(namespace=g_config)
+    config = Config()
+    config.gui = mode == 'gui'
+    parser.parse_args(namespace=config)
+    
+    if config.show_version:
+        print(config.version)
+        sys.exit()
 
+    return config
