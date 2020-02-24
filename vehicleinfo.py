@@ -8,7 +8,8 @@ import re
 
 from lib.config import parseArgument, g_config as config 
 from lib.application import g_application as app
-from lib.vehicleinfo2 import listVehicleModule, _outputValues
+from lib.query import queryVehicleModule
+from lib.output import outputValues
 
 
 defaultargs = {
@@ -93,8 +94,8 @@ if __name__ == '__main__':
                 sorttags = default['sort']
             if headers is None:
                 headers = default['header']
-        result = listVehicleModule(vehicles, modules, showtags, sort=sorttags)
-        _outputValues(result, show=showtags, headers=headers)
+        result = queryVehicleModule(app, vehicles, modules, showtags, sort=sorttags)
+        outputValues(result, shows=showtags, headers=headers, option=config)
     elif config.list_tag:
         result = app.schema.keys()
         def f(pattern, string):

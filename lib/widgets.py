@@ -4,29 +4,22 @@ import tkinter
 import tkinter.ttk
 import tkinter.font
 
-from lib import csvoutput
-from lib.config import parseArgument, g_config as config
+from lib.output import getOutputCsv
+from lib.stats import VehicleStats
+from lib.wselector import SelectorPanel
+from lib.wdescription import SpecViewItem, updateDisplayValue, g_vehicleStats
 
-from lib.application import g_application as app
 
-class Application(tkinter.Frame):
+class GuiApplication(tkinter.Frame):
 
-    def __init__(self, master=None, strage=None):
-        self.__strage = strage
+    def __init__(self, app, master=None):
+        super(GuiApplication, self).__init__(master)
+        self.__app = app
 
         self.__itemgroup = app.settings.guiitems
         self.__titlesdesc = app.settings.guititles
         self.__selectorsdesc = app.settings.guiselectors
 
-        self.__handlerChangeSelected = {
-            'vehicleFilter':    self.changeVehicleFilter,
-            'vehicle':          self.changeVehicle,
-            'turret':           self.changeTurret,
-            'gun':              self.changeGun,
-            'modules':          self.changeModules
-        }
-        
-        tkinter.Frame.__init__(self, master)
         self.font = tkinter.font.Font(family='Arial', size=10, weight='normal')
         self.option_add('*font', self.font)
         self.option_add('*background', 'white')
@@ -40,34 +33,26 @@ class Application(tkinter.Frame):
         self.createSpecView(self.master, self.__itemgroup, None)
         self.createCommandView(self.master)
 
-        if config.vehicle is not None:
-            param = self.__strage.getParamFromVehicle(config.vehicle)
-        else:
-            param = None
-
-        self.packTitleDesc()
-        self.changeVehicleFilter(param)
+        self.__app.widgets['!vehicleselector'].onSelected.append(self.changeSpec)
+        self.__app.widgets['!chassisselector'].onSelected.append(self.changeSpec)
+        self.__app.widgets['!turretselector'].onSelected.append(self.changeSpec)
+        self.__app.widgets['!engineselector'].onSelected.append(self.changeSpec)
+        self.__app.widgets['!radioselector'].onSelected.append(self.changeSpec)
+        self.__app.widgets['!gunselector'].onSelected.append(self.changeSpec)
+        self.__app.widgets['!shellselector'].onSelected.append(self.changeSpec)
+        self.changeSpec()
 
     def createSelectorBars(self, master):
-        self.__selectorSchema = {}
-        self.__selector = {}
-        self.__selectorList = []
+        selectors = []
         for row in self.__selectorsdesc:
             bar = tkinter.Frame(master)
             bar.pack(side='top', expand=1, fill='x', padx=4, pady=1)
-            for entry in row:
-                option = entry['option']
-                name = entry['id'] + 'Selector'
-                selected = entry['selected'] if 'selected' in entry else None
-                #selector = DropdownList(bar, name=name, entry=entry, method=self.getDropdownList, option=option, selected=selected)
-                selector = DropdownList(bar, name=name, entry=entry, method=self.getDropdownList2, option=option, selected=selected)
-                if 'attr' in entry and entry['attr'] == 'const':
-                    selector.update()
-                callback = lambda self, id, event : self.__handlerChangeSelected[id]()
-                selector.setCallback(partial(callback, self, entry['callback']))
-                self.__selectorSchema[entry['id']] = entry
-                self.__selector[entry['id']] = selector 
-                self.__selectorList.append(selector)
+            for desc in row:
+                widget = SelectorPanel(bar, app=self.__app, desc=desc)
+                widget.pack(side='left')
+                selectors.append(widget)
+        for widget in selectors:
+            widget.setup()
 
     def createDescriptionView(self, master):
         view = tkinter.Frame(master, highlightthickness=1, highlightbackground='gray')
@@ -75,35 +60,26 @@ class Application(tkinter.Frame):
         opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
         self.__vehicleDescs = []
         for entry in self.__titlesdesc:
-            panel = PanelItemValue(view, entry, self.getVehicleValue, option=opts)
-            self.__vehicleDescs.append(panel)
+            widget = SpecViewItem(view, desc=entry, option=opts)
+            widget.pack(side='top')
 
-    def createSpecView(self, master, target, option):
-        self.__itemValues = []
-        panel = tkinter.Frame(master)
-        panel.pack(side='top', expand=1, fill='x')
-        option = target.get('guioption', option)
-        for column in target.get('columns', []):
-            self.createSpecViewColumn(panel, column, option)
-
-    def createSpecViewColumn(self, master, target, option):
-        panel = tkinter.Frame(master)
-        panel.pack(side='left', anchor='n')
-        option = target.get('guioption', option)
-        for row in target.get('rows', []):
-            self.createSpecViewRow(panel, row, option)
-
-    def createSpecViewRow(self, master, target, option):
-        panel = tkinter.Frame(master, highlightthickness=1, highlightbackground='gray')
-        panel.pack(side='top', expand=1, padx=8, pady=2, anchor='w')
-        option = target.get('guioption', option)
-        for item in target.get('items', []):
-            self.createSpecViewItem(panel, item, option)
-        
-    def createSpecViewItem(self, master, target, option):
-        option = target.get('guioption', option)
-        panel = PanelItemValue(master, target, self.getVehicleValue, option=option)
-        self.__itemValues.append(panel)
+    def createSpecView(self, master, desc, option):
+        view = tkinter.Frame(master)
+        view.pack(side='top', expand=1, fill='x')
+        option = desc.get('guioption', {})
+        for column in desc.get('columns', []):
+            columnOption = column.get('guioption', option)
+            columnView = tkinter.Frame(view)
+            columnView.pack(side='left', anchor='n')
+            for row in column.get('rows', []):
+                rowOption = row.get('guioption', columnOption)
+                rowView = tkinter.Frame(columnView, highlightthickness=1, highlightbackground='gray')
+                rowView.pack(side='top', expand=1, padx=8, pady=2, anchor='w')
+                for item in row.get('items', []):
+                    itemOption = item.get('guioption', rowOption)
+                    widget = SpecViewItem(rowView, desc=item, option=itemOption)
+                    widget.pack(side='top')
+        return
 
     def createCommandView(self, master):
         label = 'copy to clipboard'
@@ -111,214 +87,33 @@ class Application(tkinter.Frame):
         copyButton = tkinter.Button(master, text=label, command=self.createMessage, **option)
         copyButton.pack(side='top', expand=1, fill='x', padx=7, pady=2)   
 
-    def packSelectors(self):
-        for panel in self.__selectorList:
-            panel.pack()
-
-    def packTitleDesc(self):
-        for panel in self.__vehicleDescs:
-            panel.pack()
-
-    def packItemGroup(self):
-        for panel in self.__itemValues:
-            panel.pack()
+    def changeSpec(self):
+        ctx = self.getSelectedValues()
+        tags = g_vehicleStats.keys()
+        result = self.__app.vd.getVehicleItems(g_vehicleStats.keys(), ctx)
+        result = VehicleStats(result, schema=self.__app.settings.schema)
+        for k, v in result.items():
+            if v is None:
+                v = ''
+            g_vehicleStats[k] = v.value
+        updateDisplayValue()
 
     def getSelectedValues(self):
+        if len(self.__app.widgets) == 0:
+            return None
         param = {}
-        for id, selector in self.__selector.items():
-            param[id] = selector.getSelected()
+        param['nation'] = self.__app.widgets['!nationselector'].getId()
+        param['vehicle'] = self.__app.widgets['!vehicleselector'].getId()
+        param['chassis'] = self.__app.widgets['!chassisselector'].getId()
+        param['turret'] = self.__app.widgets['!turretselector'].getId()
+        param['engine'] = self.__app.widgets['!engineselector'].getId()
+        param['radio'] = self.__app.widgets['!radioselector'].getId()
+        param['gun'] = self.__app.widgets['!gunselector'].getId()
+        param['shell'] = self.__app.widgets['!shellselector'].getId()
         return param
  
-    def getDropdownList2(self, schema):
-        param = self.getSelectedValues()
-        category = schema['id']
-        if category == 'nation':
-            result = app.dropdownlist.fetchNationList(param=param)
-        elif category == 'tier':
-            result = app.dropdownlist.fetchTierList(param=param)
-        elif category == 'type':
-            result = app.dropdownlist.fetchTypeList(param=param)
-        elif category == 'secret':
-            result = app.dropdownlist.fetchSecretList(param=param)
-        elif category == 'vehicle':
-            result = app.dropdownlist.fetchVehicleList(param=param)
-        elif param['vehicle'] is None:
-            result = None
-        else:
-            for k,v in {'chassis':-1, 'turret':-1, 'engine':-1, 'radio':-1, 'gun':-1, 'shell':1 }.items():
-                if param.get(k, None) is None:
-                    param[k] = v
-            if category == 'chassis':
-                result = app.dropdownlist.fetchChassisList(param=param)
-            elif category == 'turret':
-                result = app.dropdownlist.fetchTurretList(param=param)
-            elif category == 'engine':
-                result = app.dropdownlist.fetchEngineList(param=param)
-            elif category == 'radio':
-                result = app.dropdownlist.fetchRadioList(param=param)
-            elif category == 'gun':
-                result = app.dropdownlist.fetchGunList(param=param)
-            elif category == 'shell':
-                result = app.dropdownlist.fetchShellList(param=param)
-            elif category == 'siege':
-                result = [['', ''], ['siege', 'siege']]
-            else:
-                raise NotImplementedError
-        if result is None or result == []:
-            result = [ [ None, '' ] ]
-        #print('category={}'.format(category))
-        #print('param={}'.format(param))
-        #print('result={}'.format(result))
-        return result
-
-    def getVehicleValue(self, schema):
-        tags = schema['value']
-        if isinstance(tags, str):
-            tags = [tags]
-        form = schema.get('format', None)
-        ctx = self.getSelectedValues()
-        #print('schema={}, ctx={}'.format(schema, ctx))
-        result = app.vd.getVehicleItems(tags, ctx)
-        for k in tags:
-            if schema.get('consider', None) == 'float':
-                result[k] = float(result[k]) if result[k] is not None else ''
-        result = [ result[k] for k in tags ]
-        result = list(map(lambda x:x if x is not None else '', result))
-        #print('tags={}, result={}'.format(tags, result))
-        if form:
-            try:
-                text = form.format(*result)
-            except ValueError:
-                text = ''
-        elif isinstance(result, list):
-            text = ' ' .join(result)
-        else:
-            text = result
-        #print('text={}'.format(text))
-        return text
-
-    def changeVehicleFilter(self, param=None):
-        if param is not None:
-            self.__selector['nation'].select(param['nation'])
-            self.__selector['tier'].select(param['tier'])
-            self.__selector['type'].select(param['type'])
-            self.__selector['secret'].select(param['secret'])
-        self.__selector['vehicle'].update()
-        self.changeVehicle()
-
-    def changeVehicle(self):
-        for s in [ 'chassis', 'turret', 'engine', 'radio', 'siege' ]:
-            self.__selector[s].update()
-        self.changeTurret()
-
-    def changeTurret(self):
-        self.__selector['gun'].update()
-        self.changeGun()
-
-    def changeGun(self):
-        self.__selector['shell'].update()
-        self.changeModules()
-
-    def changeModules(self):
-        for panel in self.__vehicleDescs:
-            panel.update()
-        for panel in self.__itemValues:
-            panel.update()
-        self.packSelectors()
-        self.packItemGroup()
 
     def createMessage(self):
-        param = self.getSelectedValues()
-        values = self.__strage.getDescription(param)
-        message = csvoutput.createMessage(self.__strage, values)
+        message = getOutputCsv(g_vehicleStats)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
-
-
-class PanelItemValue(tkinter.Frame):
-
-    def __init__(self, master, target, method, *args, option=None, **kwargs):
-        self.__target = target
-        self.__method = method
-        frameopt = { 'borderwidth':0 }
-        frameopt.update(kwargs)
-        super().__init__(master, *args, **frameopt)
-        labelopt = option['label'] if option is not None and 'label' in option else {}
-        valueopt = option['value'] if option is not None and 'value' in option else {}
-        unitopt = option['unit'] if option is not None and 'unit' in option else {}
-        self.__label = tkinter.Label(self, **labelopt)
-        self.__label['text'] = target['label']
-        self.__label.pack(side='left')
-        self.__value = tkinter.Label(self, **valueopt)
-        self.__value.pack(side='left')
-        if 'unit' in target:
-            self.__unit = tkinter.Label(self, **unitopt)
-            self.__unit['text'] = target['unit']
-            self.__unit.pack(side='left')
-
-    def pack(self):
-        super().pack_forget()
-        if self.__target and 'attr' in self.__target:
-            if self.__target['attr'] == 'phantom':
-                value = self.__value['text']
-                if value is None or value == '':
-                    return
-        super().pack(side='top', fill='x', pady=0)
-
-    def update(self):
-        text = self.__method(self.__target)
-        if text is None:
-            text = ''
-        self.__value['text'] = text
-
-
-class DropdownList(tkinter.Frame):
-
-    def __init__(self, master, *args, entry=None, method=None, option=None, selected=None, **kwargs):
-        self.__target = entry
-        self.__method = method
-        self.__defaultSelected = selected
-        self.__values = [ None ]
-        frameopt = { 'borderwidth':0, 'padx':4 }
-        frameopt.update(kwargs)
-        cboxopt = {}
-        if 'combobox' in option:
-            cboxopt.update(option['combobox'])
-        super().__init__(master, *args, **frameopt)
-        if 'label' in option:
-            self.__label = tkinter.Label(self, **option['label'])
-            self.__label.pack(side='left')
-        self.__combobox = tkinter.ttk.Combobox(self, state='readonly', **cboxopt)
-        self.__combobox.pack(side='left')
-        name = str(self).split('.')[-1]
-        if 'value' in option and 'justify' in option['value']:
-            self.option_add('*' + name + '*justify', option['value']['justify'])
-    
-    def setCallback(self, cbFunc):
-        self.__combobox.bind('<<ComboboxSelected>>', cbFunc)
-
-    def update(self):
-        list = self.__method(self.__target)
-        self.__values = [ t[0] for t in list ]
-        self.__combobox['values'] = [ t[1] for t in list ]
-        name = str(self).split('.')[-1]
-        if self.__defaultSelected == 'last':
-            self.__combobox.current(len(list) - 1)
-        else:
-            self.__combobox.current(0)
-
-    def select(self, value):
-        index = self.__values.index(value)
-        self.__combobox.current(index)
-    
-    def getSelected(self):
-        index = self.__combobox.current()
-        return self.__values[index]
-
-    def pack(self):
-        super().pack_forget()
-        if self.__target.get('attr', None) == 'phantom':
-            if not self.__values[-1]:
-                return
-        super().pack(side='left')
-

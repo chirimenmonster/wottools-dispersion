@@ -2,14 +2,6 @@
 import argparse
 import os
 
-TIERS = [ str(tier) for tier in range(1, 10 + 1) ]
-TIERS_LABEL = { '1':'I', '2':'II', '3':'III', '4':'IV', '5':'V', '6':'VI', '7':'VII', '8':'VIII', '9':'IX', '10':'X'}
-TIERS_LIST = [ TIERS_LABEL[t] for t in TIERS ]
-
-WG_TYPES = [ 'lightTank', 'mediumTank', 'heavyTank', 'AT-SPG', 'SPG' ]
-TYPES_MAP = { 'lightTank':'LT', 'mediumTank':'MT', 'heavyTank':'HT', 'AT-SPG':'TD', 'SPG':'SPG' }
-TYPES = [ TYPES_MAP[t] for t in WG_TYPES ]
-
 
 class Config:
     gui = False
@@ -17,9 +9,9 @@ class Config:
     LOCALE_RELPATH = 'res'
     VEHICLES = 'vehicles'
     GUI_SETTINGS = 'gui'
-    SCRIPTS_DIR = None
-    GUI_DIR = None
     basedir = None
+    scriptsdir = None
+    guidir = None
     pkgdir = None
     scriptspkg = None
     guipkg = None
@@ -62,8 +54,8 @@ def parseArgument(mode=None):
         group.add_argument('--tag-pattern', dest='list_tag', help='show tags matched regex')
 
         group = parser.add_mutually_exclusive_group()
-        group.add_argument('--csv', dest='csvoutput', action='store_true', help='output CSV')
-        group.add_argument('--json', dest='outputjson', action='store_true', help='output JSON')
+        group.add_argument('--csv', dest='output_csv', action='store_true', help='output CSV')
+        group.add_argument('--json', dest='output_json', action='store_true', help='output JSON')
 
         parser.add_argument('--list-module', dest='list_module', help='list modules.  ex. "gun" or "engine,radio')
         parser.add_argument('--show', dest='show_params', help='parameter names to show.  ex. "shell:speed,shell:gravity"')
@@ -75,7 +67,4 @@ def parseArgument(mode=None):
         parser.add_argument('--prefer-userstring', action='store_const', const='userString', default='index', dest='indextag', help='prefer userString')
 
     parser.parse_args(namespace=g_config)
-    if g_config.SCRIPTS_DIR:
-        g_config.DATA[g_config.VEHICLES]['extracted'] = g_config.SCRIPTS_DIR
-    if g_config.GUI_DIR:
-        g_config.DATA[g_config.GUI_SETTINGS]['extracted'] = g_config.GUI_DIR
+

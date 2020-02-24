@@ -1,25 +1,23 @@
 
-import os
-import sys
 import unittest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-from lib.config import g_config as config
-from lib.application import g_application as app
+from lib.config import Config
+from lib.application import Application
 from lib.dropdownlist import DropdownList
 
 
 class DropdownListTestCase(unittest.TestCase):
 
     def setUp(self):
-        config.GUI_DIR = 'test/data/res'
+        config = Config()
+        config.guipkg = 'test/data/res/packages/gui.pkg'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
         config.schema = 'res/itemschema.json'
         config.localedir = 'test/data/res'
         config.outputjson = True
+        app = Application()
         app.setup(config)
-        self.dropdownlist = DropdownList()
+        self.dropdownlist = DropdownList(app)
 
     def test_fetchNationList(self):
         result = self.dropdownlist.fetchNationList()
@@ -92,6 +90,3 @@ class DropdownListTestCase(unittest.TestCase):
             ['IS-3M', 'IS-3M']]
         self.assertEqual(expect_chassis, self.dropdownlist.fetchChassisList(param=ctx))
         
-
-    def test_application(self):
-        self.assertEqual('T-34', app.gettext.translate('#ussr_vehicles:T-34'))

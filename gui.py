@@ -1,11 +1,10 @@
 
 import sys
 import io
-import os
 
-from lib.widgets import Application
-from lib.config import parseArgument, g_config as config
-from lib.application import g_application as appenv
+from lib.config import Config, parseArgument
+from lib.application import Application
+from lib.widgets import GuiApplication
 from lib.dropdownlist import DropdownList
 
 
@@ -14,15 +13,16 @@ if __name__ == '__main__':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-
+    config = Config()
     config.schema = 'res/itemschema.json'
     config.gui = True
 
     parseArgument()
 
-    appenv.setup(config)
-    appenv.dropdownlist = DropdownList()
-
     app = Application()
-    app.mainloop()
+    app.setup(config)
+    app.dropdownlist = DropdownList(app)
+
+    gui = GuiApplication(app)
+    gui.mainloop()
     

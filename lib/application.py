@@ -1,8 +1,11 @@
 
 import os
+import json
 
-from lib.vpath import Strage, VPath, Settings, Resource
-from lib.vehicles import VehicleDatabase
+from lib.vpath import VPath
+from lib.strage import Strage
+from lib.resource import Resource
+from lib.database import VehicleDatabase
 from lib.translate import Gettext
 
 
@@ -25,27 +28,27 @@ class Application(object):
             config.localedir = os.path.join(config.basedir, config.LOCALE_RELPATH)
         if config.schema is None:
             config.schema = 'res/itemschema.json'
-        settings = self.setupSettings(config)
-        schema = settings.schema
+        self.settings = self.setupSettings(config)
+        self.config = config
+        self.schema = self.settings.schema
         vpath = self.setupVPath(config)
         strage = Strage()
         self.gettext = self.setupGettext(config)
-        resource = Resource(strage, vpath, schema, gettext=self.gettext)
-        vd = VehicleDatabase(resource)
-        vd.prepare()
-        self.settings = settings
-        self.vd = vd
-        self.resource = resource
-        self.schema = schema
-        self.config = config
+        self.resource = Resource(self, strage, vpath, self.schema, gettext=self.gettext)
+        self.vd = VehicleDatabase()
+        self.vd.setup(self.resource)
         self.dropdownlist = None
+        orders = ('settings:nationsOrder', 'settings:tiersOrder', 'settings:typesOrder', 'settings:tiersLabel')
+        self.settings.addDict('orders', { k:self.resource.getValue(k) for k in orders })
+        self.widgets = {}
 
     def setupSettings(self, config):
         if config.schema is None:
             schemapath = 'res/itemschema.json'
         else:
             schemapath = config.schema
-        settings = Settings(schema=schemapath)
+        settings = Settings()
+        settings.add('schema', schemapath)
         if config.gui:
             settings.add('guiitems', 'res/guisettings_items.json')
             settings.add('guititles', 'res/guisettings_titles.json')
@@ -59,9 +62,9 @@ class Application(object):
             else:
                 pkgdir = None
         else:
-            pkgdir = config.pkg
-        scriptsdir = config.SCRIPTS_DIR
-        guidir = config.GUI_DIR
+            pkgdir = config.pkgdir
+        scriptsdir = config.scriptsdir
+        guidir = config.guidir
         scriptspkg = config.scriptspkg
         vpath = VPath(pkgdir=pkgdir, scriptsdir=scriptsdir, guidir=guidir, scriptspkg=scriptspkg)
         return vpath
@@ -79,5 +82,24 @@ class Application(object):
             self.titlesdesc = json.load(fp)
         with open('res/guisettings_selectors.json', 'r') as fp:
             self.selectorsdesc = json.load(fp)
+
+
+class Settings(object):
+
+    def load(self, path):
+        with open(path, 'r') as fp:
+            result = json.load(fp)
+        return result
+
+    def add(self, name, path):
+        with open(path, 'r') as fp:
+            result = json.load(fp)
+        setattr(self, name, result)
+        return self
+
+    def addDict(self, name, dict):
+        setattr(self, name, dict)
+        return self
+
 
 g_application = Application()
