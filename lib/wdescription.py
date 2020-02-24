@@ -22,6 +22,9 @@ class VehicleStatsPool(object):
         for t in tags:
             self.stats[t] = ''
 
+    def get(self):
+        return self.stats
+    
     def fetchStats(self, ctx):
         tags = self.stats.keys()
         result = self.app.vd.getVehicleItems(tags, ctx)

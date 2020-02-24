@@ -47,6 +47,7 @@
     {
         "label":    "Secret:",
         "format":   "{}",
-        "value":    [ "vehicle:secret" ]
+        "value":    [ "vehicle:secret" ],
+        "attr":     "phantom"
     }
 ]

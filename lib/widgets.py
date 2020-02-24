@@ -108,8 +108,8 @@ class GuiApplication(tkinter.Frame):
             ctx[k] = self.app.widgets[v].getId()
         return ctx
  
-
     def createMessage(self):
-        message = getOutputCsv(g_vehicleStats)
+        result = self.app.vehicleStatsPool.get()
+        message = getOutputCsv(result)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
