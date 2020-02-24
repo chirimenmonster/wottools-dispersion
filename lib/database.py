@@ -67,10 +67,11 @@ class VehicleDatabase(object):
         return result
 
     def getVehicleItems(self, tags, ctx):
+        ctx = ctx.copy()
         if ctx.get('siege', None) == 'siegeMode':
-            ctx = ctx.copy()
-            if not ctx['vehicle'].endswith('_siege_mode'): 
-                ctx['vehicle'] += '_siege_mode'
+            ctx['vehicle_siege'] = ctx['vehicle'] + '_siege_mode'
+        else:
+            ctx['vehicle_siege'] = ctx['vehicle']
         result = {}
         for tag in tags:
             value = self.resource.getRefValue(tag, ctx)
