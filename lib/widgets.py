@@ -5,8 +5,9 @@ import tkinter.ttk
 import tkinter.font
 
 from lib.output import getOutputCsv
+from lib.stats import VehicleStats
 from lib.wselector import SelectorPanel
-from lib.wdescription import SpecViewItem, g_data
+from lib.wdescription import SpecViewItem, updateDisplayValue, g_vehicleStats
 
 
 class GuiApplication(tkinter.Frame):
@@ -32,8 +33,6 @@ class GuiApplication(tkinter.Frame):
         self.createSpecView(self.master, self.__itemgroup, None)
         self.createCommandView(self.master)
 
-        self.packTitleDesc()
-
         self.__app.widgets['!vehicleselector'].onSelected.append(self.changeSpec)
         self.__app.widgets['!chassisselector'].onSelected.append(self.changeSpec)
         self.__app.widgets['!turretselector'].onSelected.append(self.changeSpec)
@@ -55,22 +54,14 @@ class GuiApplication(tkinter.Frame):
         for widget in selectors:
             widget.setup()
 
-    def changeSpec(self):
-        ctx = self.getSelectedValues()
-        result = self.__app.vd.getVehicleItems(g_data.keys(), ctx)
-        for k, v in result.items():
-            if v is None:
-                v = ''
-            g_data[k].set(v)
-
     def createDescriptionView(self, master):
         view = tkinter.Frame(master, highlightthickness=1, highlightbackground='gray')
         view.pack(side='top', expand=1, fill='x', padx=8, pady=4)
         opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
         self.__vehicleDescs = []
         for entry in self.__titlesdesc:
-            panel = PanelItemValue(view, entry, self.getVehicleValue, option=opts)
-            self.__vehicleDescs.append(panel)
+            widget = SpecViewItem(view, desc=entry, option=opts)
+            widget.pack(side='top')
 
     def createSpecView(self, master, desc, option):
         view = tkinter.Frame(master)
@@ -96,17 +87,16 @@ class GuiApplication(tkinter.Frame):
         copyButton = tkinter.Button(master, text=label, command=self.createMessage, **option)
         copyButton.pack(side='top', expand=1, fill='x', padx=7, pady=2)   
 
-    def packSelectors(self):
-        for panel in self.__selectorList:
-            panel.pack()
-
-    def packTitleDesc(self):
-        for panel in self.__vehicleDescs:
-            panel.pack()
-
-    def packItemGroup(self):
-        for panel in self.__itemValues:
-            panel.pack()
+    def changeSpec(self):
+        ctx = self.getSelectedValues()
+        tags = g_vehicleStats.keys()
+        result = self.__app.vd.getVehicleItems(g_vehicleStats.keys(), ctx)
+        result = VehicleStats(result, schema=self.__app.settings.schema)
+        for k, v in result.items():
+            if v is None:
+                v = ''
+            g_vehicleStats[k] = v.value
+        updateDisplayValue()
 
     def getSelectedValues(self):
         if len(self.__app.widgets) == 0:
@@ -123,74 +113,7 @@ class GuiApplication(tkinter.Frame):
         return param
  
 
-    def getVehicleValue(self, schema):
-        app = self.__app
-        tags = schema['value']
-        if isinstance(tags, str):
-            tags = [tags]
-        form = schema.get('format', None)
-        ctx = self.getSelectedValues()
-        #print('schema={}, ctx={}'.format(schema, ctx))
-        result = app.vd.getVehicleItems(tags, ctx)
-        for k in tags:
-            if schema.get('consider', None) == 'float':
-                result[k] = float(result[k]) if result[k] is not None else ''
-        result = [ result[k] for k in tags ]
-        result = list(map(lambda x:x if x is not None else '', result))
-        #print('tags={}, result={}'.format(tags, result))
-        if form:
-            try:
-                text = form.format(*result)
-            except ValueError:
-                text = ''
-        elif isinstance(result, list):
-            text = ' ' .join(result)
-        else:
-            text = result
-        #print('text={}'.format(text))
-        return text
-
     def createMessage(self):
-        param = self.getSelectedValues()
-        values = self.__strage.getDescription(param)
-        message = getOutputCsv(values)
+        message = getOutputCsv(g_vehicleStats)
         self.master.clipboard_clear()
         self.master.clipboard_append(message)
-
-
-class PanelItemValue(tkinter.Frame):
-
-    def __init__(self, master, target, method, *args, option=None, **kwargs):
-        self.__target = target
-        self.__method = method
-        frameopt = { 'borderwidth':0 }
-        frameopt.update(kwargs)
-        super().__init__(master, *args, **frameopt)
-        labelopt = option['label'] if option is not None and 'label' in option else {}
-        valueopt = option['value'] if option is not None and 'value' in option else {}
-        unitopt = option['unit'] if option is not None and 'unit' in option else {}
-        self.__label = tkinter.Label(self, **labelopt)
-        self.__label['text'] = target['label']
-        self.__label.pack(side='left')
-        self.__value = tkinter.Label(self, **valueopt)
-        self.__value.pack(side='left')
-        if 'unit' in target:
-            self.__unit = tkinter.Label(self, **unitopt)
-            self.__unit['text'] = target['unit']
-            self.__unit.pack(side='left')
-
-    def pack(self):
-        super().pack_forget()
-        if self.__target and 'attr' in self.__target:
-            if self.__target['attr'] == 'phantom':
-                value = self.__value['text']
-                if value is None or value == '':
-                    return
-        super().pack(side='top', fill='x', pady=0)
-
-    def update(self):
-        text = self.__method(self.__target)
-        if text is None:
-            text = ''
-        self.__value['text'] = text
-

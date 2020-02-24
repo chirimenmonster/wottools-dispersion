@@ -60,6 +60,7 @@
         ]
     },
     "vehicle:totalWeight": {
+        "value":    "float",
         "resources": [
             {
                 "func":     "sum()",
@@ -69,6 +70,7 @@
         ]
     },
     "vehicle:totalHealth": {
+        "value":    "float",
         "resources": [
             {
                 "func":     "sum()",
@@ -77,6 +79,7 @@
         ]
     },
     "vehicle:powerWeightRatio": {
+        "value":    "float",
         "resources": [
             {
                 "func":     "div()",
@@ -85,6 +88,7 @@
         ]
     },
     "vehicle:powerWeightRatioSI": {
+        "value":    "float",
         "resources": [
             {
                 "func":     "mul()",
@@ -102,6 +106,7 @@
         ]
     },
     "vehicle:maxSpeed_hard": {
+        "value":    "float",
         "resources": [
             {
                 "func":     "div()",
@@ -110,6 +115,7 @@
         ]
     },
     "vehicle:maxSpeed_medium": {
+        "value":    "float",
         "resources": [
             {
                 "func":     "div()",
@@ -118,6 +124,7 @@
         ]
     },
     "vehicle:maxSpeed_soft": {
+        "value":    "float",
         "resources": [
             {
                 "func":     "div()",
@@ -259,6 +266,7 @@
         ]
     },
     "vehicle:invisibilityMoving": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -267,6 +275,7 @@
         ]
     },
     "vehicle:invisibilityStill": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -275,6 +284,7 @@
         ]
     },
     "vehicle:invisibilityCamouflageBonus": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -283,6 +293,7 @@
         ]
     },
     "vehicle:invisibilityCamouflageNetBonus": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -291,6 +302,7 @@
         ]
     },
     "vehicle:invisibilityFirePenalty": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -299,6 +311,7 @@
         ]
     },
     "vehicle:speedLimits": {
+        "value":    "float",
         "resources": [
             {
                 "func":     "join()",
@@ -307,6 +320,7 @@
         ]
     },
     "vehicle:speedLimits_forward": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -315,6 +329,7 @@
         ]
     },
     "vehicle:speedLimits_backward": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -437,6 +452,7 @@
         ]
     },
     "chassis:rotationSpeed": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -453,7 +469,38 @@
             }
         ]
     },
+    "chassis:terrainResistance_1": {
+        "value":    "float",
+        "map":      "split()[0]",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "chassis/{chassis}/terrainResistance"
+            }
+        ]
+    },
+    "chassis:terrainResistance_2": {
+        "value":    "float",
+        "map":      "split()[1]",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "chassis/{chassis}/terrainResistance"
+            }
+        ]
+    },
+    "chassis:terrainResistance_3": {
+        "value":    "float",
+        "map":      "split()[2]",
+        "resources": [
+            {
+                "file":     "vehicles/{nation}/{vehicle}.xml",
+                "xpath":    "chassis/{chassis}/terrainResistance"
+            }
+        ]
+    },
     "chassis:vehicleMovement": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -462,6 +509,7 @@
         ]
     },
     "chassis:vehicleRotation": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -540,6 +588,7 @@
         ]
     },
     "turret:rotationSpeed": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -590,6 +639,7 @@
         ]
     },
     "engine:power": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/engines.xml",
@@ -624,6 +674,7 @@
         ]
     },
     "engine:rpmMax": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/engines.xml",
@@ -632,6 +683,7 @@
         ]
     },
     "engine:rpmMin": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/engines.xml",
@@ -780,6 +832,7 @@
         ]
     },
     "gun:reloadTime": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -810,6 +863,7 @@
         ]
     },
     "gun:clipCount": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -822,6 +876,7 @@
         ]
     },
     "gun:clipRate": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -834,6 +889,7 @@
         ]
     },
     "gun:aimingTime": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -846,6 +902,7 @@
         ]
     },
     "gun:invisibilityFactorAtShot": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -858,6 +915,7 @@
         ]
     },
     "gun:shotDispersionRadius": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -870,6 +928,7 @@
         ]
     },
     "gun:turretRotation": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -882,6 +941,7 @@
         ]
     },
     "gun:afterShot": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -894,6 +954,7 @@
         ]
     },
     "gun:whileGunDamaged": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -906,6 +967,7 @@
         ]
     },
     "gun:dualGunChargeTime": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -914,6 +976,7 @@
         ]
     },
     "gun:dualGunReloadLockTime": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/{vehicle}.xml",
@@ -939,6 +1002,7 @@
         ]
     },
     "shot:piercingPower_1": {
+        "value":    "float",
         "map":      "split()[0]",
         "resources": [
             {
@@ -949,6 +1013,7 @@
         ]
     },
     "shot:piercingPower_2": {
+        "value":    "float",
         "map":      "split()[0]",
         "resources": [
             {
@@ -959,6 +1024,7 @@
         ]
     },
     "shot:piercingPower_3": {
+        "value":    "float",
         "map":      "split()[0]",
         "resources": [
             {
@@ -977,6 +1043,7 @@
         ]
     },
     "shot:damage_1": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -986,6 +1053,7 @@
         ]
     },
     "shot:damage_2": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",
@@ -995,6 +1063,7 @@
         ]
     },
     "shot:damage_3": {
+        "value":    "float",
         "resources": [
             {
                 "file":     "vehicles/{nation}/components/shells.xml",

@@ -55,8 +55,13 @@ def getOutputCsv(records, shows=None, headers=None, option=None):
     if isinstance(records, VehicleStatsCollection):
         for r in records:
             writer.writerow(list(map(lambda k: r[k].orig, shows)))
-    else:
+    elif isinstance(records, list):
         for r in records:
-            writer.writerow(list(map(lambda k: r[k], shows)))    
+            writer.writerow(list(map(lambda k: r[k], shows)))
+    elif isinstance(records, dict):
+        for k,v in records.items():
+            writer.writerow([k, v])        
+    else:
+        raise NotImplementedError
     result = output.getvalue()
     return result
