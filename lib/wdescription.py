@@ -4,7 +4,7 @@ import tkinter.ttk
 
 from lib.stats import VehicleStats
 
-VehicleDisplay = namedtuple('VehicleDisplay', 'tags template textvariable')
+VehicleDisplay = namedtuple('VehicleDisplay', 'tags template textvariable widget')
 
 
 class VehicleStatsPool(object):
@@ -13,12 +13,12 @@ class VehicleStatsPool(object):
         self.stats = {}
         self.displays = []
 
-    def add(self, tags, template, stringvar):
+    def add(self, tags, template, stringvar, widget):
         if isinstance(tags, list):
             tags = tuple(tags)
         else:
             tags = tuple([tags])
-        self.displays.append(VehicleDisplay(tags, template, stringvar))
+        self.displays.append(VehicleDisplay(tags, template, stringvar, widget))
         for t in tags:
             self.stats[t] = ''
 
@@ -43,7 +43,15 @@ class VehicleStatsPool(object):
                 except:
                     print(d.tags, d.template, repr(values))
                     raise
-            d.textvariable.set(text)
+            if d.textvariable is not None:
+                d.textvariable.set(text)
+            elif isinstance(d.widget, tkinter.Text):
+                d.widget.delete('1.0', 'end')
+                d.widget['height'] = 1
+                d.widget.lock = False
+                d.widget.insert('1.0', text)
+            else:
+                raise NotImplementedError
 
 
 class SpecViewItem(tkinter.Frame):
@@ -56,9 +64,16 @@ class SpecViewItem(tkinter.Frame):
         
         widget = LabelItem(self, text=label, **option['label'])
         widget.pack(side='left')
-        
-        widget = ValueItem(self, app=app, **option['value'])
-        widget.pack(side='left')
+
+        if desc.get('attr', None) == 'multiline':
+            opt = option['value'].copy()
+            if 'anchor' in opt:
+                del opt['anchor']
+            widget = ValueTextItem(self, app=app, **opt)
+            widget.pack(side='left', fill='x', expand=1)
+        else:
+            widget = ValueItem(self, app=app, **option['value'])
+            widget.pack(side='left')
         widget.setValue(desc)
 
         if unit is not None:
@@ -76,6 +91,8 @@ class SpecViewItem(tkinter.Frame):
 class LabelItem(tkinter.Label):
     pass
 
+class UnitItem(tkinter.Label):
+    pass
     
 class ValueItem(tkinter.Label):
     def __init__(self, *args, app=None, **kwargs):
@@ -89,7 +106,7 @@ class ValueItem(tkinter.Label):
         stringvar.trace('w', self.callback)
         self['textvariable'] = stringvar
         self.__stringvar = stringvar
-        self.app.vehicleStatsPool.add(value, template, stringvar)
+        self.app.vehicleStatsPool.add(value, template, stringvar, self)
 
     def callback(self, *args):
         value = self.__stringvar.get()
@@ -98,5 +115,29 @@ class ValueItem(tkinter.Label):
         self.master.assignValue(value)
 
 
-class UnitItem(tkinter.Label):
-    pass
+class ValueTextItem(tkinter.Text):
+    def __init__(self, *args, app=None, **kwargs):
+        super(ValueTextItem, self).__init__(*args, **kwargs, height=4)
+        self.app = app
+        self.delete('1.0', 'end')
+        self.lock = True
+        self['yscrollcommand'] = self.setScroll
+
+    def setValue(self, desc):
+        value = desc['value']
+        self.app.vehicleStatsPool.add(value, '{}', None, self)
+
+    def setScroll(self, first, last):
+        if self.lock:
+            return
+        first, last = float(first), float(last)
+        if first == 0.0 and last == 1.0:
+            return
+        nrows = self['height'] / (last - first)
+        #text = self.get('0.0', 'end')
+        #if nrows == 16 and nrows > len(text) / 60:
+        if nrows > 8:
+            return
+        self.lock = True
+        self['height'] = nrows
+

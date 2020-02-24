@@ -61,7 +61,7 @@ class GuiApplication(tkinter.Frame):
         self.__vehicleDescs = []
         for entry in self.__titlesdesc:
             widget = SpecViewItem(view, app=self.__app, desc=entry, option=opts)
-            widget.pack(side='top')
+            widget.pack(side='top', fill='x', expand=1)
 
     def createSpecView(self, master, desc, option):
         view = tkinter.Frame(master)

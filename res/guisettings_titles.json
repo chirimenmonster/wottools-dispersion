@@ -1,8 +1,13 @@
 [
     {
         "label":    "Vehicle:",
-        "format":   "{} ({}), {}: {}",
-        "value":    [ "vehicle:userString", "vehicle:index", "vehicle:shortUserString", "vehicle:description" ]
+        "format":   "{} ({}), {}",
+        "value":    [ "vehicle:userString", "vehicle:index", "vehicle:shortUserString" ]
+    },
+    {
+        "label":    "",
+        "value":    "vehicle:description",
+        "attr":     "multiline"
     },
     {
         "label":    "Chassis:",
