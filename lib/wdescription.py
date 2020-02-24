@@ -1,4 +1,5 @@
 
+import string
 from collections import namedtuple
 import tkinter.ttk
 
@@ -36,16 +37,19 @@ class VehicleStatsPool(object):
         self.updateDisplay()
 
     def updateDisplay(self):
+        formatter = string.Formatter()
         for d in self.displays:
-            values = [ self.stats[k] for k in d.tags ]
-            if None in values:
-                text = ''
-            else:
-                try:
-                    text = d.template.format(*values)
-                except:
-                    print(d.tags, d.template, repr(values))
-                    raise
+            text = ''
+            n = len(list(filter(lambda x: self.stats[x] is not None, d.tags)))
+            if n > 0:
+                for i, f in enumerate(formatter.parse(d.template)):
+                    literal_text, _, format_spec, _ = f
+                    text += literal_text
+                    if format_spec is None:
+                        continue
+                    value = self.stats[d.tags[i]]
+                    if value is not None:
+                        text += formatter.format_field(value, format_spec)
             if d.textvariable is not None:
                 d.textvariable.set(text)
             elif isinstance(d.widget, tkinter.Text):
@@ -70,12 +74,13 @@ class SpecViewItem(tkinter.Frame):
 
         if desc.get('attr', None) == 'multiline':
             opt = option['value'].copy()
-            if 'anchor' in opt:
-                del opt['anchor']
+            if 'justify' in opt:
+                del opt['justify']
             widget = ValueTextItem(self, app=app, **opt)
             widget.pack(side='left', fill='x', expand=1)
         else:
-            widget = ValueItem(self, app=app, **option['value'])
+            opt = option['value'].copy()
+            widget = ValueItem(self, app=app, **opt)
             widget.pack(side='left')
         widget.setValue(desc)
 
@@ -97,7 +102,7 @@ class LabelItem(tkinter.Label):
 class UnitItem(tkinter.Label):
     pass
     
-class ValueItem(tkinter.Label):
+class ValueItem(tkinter.Entry):
     def __init__(self, *args, app=None, **kwargs):
         super(ValueItem, self).__init__(*args, **kwargs)
         self.app = app

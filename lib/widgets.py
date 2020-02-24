@@ -56,7 +56,7 @@ class GuiApplication(tkinter.Frame):
     def createDescriptionView(self, master):
         view = tkinter.Frame(master, highlightthickness=1, highlightbackground='gray')
         view.pack(side='top', expand=1, fill='x', padx=8, pady=4)
-        opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100, 'anchor':'w'} }
+        opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100} }
         self.__vehicleDescs = []
         for entry in self.__titlesdesc:
             widget = SpecViewItem(view, app=self.app, desc=entry, option=opts)
@@ -78,7 +78,6 @@ class GuiApplication(tkinter.Frame):
                     itemOption = item.get('guioption', rowOption)
                     widget = SpecViewItem(rowView, app=self.app, desc=item, option=itemOption)
                     widget.pack(side='top')
-        return
 
     def createCommandView(self, master):
         label = 'copy to clipboard'
@@ -89,6 +88,7 @@ class GuiApplication(tkinter.Frame):
     def changeSpec(self):
         ctx = self.getSelectedValues()
         self.app.vehicleStatsPool.fetchStats(ctx)
+        result = self.app.vehicleStatsPool.get()
 
     def getSelectedValues(self):
         source = {

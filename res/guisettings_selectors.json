@@ -2,54 +2,42 @@
     [
         {
             "id":       "nation",
-            "attr":     "const",
-            "callback": "vehicleFilter",
             "option":   { "label": { "text": "Nation" }, "combobox": { "width": 10 } }
         },
         {
             "id":       "tier",
-            "attr":     "const",
-            "callback": "vehicleFilter",
             "option":   { "label": { "text": "Tier" }, "combobox": { "width": 3 }, "value": { "justify": "center" } }
         },
         {
             "id":       "type",
-            "attr":     "const",
-            "callback": "vehicleFilter",
             "option":   { "label": { "text": "Type"}, "combobox": { "width": 4 }, "value": { "justify": "center" } }
         },
         {
+            "id":       "secret",
+            "option":   { "label": { "text": "Secret" }, "combobox": { "width": 8 } }
+        },
+        {
             "id":       "vehicle",
-            "callback": "vehicle",
             "option":   { "label": { "text": "Vehicle" }, "combobox": { "width": 40 } },
             "label":    {
                 "format":   "{}",
                 "value":    [ "vehicle:displayString" ]
             }
-        },
-        {
-            "id":       "secret",
-            "callback": "vehicleFilter",
-            "attr":     "const",
-            "option":   { "label": { "text": "Secret" }, "combobox": { "width": 8 } }
         }
     ],
     [
         {
             "id":       "chassis",
-            "callback": "modules",
             "selected": "last",
             "option":   { "label": { "text": "Chassis" }, "combobox": { "width": 32 } }
         },
         {
             "id":       "turret",
-            "callback": "turret",
             "selected": "last",
             "option":   { "label": { "text": "Turret" }, "combobox": { "width": 32 } }
         },
         {
             "id":       "engine",
-            "callback": "modules",
             "selected": "last",
             "option":   { "label": { "text": "Engine" }, "combobox": { "width": 32 } }
         }
@@ -57,19 +45,16 @@
     [
         {
             "id":       "radio",
-            "callback": "modules",
             "selected": "last",
             "option":   { "label": { "text": "Radio" }, "combobox": { "width": 16 } }
         },
         {
             "id":       "gun",
-            "callback": "gun",
             "selected": "last",
             "option":   { "label": { "text": "Gun" }, "combobox": { "width": 24 } }
         },
         {
             "id":       "shell",
-            "callback": "modules",
             "option":   { "label": { "text": "Shell" }, "combobox": { "width": 24 } },
             "label":    {
                 "format":   "{}, {}",
@@ -78,7 +63,6 @@
         },
         {
             "id":       "siege",
-            "callback": "modules",
             "option":   { "label": { "text": "Siege" }, "combobox": { "width": 8 } },
             "attr":     "phantom"
         }

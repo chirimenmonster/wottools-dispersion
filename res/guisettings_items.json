@@ -1,7 +1,7 @@
 {
     "guioption": {
         "label":    { "width": 20,  "anchor": "e" },
-        "value":    { "width": 4,   "anchor": "e" },
+        "value":    { "width": 6,   "justify": "right" },
         "unit":     { "width": 5,   "anchor": "w" }
     },
     "columns": [
@@ -182,13 +182,13 @@
             ]
         },
         {
+            "guioption": {
+                "label":    { "width": 20,  "anchor": "e" },
+                "value":    { "width": 8,   "justify": "right" },
+                "unit":     { "width": 5,   "anchor": "w" }
+            },
             "rows": [
                 {
-                    "guioption": {
-                        "label":    { "width": 18,  "anchor": "e" },
-                        "value":    { "width": 6,   "anchor": "e" },
-                        "unit":     { "width": 5,   "anchor": "w" }
-                    },
                     "items": [
                         {
                             "label":    "total weight",
