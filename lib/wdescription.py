@@ -4,6 +4,7 @@ from collections import namedtuple
 import tkinter.ttk
 
 from lib.stats import VehicleStats
+from lib.utils import VStatsFormatter
 
 VehicleDisplay = namedtuple('VehicleDisplay', 'tags template textvariable widget')
 
@@ -31,25 +32,18 @@ class VehicleStatsPool(object):
         result = self.app.vd.getVehicleItems(tags, ctx)
         result = VehicleStats(result, schema=self.app.settings.schema)
         for k, v in result.items():
-            if v is None:
-                v = ''
-            self.stats[k] = v.value
+            self.stats[k] = v.value if v is not None else ''
         self.updateDisplay()
     
     def updateDisplay(self):
-        formatter = string.Formatter()
+        formatter = VStatsFormatter()
         for d in self.displays:
             text = ''
-            n = len(list(filter(lambda x: self.stats[x] is not None, d.tags)))
-            if n > 0:
-                for i, f in enumerate(formatter.parse(d.template)):
-                    literal_text, _, format_spec, _ = f
-                    text += literal_text
-                    if format_spec is None:
-                        continue
-                    value = self.stats[d.tags[i]]
-                    if value is not None:
-                        text += formatter.format_field(value, format_spec)
+            args = [ self.stats[k] for k in d.tags ]
+            if len(list(filter(lambda x: x is not None, args))) == 0:
+                text = ''
+            else:
+                text = formatter.vformat(d.template, args, None)
             if d.textvariable is not None:
                 d.textvariable.set(text)
             elif isinstance(d.widget, tkinter.Text):
@@ -89,11 +83,9 @@ class SpecViewItem(tkinter.Frame):
             widget.pack(side='left')
 
     def assignValue(self, value):
-        if value is None:
-            if self.isPhantom:
-                self.pack_forget()
-        else:
-            self.pack()
+        if value is None and self.isPhantom:
+            return
+        self.pack()
 
 
 class LabelItem(tkinter.Label):

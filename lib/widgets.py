@@ -92,7 +92,7 @@ class GuiApplication(tkinter.Frame):
         for widget in self.specViewWidgets:
             widget.pack_forget()
         self.app.vehicleStatsPool.fetchStats(ctx)
-        result = self.app.vehicleStatsPool.get()
+        #print(self.app.vehicleStatsPool.get(), flush=True)
 
     def getSelectedValues(self):
         source = {
