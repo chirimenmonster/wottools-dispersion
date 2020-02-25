@@ -38,52 +38,42 @@ class VehicleStatsPool(object):
     def updateDisplay(self):
         formatter = VStatsFormatter()
         for d in self.displays:
-            text = ''
             args = [ self.stats[k] for k in d.tags ]
-            if len(list(filter(lambda x: x is not None, args))) == 0:
+            if len(list(filter(lambda x: x is not None or x == '', args))) == 0:
                 text = ''
             else:
                 text = formatter.vformat(d.template, args, None)
-            if d.textvariable is not None:
-                d.textvariable.set(text)
-            elif isinstance(d.widget, tkinter.Text):
-                d.widget.delete('1.0', 'end')
-                d.widget['height'] = 1
-                d.widget.lock = False
-                d.widget.insert('1.0', text)
-            else:
-                raise NotImplementedError
+            d.textvariable.set(text)
 
 
 class SpecViewItem(tkinter.Frame):
     def __init__(self, *args, app=None, desc=None, option={}, **kwargs):
         super(SpecViewItem, self).__init__(*args, **kwargs, borderwidth=0)
-        label = desc.get('label', None)
-        value = desc.get('value', None)
-        unit = desc.get('unit', None)
         self.isPhantom = True if desc.get('attr', None) == 'phantom' else False
         
+        label = desc.get('label', None)
         widget = LabelItem(self, text=label, **option['label'])
         widget.pack(side='left')
 
-        if desc.get('attr', None) == 'multiline':
-            opt = option['value'].copy()
-            if 'justify' in opt:
-                del opt['justify']
-            widget = ValueTextItem(self, app=app, **opt)
-            widget.pack(side='left', fill='x', expand=1)
-        else:
-            opt = option['value'].copy()
-            widget = ValueItem(self, app=app, **opt)
-            widget.pack(side='left')
-        widget.setValue(desc)
+        value = desc.get('value', None)
+        factory = ValueItemFactory(app)
+        widget = factory.create(self, desc=desc, **option['value'])
+        widget.pack(side='left', fill='x', expand=1)
 
+        unit = desc.get('unit', None)
         if unit is not None:
             widget = UnitItem(self, text=unit, **option['unit'])
             widget.pack(side='left')
 
+        print('{}: {}'.format(value, self.isPhantom))
+
     def assignValue(self, value):
         if value is None and self.isPhantom:
+            return
+        self.pack()
+
+    def update(self, isNone=False):
+        if isNone and self.isPhantom:
             return
         self.pack()
 
@@ -93,39 +83,51 @@ class LabelItem(tkinter.Label):
 
 class UnitItem(tkinter.Label):
     pass
-    
+
+
+class ValueItemFactory(object):
+    def __init__(self, app):
+        self.app = app
+        
+    def create(self, *args, desc=None, **kwargs):
+        if desc.get('attr', '') == 'multiline':
+            if 'justify' in kwargs:
+                del kwargs['justify']
+            widget = ValueTextItem(*args, app=self.app, desc=desc, **kwargs)
+        else:
+            widget = ValueItem(*args, app=self.app, desc=desc, **kwargs)
+        return widget
+
+
 class ValueItem(tkinter.Entry):
-    def __init__(self, *args, app=None, **kwargs):
+    def __init__(self, *args, app=None, desc=None, **kwargs):
         super(ValueItem, self).__init__(*args, **kwargs)
         self.app = app
-
-    def setValue(self, desc):
-        value = desc['value']
         template = desc.get('format', '{}')
         stringvar = tkinter.StringVar(value='')
         stringvar.trace('w', self.callback)
         self['textvariable'] = stringvar
         self.__stringvar = stringvar
-        self.app.vehicleStatsPool.add(value, template, stringvar, self)
+        self.app.vehicleStatsPool.add(desc['value'], template, stringvar, self)
 
     def callback(self, *args):
-        value = self.__stringvar.get()
-        if value == '':
-            value = None
-        self.master.assignValue(value)
+        text = self.__stringvar.get()
+        self.master.update(isNone=(text == ''))
 
 
 class ValueTextItem(tkinter.Text):
-    def __init__(self, *args, app=None, **kwargs):
+    def __init__(self, *args, app=None, desc=None, **kwargs):
         super(ValueTextItem, self).__init__(*args, **kwargs, height=4)
         self.app = app
+        template = '{}'
+        stringvar = tkinter.StringVar(value='')
+        stringvar.trace('w', self.callback)
+        self.__stringvar = stringvar
+        self.app.vehicleStatsPool.add(desc['value'], '{}', stringvar, self)
         self.delete('1.0', 'end')
+        self['height'] = 1
         self.lock = True
         self['yscrollcommand'] = self.setScroll
-
-    def setValue(self, desc):
-        value = desc['value']
-        self.app.vehicleStatsPool.add(value, '{}', None, self)
 
     def setScroll(self, first, last):
         if self.lock:
@@ -139,3 +141,10 @@ class ValueTextItem(tkinter.Text):
         self.lock = True
         self['height'] = nrows
 
+    def callback(self, *args):
+        text = self.__stringvar.get()
+        self.delete('1.0', 'end')
+        self['height'] = 1
+        self.lock = False
+        self.insert('1.0', text)
+        self.master.update(isNone=(text == ''))

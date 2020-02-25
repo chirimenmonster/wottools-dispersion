@@ -16,7 +16,8 @@ class ResourceTestCase(unittest.TestCase):
         app = Application()
         app.setup(config)
         self.resource = app.resource
-        self.ctx = {'nation':'ussr', 'vehicle':'R04_T-34', 'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
+        self.ctx = {'nation':'ussr', 'vehicle':'R04_T-34', 'vehicle_siege':'R04_T-34',
+            'chassis':'T-34_mod_1943', 'turret':'T-34_mod_1942',
             'engine':'V-2-34', 'radio':'_9RM', 'gun':'_76mm_S-54'}
         
     def test_resource_getNodes_immediateValue_string(self):
