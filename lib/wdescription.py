@@ -65,17 +65,12 @@ class SpecViewItem(tkinter.Frame):
             widget = UnitItem(self, text=unit, **option['unit'])
             widget.pack(side='left')
 
-        print('{}: {}'.format(value, self.isPhantom))
-
-    def assignValue(self, value):
-        if value is None and self.isPhantom:
-            return
-        self.pack()
-
     def update(self, isNone=False):
+        #self.pack_forget()
         if isNone and self.isPhantom:
             return
-        self.pack()
+        #self.pack(side='top', fill='x', expand=1)
+        self.pack(side='top')
 
 
 class LabelItem(tkinter.Label):
@@ -109,10 +104,13 @@ class ValueItem(tkinter.Entry):
         self['textvariable'] = stringvar
         self.__stringvar = stringvar
         self.app.vehicleStatsPool.add(desc['value'], template, stringvar, self)
+        self.__isSecret = True if 'vehicle:secret' in desc['value'] else False
 
     def callback(self, *args):
         text = self.__stringvar.get()
         self.master.update(isNone=(text == ''))
+        #if self.__isSecret:
+        #    print('update: "{}", {}'.format(text, (text == '')), flush=True)
 
 
 class ValueTextItem(tkinter.Text):
