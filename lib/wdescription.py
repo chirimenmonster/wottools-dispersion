@@ -146,7 +146,7 @@ class ValueTextItem(tkinter.Text):
    
     
     def resizeHeight(self, *args):
-        bwidth = float(self['width']) * 7
+        bwidth = self.font.measure('0' * int(float(self['width'])))
         width = 0
         nlines = 0
         for line in self.get('1.0', 'end-1c').split('\n'):
