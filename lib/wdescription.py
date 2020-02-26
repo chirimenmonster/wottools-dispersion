@@ -51,7 +51,9 @@ class SpecViewItem(tkinter.Frame):
     def __init__(self, *args, app=None, desc=None, option={}, **kwargs):
         super(SpecViewItem, self).__init__(*args, **kwargs, borderwidth=0)
         self.isPhantom = True if desc.get('attr', None) == 'phantom' else False
-        
+        self.__pack_args = []
+        self.__pack_kwargs = {}
+
         label = desc.get('label', None)
         widget = LabelItem(self, text=label, **option['label'])
         widget.pack(side='left')
@@ -70,8 +72,16 @@ class SpecViewItem(tkinter.Frame):
         self.pack_forget()
         if isNone and self.isPhantom:
             return
-        #self.pack(side='top', fill='x', expand=1)
-        self.pack(side='top')
+        self.pack()
+
+    def pack(self, *args, **kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            args = self.__pack_args
+            kwargs = self.__pack_kwargs
+        else:
+            self.__pack_args = args
+            self.__pack_kwargs = kwargs
+        super(SpecViewItem, self).pack(*args, **kwargs)
 
 
 class LabelItem(tkinter.Label):
@@ -110,104 +120,32 @@ class ValueItem(tkinter.Entry):
     def callback(self, *args):
         text = self.__stringvar.get()
         self.master.update(isNone=(text == ''))
-        #if self.__isSecret:
-        #    print('update: "{}", {}'.format(text, (text == '')), flush=True)
 
 
 class ValueTextItem(tkinter.Text):
     def __init__(self, *args, app=None, desc=None, **kwargs):
         super(ValueTextItem, self).__init__(*args, **kwargs, height=4)
-        self.font = tkinter.font.Font(family='Arial', size=10, weight='normal')
         self.app = app
-        template = '{}'
         stringvar = tkinter.StringVar(value='')
         stringvar.trace('w', self.callback)
         self.__stringvar = stringvar
         self.app.vehicleStatsPool.add(desc['value'], '{}', stringvar, self)
-        self.delete('1.0', 'end')
-        self['height'] = 1
-        #self.lock = True
-        #self['yscrollcommand'] = self.setScroll
-        self.__nrows = tkinter.StringVar(value='')
-        #self.__nrows.trace('w', self.delayResize)
-        self.bind('<Map>', self.catchMap)
-        self['yscrollcommand'] = self.dummyScrollCommand
-
-    def catchMap(self, *args):
-        print('catchMap: change height=1', flush=True)
-        self.__nrows.set(value='')
-        #self['height'] = 1
-        #self.resizeHeight()
-        
-        
-    def delayResize(self, *args):
-        print('derayResize:', flush=True)
-        self.after(5000, self.resizeHeight)
-   
-    
+            
     def resizeHeight(self, *args):
-        bwidth = self.font.measure('0' * int(float(self['width'])))
+        pwidth = self.app.font.measure('0' * int(float(self['width'])))
         width = 0
         nlines = 0
         for line in self.get('1.0', 'end-1c').split('\n'):
-            width = max(width, self.font.measure(line))
-            nlines += math.ceil(width / bwidth)
-            print('width={}, bwidth={},  nlines={}'.format(width, bwidth, nlines))
-        nrows = nlines
-        #nrows = self.__nrows.get()
-        #nrows = self.__needsRows
-        print('resizeHeight: nrows={}'.format(repr((nrows))), flush=True)
-        self['height'] = nrows
-        #if nrows != '':
-        #    print('resizeHeight: set height, nrows={}'.format(repr((nrows))), flush=True)
-        #    self['height'] = nrows
-        #else:
-        #    print('resizeHeight: unknown nrows={}'.format(repr((nrows))), flush=True)
-        #self['height'] = 1
-        #self['yscrollcommand'] = None
-        #self['height'] = self.__nrows
-
-    def getDisplayHeight(self):
-        self.__nrows.set('')
-        self['height'] = 1
-        print('getDisplayHeight', flush=True)
-
-    def dummyScrollCommand(self, first, last):
-        first, last = float(first), float(last)
-        nrows = self['height'] / (last - first)
-        self.__needsRows = nrows
-        #current = self.__nrows.get()
-        print('dummyScrollCommand: need={}, height={}, first={}, last={}'.format(nrows, self['height'], first, last), flush=True)
-        #if current != '':
-        #    return
-        #self.__nrows.set(nrows)
-        #print('dummyScrollCommand: need={}, current={}'.format(nrows, self['height']), flush=True)
-
-    def setScroll(self, first, last):
-        if self.lock:
-            return
-        first, last = float(first), float(last)
-        if first == 0.0 and last == 1.0:
-            return
-        nrows = self['height'] / (last - first)
-        if nrows > 8:
-            return
-        self.lock = True
-        self['height'] = nrows
-
+            width = max(width, self.app.font.measure(line))
+            nlines += math.ceil(width / pwidth)
+            #print('width={}, pwidth={},  nlines={}'.format(width, pwidth, nlines))
+        #print('resizeHeight: nrows={}'.format(repr((nrows))), flush=True)
+        self['height'] = nlines
+        
     def callback(self, *args):
         text = self.__stringvar.get()
-        print('callback: len={}, text={}...'.format(len(text), text[:16]), flush=True)
+        #print('callback: len={}, text={}...'.format(len(text), text[:16]), flush=True)
         self.delete('1.0', 'end')
-        #self['height'] = 1
-        #self.lock = False
         self.insert('1.0', text)
-        #self.resize()
-        self.master.update(isNone=(text == ''))
-        #self.__nrows.set('')
-        #self['height'] = 1
-        #self.delayResize()
-        #self.after(1000, lambda : self.yview_moveto(0.0))
-        #self.after(2000, lambda : self.yview_moveto(1.0))
-        #self.after(1000, lambda : self.resizeHeight())
         self.resizeHeight()
+        self.master.update(isNone=(text == ''))
