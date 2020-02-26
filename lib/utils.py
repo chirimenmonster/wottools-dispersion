@@ -22,3 +22,10 @@ def substitute(value, ctx):
         except TypeError as e:
             raise TypeError(e.args[0], value, ctx) from e
     return value
+
+
+class VStatsFormatter(string.Formatter):
+    def format_field(self, value, format_spec):
+        if value is None:
+            return ''
+        return super(VStatsFormatter, self).format_field(value, format_spec)

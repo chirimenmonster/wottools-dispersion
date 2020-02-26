@@ -20,8 +20,9 @@ class GuiApplication(tkinter.Frame):
         self.__titlesdesc = app.settings.guititles
         self.__selectorsdesc = app.settings.guiselectors
 
-        self.font = tkinter.font.Font(family='Arial', size=10, weight='normal')
-        self.option_add('*font', self.font)
+        font = tkinter.font.Font(family='Arial', size=10, weight='normal')
+        self.app.font = font
+        self.option_add('*font', font)
         self.option_add('*background', 'white')
         self.option_add('*relief', 'flat')
         self.master.title('Vehicle Selector')
@@ -58,7 +59,7 @@ class GuiApplication(tkinter.Frame):
     def createDescriptionView(self, master):
         view = tkinter.Frame(master, highlightthickness=1, highlightbackground='gray')
         view.pack(side='top', expand=1, fill='x', padx=8, pady=4)
-        opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':100} }
+        opts = { 'label':{'width':8, 'anchor':'e'}, 'value':{'width':116} }
         self.__vehicleDescs = []
         for entry in self.__titlesdesc:
             widget = SpecViewItem(view, app=self.app, desc=entry, option=opts)
@@ -89,10 +90,10 @@ class GuiApplication(tkinter.Frame):
 
     def changeSpec(self):
         ctx = self.getSelectedValues()
-        for widget in self.specViewWidgets:
-            widget.pack_forget()
+        #for widget in self.specViewWidgets:
+        #    widget.pack_forget()
         self.app.vehicleStatsPool.fetchStats(ctx)
-        result = self.app.vehicleStatsPool.get()
+        #print(self.app.vehicleStatsPool.get(), flush=True)
 
     def getSelectedValues(self):
         source = {

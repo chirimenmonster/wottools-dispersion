@@ -1,9 +1,11 @@
 
+import math
 import string
 from collections import namedtuple
 import tkinter.ttk
 
 from lib.stats import VehicleStats
+from lib.utils import VStatsFormatter
 
 VehicleDisplay = namedtuple('VehicleDisplay', 'tags template textvariable widget')
 
@@ -31,69 +33,55 @@ class VehicleStatsPool(object):
         result = self.app.vd.getVehicleItems(tags, ctx)
         result = VehicleStats(result, schema=self.app.settings.schema)
         for k, v in result.items():
-            if v is None:
-                v = ''
-            self.stats[k] = v.value
+            self.stats[k] = v.value if v is not None else ''
         self.updateDisplay()
     
     def updateDisplay(self):
-        formatter = string.Formatter()
+        formatter = VStatsFormatter()
         for d in self.displays:
-            text = ''
-            n = len(list(filter(lambda x: self.stats[x] is not None, d.tags)))
-            if n > 0:
-                for i, f in enumerate(formatter.parse(d.template)):
-                    literal_text, _, format_spec, _ = f
-                    text += literal_text
-                    if format_spec is None:
-                        continue
-                    value = self.stats[d.tags[i]]
-                    if value is not None:
-                        text += formatter.format_field(value, format_spec)
-            if d.textvariable is not None:
-                d.textvariable.set(text)
-            elif isinstance(d.widget, tkinter.Text):
-                d.widget.delete('1.0', 'end')
-                d.widget['height'] = 1
-                d.widget.lock = False
-                d.widget.insert('1.0', text)
+            args = [ self.stats[k] for k in d.tags ]
+            if len(list(filter(lambda x: x is not None or x == '', args))) == 0:
+                text = ''
             else:
-                raise NotImplementedError
+                text = formatter.vformat(d.template, args, None)
+            d.textvariable.set(text)
 
 
 class SpecViewItem(tkinter.Frame):
     def __init__(self, *args, app=None, desc=None, option={}, **kwargs):
         super(SpecViewItem, self).__init__(*args, **kwargs, borderwidth=0)
-        label = desc.get('label', None)
-        value = desc.get('value', None)
-        unit = desc.get('unit', None)
         self.isPhantom = True if desc.get('attr', None) == 'phantom' else False
-        
+        self.__pack_args = []
+        self.__pack_kwargs = {}
+
+        label = desc.get('label', None)
         widget = LabelItem(self, text=label, **option['label'])
         widget.pack(side='left')
 
-        if desc.get('attr', None) == 'multiline':
-            opt = option['value'].copy()
-            if 'justify' in opt:
-                del opt['justify']
-            widget = ValueTextItem(self, app=app, **opt)
-            widget.pack(side='left', fill='x', expand=1)
-        else:
-            opt = option['value'].copy()
-            widget = ValueItem(self, app=app, **opt)
-            widget.pack(side='left')
-        widget.setValue(desc)
+        value = desc.get('value', None)
+        factory = ValueItemFactory(app)
+        widget = factory.create(self, desc=desc, **option['value'])
+        widget.pack(side='left', fill='x', expand=1)
 
+        unit = desc.get('unit', None)
         if unit is not None:
             widget = UnitItem(self, text=unit, **option['unit'])
             widget.pack(side='left')
 
-    def assignValue(self, value):
-        if value is None:
-            if self.isPhantom:
-                self.pack_forget()
+    def update(self, isNone=False):
+        self.pack_forget()
+        if isNone and self.isPhantom:
+            return
+        self.pack()
+
+    def pack(self, *args, **kwargs):
+        if len(args) == 0 and len(kwargs) == 0:
+            args = self.__pack_args
+            kwargs = self.__pack_kwargs
         else:
-            self.pack()
+            self.__pack_args = args
+            self.__pack_kwargs = kwargs
+        super(SpecViewItem, self).pack(*args, **kwargs)
 
 
 class LabelItem(tkinter.Label):
@@ -101,49 +89,63 @@ class LabelItem(tkinter.Label):
 
 class UnitItem(tkinter.Label):
     pass
-    
+
+
+class ValueItemFactory(object):
+    def __init__(self, app):
+        self.app = app
+        
+    def create(self, *args, desc=None, **kwargs):
+        if desc.get('attr', '') == 'multiline':
+            if 'justify' in kwargs:
+                del kwargs['justify']
+            widget = ValueTextItem(*args, app=self.app, desc=desc, **kwargs)
+        else:
+            widget = ValueItem(*args, app=self.app, desc=desc, **kwargs)
+        return widget
+
+
 class ValueItem(tkinter.Entry):
-    def __init__(self, *args, app=None, **kwargs):
+    def __init__(self, *args, app=None, desc=None, **kwargs):
         super(ValueItem, self).__init__(*args, **kwargs)
         self.app = app
-
-    def setValue(self, desc):
-        value = desc['value']
         template = desc.get('format', '{}')
         stringvar = tkinter.StringVar(value='')
         stringvar.trace('w', self.callback)
         self['textvariable'] = stringvar
         self.__stringvar = stringvar
-        self.app.vehicleStatsPool.add(value, template, stringvar, self)
+        self.app.vehicleStatsPool.add(desc['value'], template, stringvar, self)
+        self.__isSecret = True if 'vehicle:secret' in desc['value'] else False
 
     def callback(self, *args):
-        value = self.__stringvar.get()
-        if value == '':
-            value = None
-        self.master.assignValue(value)
+        text = self.__stringvar.get()
+        self.master.update(isNone=(text == ''))
 
 
 class ValueTextItem(tkinter.Text):
-    def __init__(self, *args, app=None, **kwargs):
+    def __init__(self, *args, app=None, desc=None, **kwargs):
         super(ValueTextItem, self).__init__(*args, **kwargs, height=4)
         self.app = app
+        stringvar = tkinter.StringVar(value='')
+        stringvar.trace('w', self.callback)
+        self.__stringvar = stringvar
+        self.app.vehicleStatsPool.add(desc['value'], '{}', stringvar, self)
+            
+    def resizeHeight(self, *args):
+        pwidth = self.app.font.measure('0' * int(float(self['width'])))
+        width = 0
+        nlines = 0
+        for line in self.get('1.0', 'end-1c').split('\n'):
+            width = max(width, self.app.font.measure(line))
+            nlines += math.ceil(width / pwidth)
+            #print('width={}, pwidth={},  nlines={}'.format(width, pwidth, nlines))
+        #print('resizeHeight: nrows={}'.format(repr((nrows))), flush=True)
+        self['height'] = nlines
+        
+    def callback(self, *args):
+        text = self.__stringvar.get()
+        #print('callback: len={}, text={}...'.format(len(text), text[:16]), flush=True)
         self.delete('1.0', 'end')
-        self.lock = True
-        self['yscrollcommand'] = self.setScroll
-
-    def setValue(self, desc):
-        value = desc['value']
-        self.app.vehicleStatsPool.add(value, '{}', None, self)
-
-    def setScroll(self, first, last):
-        if self.lock:
-            return
-        first, last = float(first), float(last)
-        if first == 0.0 and last == 1.0:
-            return
-        nrows = self['height'] / (last - first)
-        if nrows > 8:
-            return
-        self.lock = True
-        self['height'] = nrows
-
+        self.insert('1.0', text)
+        self.resizeHeight()
+        self.master.update(isNone=(text == ''))
