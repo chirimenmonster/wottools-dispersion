@@ -6,6 +6,7 @@ import tkinter.ttk
 
 from lib.stats import VehicleStats
 from lib.utils import VStatsFormatter
+from lib.textfolding import foldtext
 
 VehicleDisplay = namedtuple('VehicleDisplay', 'tags template textvariable widget')
 
@@ -131,7 +132,9 @@ class ValueTextItem(tkinter.Text):
         self.__stringvar = stringvar
         self.app.vehicleStatsPool.add(desc['value'], '{}', stringvar, self)
             
-    def resizeHeight(self, *args):
+    def resizeHeight(self, nlines):
+        self['height'] = nlines
+        return
         pwidth = self.app.font.measure('0' * int(float(self['width'])))
         width = 0
         nlines = 0
@@ -144,8 +147,12 @@ class ValueTextItem(tkinter.Text):
         
     def callback(self, *args):
         text = self.__stringvar.get()
-        #print('callback: len={}, text={}...'.format(len(text), text[:16]), flush=True)
+        pwidth = self.app.font.measure('0' * int(float(self['width'])))
+        f = lambda x: self.app.font.measure(x) > pwidth
+        lines = foldtext(f, text)
+        self['height'] = len(lines)
+        #print(lines, flush=True)
+        text = '\n'.join(lines)
         self.delete('1.0', 'end')
         self.insert('1.0', text)
-        self.resizeHeight()
         self.master.update(isNone=(text == ''))
