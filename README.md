@@ -6,7 +6,10 @@
 ## GUI
 ### usage
 
-`python gui.py [-d <WoT_game_folder>]`
+gui.py [-h] [-d BASEDIR] [-s SCRIPTSDIR] [-g GUIDIR]
+              [--locale LOCALEDIR] [--schema SCHEMA] [--gui-items GUI_ITEMS]
+              [-v] [--vehicle VEHICLE]
+
 
 ## screenshot
 
