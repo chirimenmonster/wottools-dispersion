@@ -3,6 +3,9 @@ import unittest
 
 from lib import translate as tr
 
+from lib.config import Config
+from lib.application import Application
+
 
 class GettextTestCase(unittest.TestCase):
 
@@ -21,10 +24,9 @@ class GettextTestCase(unittest.TestCase):
 class ApplicationTranslateTestCase(unittest.TestCase):
 
     def setUp(self):
-        from lib.config import Config
-        from lib.application import Application
         config = Config()
         config.localedir = 'test/data/res'
+        config.pkgdir = 'test/data/res/packages'
         self.app = Application()
         self.app.setup(config)
 

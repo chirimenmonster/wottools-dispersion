@@ -12,6 +12,7 @@ class ResourceFactoryTestCase_1(unittest.TestCase):
         config = Config()
         config.pkgdir = 'test/data/res/packages'
         config.schema = 'res/itemschema.json'
+        config.localedir = 'test/data/res'
         self.app = Application()
         self.app.setup(config)
 
@@ -36,6 +37,7 @@ class ResourceFactoryTestCase_2(unittest.TestCase):
         config.guipkg = 'test/data/res/packages/gui.pkg'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
         config.schema = 'res/itemschema.json'
+        config.localedir = 'test/data/res'
         self.app = Application()
         self.app.setup(config)
 

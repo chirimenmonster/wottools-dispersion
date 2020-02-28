@@ -4,7 +4,7 @@ import sys
 
 
 class Config:
-    version = '0.3.1'
+    version = '0.3.2'
     gui = False
     PKG_RELPATH = 'res/packages'
     LOCALE_RELPATH = 'res'
@@ -39,6 +39,7 @@ def parseArgument(mode=None):
     parser.add_argument('-d', dest='basedir', help='specify <WoT_game_folder>')
     parser.add_argument('-s', dest='scriptsdir', help='scripts folder extracted.  ex. "C:/git/wot.scripts/scripts"')
     parser.add_argument('-g', dest='guidir', help='gui folder extracted.  ex. "./test/gui"')
+    parser.add_argument('--locale', dest='localedir', help='locale folder, with "text".  ex. "<WoT_game_folder>/res"')
     parser.add_argument('--schema', dest='schema', help='change itemschema.json')
     parser.add_argument('--gui-items', dest='gui_items', help='change guisettings_items.json')
     parser.add_argument('-v', action='store_true', dest='show_version', help='show version')

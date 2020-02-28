@@ -13,6 +13,7 @@ class MapFactoryTestCase(unittest.TestCase):
         config.guipkg = 'test/data/res/packages/gui.pkg'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
         config.schema = 'res/itemschema.json'
+        config.localedir = 'test/data/res'
         app = Application()
         app.setup(config)
         self.factory = MapFactory(app)

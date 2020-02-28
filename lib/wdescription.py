@@ -6,6 +6,7 @@ import tkinter.ttk
 
 from lib.stats import VehicleStats
 from lib.utils import VStatsFormatter
+from lib.textfolding import TextFolder
 
 VehicleDisplay = namedtuple('VehicleDisplay', 'tags template textvariable widget')
 
@@ -107,7 +108,7 @@ class ValueItemFactory(object):
 
 class ValueItem(tkinter.Entry):
     def __init__(self, *args, app=None, desc=None, **kwargs):
-        super(ValueItem, self).__init__(*args, **kwargs)
+        super(ValueItem, self).__init__(*args, **kwargs, state='readonly', readonlybackground='white')
         self.app = app
         template = desc.get('format', '{}')
         stringvar = tkinter.StringVar(value='')
@@ -124,28 +125,22 @@ class ValueItem(tkinter.Entry):
 
 class ValueTextItem(tkinter.Text):
     def __init__(self, *args, app=None, desc=None, **kwargs):
-        super(ValueTextItem, self).__init__(*args, **kwargs, height=4)
+        super(ValueTextItem, self).__init__(*args, **kwargs, height=4, state='disabled')
         self.app = app
         stringvar = tkinter.StringVar(value='')
         stringvar.trace('w', self.callback)
         self.__stringvar = stringvar
         self.app.vehicleStatsPool.add(desc['value'], '{}', stringvar, self)
-            
-    def resizeHeight(self, *args):
-        pwidth = self.app.font.measure('0' * int(float(self['width'])))
-        width = 0
-        nlines = 0
-        for line in self.get('1.0', 'end-1c').split('\n'):
-            width = max(width, self.app.font.measure(line))
-            nlines += math.ceil(width / pwidth)
-            #print('width={}, pwidth={},  nlines={}'.format(width, pwidth, nlines))
-        #print('resizeHeight: nrows={}'.format(repr((nrows))), flush=True)
-        self['height'] = nlines
         
     def callback(self, *args):
         text = self.__stringvar.get()
-        #print('callback: len={}, text={}...'.format(len(text), text[:16]), flush=True)
+        pwidth = self.app.font.measure('0' * int(float(self['width'])))
+        f = lambda x: self.app.font.measure(x) <= pwidth
+        lines = TextFolder().foldtext(f, text)
+        self['height'] = len(lines)
+        text = '\n'.join(lines)
+        self.configure(state='normal')
         self.delete('1.0', 'end')
         self.insert('1.0', text)
-        self.resizeHeight()
+        self.configure(state='disable')
         self.master.update(isNone=(text == ''))
