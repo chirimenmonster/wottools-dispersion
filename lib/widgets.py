@@ -34,6 +34,15 @@ class GuiApplication(tkinter.Frame):
         self.createSpecView(self.master, self.__itemgroup, None)
         self.createCommandView(self.master)
 
+        if app.config.vehicle is not None:
+            ctx = app.vd.getCtx(app.config.vehicle)
+            self.app.widgets['!nationselector'].selectId(ctx['nation'])
+            self.app.widgets['!tierselector'].selectId(ctx['tier'])
+            self.app.widgets['!vtypeselector'].selectId(ctx['type'])
+            self.app.widgets['!secretselector'].selectId(ctx['secret'])
+            self.app.widgets['!vehicleselector'].updateTable()
+            self.app.widgets['!vehicleselector'].selectId(ctx['vehicle'])
+
         self.app.widgets['!vehicleselector'].onSelected.append(self.changeSpec)
         self.app.widgets['!siegeselector'].onSelected.append(self.changeSpec)
         self.app.widgets['!chassisselector'].onSelected.append(self.changeSpec)
@@ -42,6 +51,7 @@ class GuiApplication(tkinter.Frame):
         self.app.widgets['!radioselector'].onSelected.append(self.changeSpec)
         self.app.widgets['!gunselector'].onSelected.append(self.changeSpec)
         self.app.widgets['!shellselector'].onSelected.append(self.changeSpec)
+        
         self.changeSpec()
 
     def createSelectorBars(self, master):

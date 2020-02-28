@@ -89,12 +89,20 @@ class Selector(tkinter.ttk.Combobox):
         id = self.__table[index].id
         return id
 
+    def selectId(self, id):
+        for i, item in enumerate(self.__table):
+            if item.id == id:
+                break
+            i = None
+        self.current(i)
+
 
 class NationSelector(Selector):
     def updateTable(self):
         nationsOrder = self.app.resource.getValue('settings:nationsOrder')
         table = [ SelectorItem(nation, nation.upper()) for nation in nationsOrder ]
         self.setTable(table)
+
 
 class TierSelector(Selector):
     def __init__(self, *args, **kwargs):
@@ -105,6 +113,10 @@ class TierSelector(Selector):
         tiersLabel = self.app.resource.getValue('settings:tiersLabel')
         table = [ SelectorItem(tier, tiersLabel[tier]) for tier in map(str, tiersOrder) ]
         self.setTable(table)
+
+    def selectId(self, id):
+        super(TierSelector, self).selectId(str(id))
+
 
 class VTypeSelector(Selector):
     def __init__(self, *args, **kwargs):
@@ -121,6 +133,9 @@ class SecretSelector(Selector):
 
     def updateTable(self):
         self.setTable(self.table)
+
+    def selectId(self, id):
+        super(SecretSelector, self).selectId(str(id))
 
 
 class VehicleSelector(Selector):

@@ -12,46 +12,52 @@
                         {
                             "label":    "damage armor",
                             "value":    "shell:damage_armor",
+                            "format":   "{:.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "piercing power",
                             "value":    "shell:piercingPower",
+                            "format":   "{:.0f}",
                             "unit":     "mm"
                         },
                         {
                             "label":    "reload time",
                             "value":    "gun:reloadTime",
+                            "format":   "{:.0f}",
                             "unit":     "s"
                         },
                         {
                             "label":    "dual gun charge time",
                             "value":    "gun:dualGunChargeTime",
-                            "unit":     "s",
                             "format":   "{:.1f}",
+                            "unit":     "s",
                             "attr":     "phantom"
                         },
                         {
                             "label":    "dual gun reload lock time",
                             "value":    "gun:dualGunReloadLockTime",
-                            "unit":     "s",
                             "format":   "{:.1f}",
+                            "unit":     "s",
                             "attr":     "phantom"
                         },
                         {
                             "label":    "clip count",
                             "value":    "gun:clipCount",
+                            "format":   "{:.0f}",
                             "unit":     "pcs",
                             "attr":     "phantom"
                         },
                         {
                             "label":    "clip rate",
+                            "format":   "{:.1f}",
                             "value":    "gun:clipRate",
                             "unit":     "rpm",
                             "attr":     "phantom"
                         },
                         {
                             "label":    "aiming time",
+                            "format":   "{:.1f}",
                             "value":    "gun:aimingTime",
                             "unit":     "s"
                         }
@@ -102,23 +108,27 @@
                         {
                             "label":    "damage devices",
                             "value":    "shell:damage_devices",
+                            "format":   "{:.0f}",
                             "unit":     "HP"
                         },
                         {
                             "label":    "explosion radius",
                             "value":    "shell:explosionRadius",
+                            "format":   "{:.0f}",
                             "unit":     "m",
                             "attr":     "phantom"
                         },
                         {
                             "label":    "stun duration",
                             "value":    "shell:stunDuration",
+                            "format":   "{:.1f}",
                             "unit":     "s",
                             "attr":     "phantom"
                         },
                         {
                             "label":    "caliber",
                             "value":    "shell:caliber",
+                            "format":   "{:.0f}",
                             "unit":     "mm"
                         },
                         {
@@ -130,6 +140,7 @@
                         {
                             "label":    "shell gravity",
                             "value":    "shell:gravity",
+                            "format":   "{:.2f}",
                             "unit":     "m/s2"
                         },  
                         {
@@ -149,11 +160,13 @@
                         {
                             "label":    "speed limits forward",
                             "value":    "vehicle:speedLimits_forward",
+                            "format":   "{:.0f}",
                             "unit":     "km/h"
                         },
                         {
                             "label":    "... backward",
                             "value":    "vehicle:speedLimits_backward",
+                            "format":   "{:.0f}",
                             "unit":     "km/h"
                         },
                         {
@@ -165,15 +178,18 @@
                         {
                             "label":    "terrain resistance hard",
                             "value":    "chassis:terrainResistance_1",
+                            "format":   "{:.1f}",
                             "unit":     ""
                         },
                         {
                             "label":    "... medium",
+                            "format":   "{:.1f}",
                             "value":    "chassis:terrainResistance_2",
                             "unit":     ""
                         },
                         {
                             "label":    "... soft",
+                            "format":   "{:.1f}",
                             "value":    "chassis:terrainResistance_3",
                             "unit":     ""
                         }
