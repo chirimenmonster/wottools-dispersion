@@ -4,7 +4,7 @@ import sys
 
 
 class Config:
-    version = '0.3.1'
+    version = '0.3.2'
     gui = False
     PKG_RELPATH = 'res/packages'
     LOCALE_RELPATH = 'res'
