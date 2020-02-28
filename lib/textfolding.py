@@ -1,36 +1,60 @@
 
 import re
+from collections import namedtuple
 
 
-class CharProperty:
-    UNKNOWN = 0
-    SPACE = 1
-    LATIN = 2
-    CJK = 3
-    HANGLE = 4
-    OTHER_ASIAN = 5
-    SYMBOL = 6
-    SYMBOL_PREFIX = 7
-    SYMBOL_SUFFIX = 8
-    CJK_PREFIX = 9
-    CJK_SUFFIX = 10
-    
+class ProhibitationPropertySet:
+    OTHERS          = 0
+    SEPARATION      = 1
+    NOT_START       = 2
+    NOT_END         = 3
+    NOT_SEPARATION  = 4
+
     pattern = {
-        SPACE:  [
+        SEPARATION: [
             r'[\s\r\n]'
         ],
-        SYMBOL_PREFIX: [
-            r'[\[({]'
+        NOT_START: [
+            r'[,.\])}]',
+            r'[、。，．・：；）｝〕〉》」』】〙〗〟’”｠»]'
         ],
-        SYMBOL_SUFFIX: [
-            r'[,.\])}]'
-        ],
-        CJK_PREFIX: [
-            r'[（｛]'
-        ],
-        CJK_SUFFIX: [
-            r'[、。，）｝]'
-        ],
+        NOT_END: [
+            r'[\[({]',
+            r'[（｛〔〈《「『【〘〖〝‘“｟«]'
+        ]
+    }
+
+    inseparable = [
+        (OTHERS,            NOT_START       ),
+        (SEPARATION,        NOT_START       ),
+        (NOT_START,         NOT_START       ),
+        (NOT_END,           NOT_START       ),
+        (NOT_SEPARATION,    NOT_START       ),
+        (NOT_END,           OTHERS          ),
+        (NOT_END,           SEPARATION      ),
+        (NOT_END,           NOT_START       ),
+        (NOT_END,           NOT_END         ),
+        (NOT_END,           NOT_SEPARATION  ),
+    ]
+
+    separable = [
+        (SEPARATION,        SEPARATION      ),
+        (SEPARATION,        OTHERS          ),
+        (SEPARATION,        NOT_END         ),
+        (OTHERS,            SEPARATION      ),
+        (NOT_START,         SEPARATION      ),
+    ]
+
+class CharacterPropertySet:
+    UNKNOWN         = 0
+    LATIN           = 1
+    CJK             = 2
+    HANGLE          = 3
+    THAI_V          = 4
+    THAI_C          = 5
+    SYMBOL          = 6
+
+    pattern = {
         SYMBOL: [
             r'[\u2000-\u206F]'                  # General Punctuation
         ],
@@ -53,137 +77,114 @@ class CharProperty:
         HANGLE: [
             r'[\uAC00-\uD7AF]'                  # Hangul Syllables
         ],
-        OTHER_ASIAN:  [
-            r'[\u0E00-\u0E7F]',                 # Thai
-            r'[\uAA80-\uAADF]'                  # Thai Viet
+        THAI_V:  [
+            r'[\u0E31\u0E33-\u0E3A\u0E47-\u0E4E]',  # Thai (Vowels)
+        ],
+        THAI_C:  [
+            r'[\u0E00-\u0E7F]',                 # Thai (Consonant)
         ]
     }
-    width = {
-        SPACE:          1,
+    
+    inseparable = [
+        (LATIN,     LATIN   ),
+        (HANGLE,    HANGLE  ),
+        (THAI_C,    THAI_V  ),
+        (THAI_V,    THAI_V  )
+    ]
+    
+    widthHint = {
         SYMBOL:         1,
-        SYMBOL_PREFIX:  1,
-        SYMBOL_SUFFIX:  1,
         LATIN:          1,
         CJK:            2,
-        CJK_PREFIX:     2,
-        CJK_SUFFIX:     2,
         HANGLE:         2,
-        OTHER_ASIAN:    1
+        THAI_C:         1
     }
+    
+    @classmethod
+    def width(self, property, char):
+        if property in self.widthHint:
+            return self.widthHint[property]
+        if property == self.THAI_V:
+            if re.match(r'[\u0E33]', char):
+                return 1
+            else:
+                return 0
+        raise NotImplementedError
 
 
-def getCharProperty(char):
-    for property, patterns in CharProperty.pattern.items():
-        for pattern in patterns:
-            if re.match(pattern, char):
-                return property
-    return CharProperty.UNKNOWN
+characterProperty = namedtuple('CharacterProperty', 'char prohibit')
 
-def enableSplit(a, b):
-    pa, pb = getCharProperty(a), getCharProperty(b)
-    if pa == CharProperty.SPACE or pb == CharProperty.SPACE:
-        return True
-    elif pa == CharProperty.SYMBOL_PREFIX:
-        return False
-    elif pa == CharProperty.SYMBOL_SUFFIX:
-        if pb == CharProperty.SYMBOL_PREFIX:
+class TextFolder(object):
+
+    def getProhibitationProperty(self, char):
+        for property, patterns in ProhibitationPropertySet.pattern.items():
+            for regex in patterns:
+                if re.match(regex, char):
+                    return property
+        return ProhibitationPropertySet.OTHERS
+
+    def getCharacterProperty(self, char):
+        for property, patterns in CharacterPropertySet.pattern.items():
+            for regex in patterns:
+                if re.match(regex, char):
+                    return property
+        return CharacterPropertySet.UNKNOWN
+
+    def getProperty(self, char):
+        return characterProperty(self.getCharacterProperty(char), self.getProhibitationProperty(char))
+
+    def getCharacterWidth(self, char):
+        return CharacterPropertySet.width(self.getCharacterProperty(char), char)
+
+    def enableSplit(self, a, b):
+        pa, pb = self.getProperty(a), self.getProperty(b)
+        if (pa.prohibit, pb.prohibit) in ProhibitationPropertySet.inseparable:
+            return False
+        if (pa.prohibit, pb.prohibit) in ProhibitationPropertySet.separable:
             return True
-        elif pb == CharProperty.SYMBOL_SUFFIX:
-            return False
-        elif pb == CharProperty.LATIN:
-            return False
-        elif pb == CharProperty.CJK:
-            return False
-        elif pb == CharProperty.OTHER_ASIAN:
-            return False
-    elif pa == CharProperty.SYMBOL:
-        if pb == CharProperty.LATIN:
+        if (pa.char, pb.char) in CharacterPropertySet.inseparable:
             return False
         return True
-    elif pa == CharProperty.LATIN:
-        if pb == CharProperty.SYMBOL_PREFIX:
-            return True
-        elif pb == CharProperty.SYMBOL_SUFFIX:
-            return False
-        elif pb == CharProperty.SYMBOL:
-            return False
-        elif pb == CharProperty.CJK_SUFFIX:
-            return False
-        elif pb == CharProperty.LATIN:
-            return False
-        elif pb == CharProperty.CJK:
-            return False
-        elif pb == CharProperty.HANGLE:
-            return False
-        elif pb == CharProperty.OTHER_ASIAN:
-            return False
-    elif pa == CharProperty.CJK_PREFIX:
-        return False
-    elif pa == CharProperty.CJK_SUFFIX:
-        if pb == CharProperty.CJK_SUFFIX:
-            return False
-        return True
-    elif pa == CharProperty.CJK:
-        if pb == CharProperty.SYMBOL_SUFFIX:
-            return False
-        elif pb == CharProperty.CJK_SUFFIX:
-            return False
-        return True
-    elif pa == CharProperty.HANGLE:
-        if pb == CharProperty.SYMBOL_PREFIX:
-            return True
-        elif pb == CharProperty.SYMBOL_SUFFIX:
-            return False
-        elif pb == CharProperty.CJK_SUFFIX:
-            return False
-        elif pb == CharProperty.HANGLE:
-            return False
-        elif pb == CharProperty.LATIN:
-            return False
-        return True
-    elif pa == CharProperty.OTHER_ASIAN:
-        if pb == CharProperty.SYMBOL_SUFFIX:
-            return False
-        return True
-    else:
-        pass
-    raise NotImplementedError('a="{}"({}, {}), b="{}"({}, {})'.format(a, pa, hex(ord(a)), b, pb, hex(ord(b))))
 
-def splitText(text):
-    for i in range(len(text) - 1):
-        if enableSplit(text[i], text[i+1]):
-            return text[:i+1], text[i+1:]
-    return text, None
+    def splitText(self, text):
+        for i in range(len(text) - 1):
+            if self.enableSplit(text[i], text[i+1]):
+                return text[:i+1], text[i+1:]
+        return text, None
 
-def splitAll(text):
-    result = []
-    while True:
-        s, text = splitText(text)
-        result.append(s)
-        if text is None:
-            break
-    return result
+    def splitTextAll(self, text):
+        result = []
+        while True:
+            s, text = self.splitText(text)
+            result.append(s)
+            if text is None:
+                break
+        return result
 
-def getDisplayWidth(text):
-    return sum(map(lambda x: CharProperty.width[getCharProperty(x)], text))
+    
+    def getDisplayWidth(self, text):
+        return sum(map(self.getCharacterWidth, text))
 
-
-def foldtext(func, text):
-    tokens = splitAll(text)
-    result = []
-    line = ''
-    for t in tokens:
-        if func(line + t):
-            result.append(line)
-            line = t if t != ' ' else ''
-        else:
-            line += t
-    result.append(line)
-    return result
-
+    def foldtext(self, criteria, text):
+        if isinstance(criteria, int):
+            criteria = lambda x, w=criteria: self.getDisplayWidth(x) <= w
+        result = []
+        line = ''
+        for token in self.splitTextAll(text):
+            if not criteria(line + token):
+                result.append(line)
+                if self.getProhibitationProperty(token) == ProhibitationPropertySet.SEPARATION:
+                    line = ''
+                else:
+                    line = token
+            else:
+                line += token
+        result.append(line)
+        return result
 
 
 if __name__ == '__main__':
+
     TEST_DATA_JA = (u'1943 年における T-34 戦車の最終型です。3 人用の新型砲塔により、より強力な 85 mm 砲の'
         u'搭載を実現し、前型である T-34-76 に比べて大幅に戦力が向上していました。数種類の派生型を合わせて合計 35,000 '
         u'両以上が生産されており、一部の国々では今も現役車輌として配備されています。' )
@@ -222,23 +223,18 @@ if __name__ == '__main__':
         u'tempur tank dibandingkan dengan pendahulunya, T-34-76. Total lebih dari 35,000, '
         u'dalam beberapa varian, diproduksi. Saat ini tank masih masuk layanan militer di '
         u'beberapa negara.' )
-    f = lambda x: getDisplayWidth(x) > 72
-    print()
-    print('\n'.join(foldtext(f, TEST_DATA_JA)), '\n')
-    print('\n'.join(foldtext(f, TEST_DATA_EN)), '\n')
-    print('\n'.join(foldtext(f, TEST_DATA_RU)), '\n')
-    print('\n'.join(foldtext(f, TEST_DATA_TW)), '\n')
-    print('\n'.join(foldtext(f, TEST_DATA_KR)), '\n')
-    #print('\n'.join(foldtext(f, TEST_DATA_THAI)), '\n')
-    #print('\n'.join(foldtext(f, TEST_DATA_VIET)), '\n')
-    #print('\n'.join(foldtext(f, TEST_DATA_INDONESIA)), '\n')
-    
-    #for s in fold(f, TEST_DATA_TW):
-    #    print(hex(ord(s[-1])))
-    #    print('{}: "{}"'.format(getDisplayWidth(s), s))
 
-    #for c in TEST_DATA_TW:
-    #    p = getCharProperty(c)
-    #    w = CharProperty.width[p]
-    #    print('"{}", property={}, width={}'.format(c, p, w))
- 
+    folder = TextFolder()
+    print()
+    print('\n'.join(folder.foldtext(72, TEST_DATA_JA)), '\n')
+    print('\n'.join(folder.foldtext(72, TEST_DATA_EN)), '\n')
+    print('\n'.join(folder.foldtext(72, TEST_DATA_RU)), '\n')
+    print('\n'.join(folder.foldtext(72, TEST_DATA_TW)), '\n')
+    print('\n'.join(folder.foldtext(72, TEST_DATA_KR)), '\n')
+    print('\n'.join(folder.foldtext(72, TEST_DATA_TH)), '\n')
+    print('\n'.join(folder.foldtext(72, TEST_DATA_VN)), '\n')
+    print('\n'.join(folder.foldtext(72, TEST_DATA_ID)), '\n')
+    
+    #for token in folder.splitTextAll(TEST_DATA_TH):
+    #    print('"{}": ({}), ({}), {}'.format(token, len(token), folder.getDisplayWidth(token),
+    #        list(map(lambda x: hex(ord(x)), token))))

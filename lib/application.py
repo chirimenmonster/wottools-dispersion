@@ -66,7 +66,8 @@ class Application(object):
         scriptsdir = config.scriptsdir
         guidir = config.guidir
         scriptspkg = config.scriptspkg
-        vpath = VPath(pkgdir=pkgdir, scriptsdir=scriptsdir, guidir=guidir, scriptspkg=scriptspkg)
+        guipkg = config.guipkg
+        vpath = VPath(pkgdir=pkgdir, scriptsdir=scriptsdir, guidir=guidir, scriptspkg=scriptspkg, guipkg=guipkg)
         return vpath
 
     def setupGettext(self, config):

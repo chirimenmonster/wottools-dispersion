@@ -11,6 +11,7 @@ class VehicleInfoTestCase(unittest.TestCase):
         config = Config()
         config.guipkg = 'test/data/res/packages/gui.pkg'
         config.scriptspkg = 'test/data/res/packages/scripts.pkg'
+        config.localedir = 'test/data/res'
         config.schema = 'res/itemschema.json'
         self.app = Application()
         self.app.setup(config)

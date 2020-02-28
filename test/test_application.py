@@ -16,7 +16,7 @@ class ApplicationTestCase(unittest.TestCase):
         vpath = app.setupVPath(config)
         result = vpath.getPathInfo('gui/gui_settings.xml')
         self.assertEqual('gui/gui_settings.xml', result.path)
-        self.assertEqual('gui.pkg', result.pkg)
+        self.assertEqual('test/data/res/packages/gui.pkg', result.pkg)
 
 if __name__ == '__main__':
     unittest.main()

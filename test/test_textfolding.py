@@ -1,7 +1,7 @@
 
 import unittest
 
-from lib.textfolding import CharProperty, splitAll, foldtext, getDisplayWidth, getCharProperty
+from lib.textfolding import TextFolder, CharacterPropertySet, ProhibitationPropertySet
 
 
 TEST_DATA_JA = (
@@ -70,37 +70,48 @@ RESULT_FOLDING_TEXT_RU = [
     u'ряда стран.' ]
 
 
-class FoldingTestCase(unittest.TestCase):
+class TextFolderTestCase(unittest.TestCase):
 
-    def test_getCharProperty(self):
-        self.assertEqual(CharProperty.SPACE, getCharProperty(' '))
-        self.assertEqual(CharProperty.LATIN, getCharProperty('3'))
-        self.assertEqual(CharProperty.LATIN, getCharProperty('A'))
-        self.assertEqual(CharProperty.CJK, getCharProperty('漢字'))
-        self.assertEqual(CharProperty.CJK, getCharProperty('ひらがな'))
-        self.assertEqual(CharProperty.CJK, getCharProperty('カタカナ'))
-        self.assertEqual(CharProperty.SYMBOL_PREFIX, getCharProperty('('))
-        self.assertEqual(CharProperty.SYMBOL_SUFFIX, getCharProperty(')'))
-        self.assertEqual(CharProperty.SYMBOL_SUFFIX, getCharProperty('.'))
-        self.assertEqual(CharProperty.SYMBOL_SUFFIX, getCharProperty(','))
-        self.assertEqual(CharProperty.CJK_PREFIX, getCharProperty('（'))
-        self.assertEqual(CharProperty.CJK_SUFFIX, getCharProperty('）'))
-        self.assertEqual(CharProperty.CJK_SUFFIX, getCharProperty('。'))
-        self.assertEqual(CharProperty.CJK_SUFFIX, getCharProperty('、'))
+    def test_getProperty(self):
+        f = TextFolder()
+        C = CharacterPropertySet
+        P = ProhibitationPropertySet
+        self.assertEqual((C.LATIN, P.SEPARATION), f.getProperty(' '))
+        self.assertEqual((C.LATIN, P.OTHERS), f.getProperty('3'))
+        self.assertEqual((C.LATIN, P.OTHERS), f.getProperty('A'))
+        self.assertEqual((C.CJK, P.OTHERS), f.getProperty('漢字'))
+        self.assertEqual((C.CJK, P.OTHERS), f.getProperty('ひらがな'))
+        self.assertEqual((C.CJK, P.OTHERS), f.getProperty('カタカナ'))
+        self.assertEqual((C.LATIN, P.NOT_END), f.getProperty('('))
+        self.assertEqual((C.LATIN, P.NOT_START), f.getProperty(')'))
+        self.assertEqual((C.LATIN, P.NOT_START), f.getProperty('.'))
+        self.assertEqual((C.LATIN, P.NOT_START), f.getProperty(','))
+        self.assertEqual((C.CJK, P.NOT_END), f.getProperty('（'))
+        self.assertEqual((C.CJK, P.NOT_START), f.getProperty('）'))
+        self.assertEqual((C.CJK, P.NOT_START), f.getProperty('。'))
+        self.assertEqual((C.CJK, P.NOT_START), f.getProperty('、'))
 
+    def test_splitTextAll(self):
+        f = TextFolder()
+        self.assertEqual(RESULT_DATA_JA, f.splitTextAll(TEST_DATA_JA))
+        self.assertEqual(RESULT_DATA_EN, f.splitTextAll(TEST_DATA_EN))
+        self.assertEqual(RESULT_DATA_RU, f.splitTextAll(TEST_DATA_RU))
 
-class SplitTestCase(unittest.TestCase):
+    def test_foldText(self):
+        f = TextFolder()
+        self.assertEqual(RESULT_FOLDING_TEXT_JA, f.foldtext(60, TEST_DATA_JA))
+        self.assertEqual(RESULT_FOLDING_TEXT_EN, f.foldtext(60, TEST_DATA_EN))
+        self.assertEqual(RESULT_FOLDING_TEXT_RU, f.foldtext(60, TEST_DATA_RU))
 
-    def test_splitAll(self):
-        self.assertEqual(RESULT_DATA_JA, splitAll(TEST_DATA_JA))
-        self.assertEqual(RESULT_DATA_EN, splitAll(TEST_DATA_EN))
-        self.assertEqual(RESULT_DATA_RU, splitAll(TEST_DATA_RU))
+    def test_getDisplayWidth(self):
+        f = TextFolder()
+        data = u'1943 年における T-34 戦車の最終型です。'
+        self.assertEqual((39, 25), (f.getDisplayWidth(data), len(data)))
 
-
-class FoldTestCase(unittest.TestCase):
-
-    def test_fold(self):
-        f = lambda x: getDisplayWidth(x) > 60
-        self.assertEqual(RESULT_FOLDING_TEXT_JA, foldtext(f, TEST_DATA_JA))
-        self.assertEqual(RESULT_FOLDING_TEXT_EN, foldtext(f, TEST_DATA_EN))
-        self.assertEqual(RESULT_FOLDING_TEXT_RU, foldtext(f, TEST_DATA_RU))
+    def test_getDisplayWidth_Thai(self):
+        f = TextFolder()
+        data = [ u'น', u'ดั', u'รุ่', u'จำ' ]
+        self.assertEqual((1, 1), (f.getDisplayWidth(data[0]), len(data[0])))    # 1 chars
+        self.assertEqual((1, 2), (f.getDisplayWidth(data[1]), len(data[1])))    # 2 chars
+        self.assertEqual((1, 3), (f.getDisplayWidth(data[2]), len(data[2])))    # 3 chars
+        self.assertEqual((2, 2), (f.getDisplayWidth(data[3]), len(data[3])))    # 2 chars
