@@ -9,7 +9,9 @@
 `python gui.py [-d <WoT_game_folder>]`
 
 ## screenshot
-![image](https://user-images.githubusercontent.com/11075065/36062614-3dbf6e8e-0eb3-11e8-97bc-133baef1d1df.png)
+
+![image](https://user-images.githubusercontent.com/11075065/75545977-f7e16b00-5a6a-11ea-80b7-e2b1b2be5546.png)
+
 
 ## commandline tool
 ### usage
