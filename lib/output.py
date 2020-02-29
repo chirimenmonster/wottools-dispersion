@@ -11,12 +11,14 @@ def outputValues(records, shows=None, headers=None, option=None):
         shows = shows.split(',')
     if isinstance(headers, str):
         headers = headers.split(',')
-    if option and option.output_csv:
+    if option.output_type == 'csv':
         result = getOutputCsv(records, shows, headers, option)
-    elif option and option.output_json:
+    elif option.output_type == 'json':
         result = getOutputJson(records, shows, headers, option)
-    else:
+    elif option.output_type == 'text':
         result = getOutputText(records, shows, headers, option)
+    else:
+        raise NotImplementedError
     print(result, end='')
 
 

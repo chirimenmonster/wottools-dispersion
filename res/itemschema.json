@@ -173,12 +173,7 @@
             {
                 "file":     "vehicles/{nation}/list.xml",
                 "xpath":    "{vehicle}/shortUserString"
-            },
-            {
-                "file":     "vehicles/{nation}/list.xml",
-                "xpath":    "{vehicle}/userString"
             }
-
         ]
     },
     "vehicle:displayString": {

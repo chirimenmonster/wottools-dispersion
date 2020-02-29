@@ -56,7 +56,7 @@ defaultargs = {
 
 
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s')
     logger = logging.getLogger(__name__)
     logger.addHandler(logging.StreamHandler())
@@ -73,7 +73,15 @@ if __name__ == '__main__':
         print(result)
     elif config.list_type:
         result = app.resource.getValue('settings:typesOrder')
-        print(result)    
+        print(result)
+    elif config.list_tag:
+        result = app.settings.schema.keys()
+        def f(pattern, string):
+            match = re.search(pattern, string)
+            return match
+        result = filter(lambda x,p=config.list_tag: f(p, x), result)
+        for r in result:
+            print(r)
     elif config.vehicle:
         vehicles = config.vehicle
         modules = config.list_module
@@ -92,13 +100,5 @@ if __name__ == '__main__':
                 headers = default['header']
         result = queryVehicleModule(app, vehicles, modules, showtags, sort=sorttags)
         outputValues(result, shows=showtags, headers=headers, option=config)
-    elif config.list_tag:
-        result = app.schema.keys()
-        def f(pattern, string):
-            match = re.search(pattern, string)
-            return match
-        result = filter(lambda x,p=config.list_tag: f(p, x), result)
-        for r in result:
-            print(r)
     else:
         raise ValueError
