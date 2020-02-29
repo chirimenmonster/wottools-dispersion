@@ -24,35 +24,31 @@ class Application(object):
     def setup(self, config):
         if config.basedir is None:
             config.basedir = guessBasedir()
-        if config.localedir is None:
-            config.localedir = os.path.join(config.basedir, config.LOCALE_RELPATH)
-        if config.schema is None:
-            config.schema = 'res/itemschema.json'
-        self.settings = self.setupSettings(config)
         self.config = config
-        self.schema = self.settings.schema
-        vpath = self.setupVPath(config)
-        strage = Strage()
+        self.settings = self.setupSettings(config)
         self.gettext = self.setupGettext(config)
-        self.resource = Resource(self, strage, vpath, self.schema, gettext=self.gettext)
-        self.vd = VehicleDatabase()
-        self.vd.setup(self.resource)
-        self.dropdownlist = None
+        self.resource = self.setupResource(config, schema=self.settings.schema, gettext=self.gettext)
+        self.vd = self.setupDatabase(resource=self.resource)
+
         orders = ('settings:nationsOrder', 'settings:tiersOrder', 'settings:typesOrder', 'settings:tiersLabel')
         self.settings.addDict('orders', { k:self.resource.getValue(k) for k in orders })
-
+        if config.gui:
+            self.dropdownlist = None
 
     def setupSettings(self, config):
+        scriptpath = os.path.join(os.path.dirname(__file__), '..')
         if config.schema is None:
-            schemapath = 'res/itemschema.json'
+            schemapath = os.path.join(scriptpath, 'res/itemschema.json')
         else:
+            if config.schema is not None and not os.path.isfile(config.schema):
+                raise FileNotFoundError('not found schema file: {}'.format(config.schema))
             schemapath = config.schema
         settings = Settings()
         settings.add('schema', schemapath)
         if config.gui:
-            settings.add('guiitems', 'res/guisettings_items.json')
-            settings.add('guititles', 'res/guisettings_titles.json')
-            settings.add('guiselectors', 'res/guisettings_selectors.json')
+            settings.add('guiitems', os.path.join(scriptpath, 'res/guisettings_items.json'))
+            settings.add('guititles', os.path.join(scriptpath, 'res/guisettings_titles.json'))
+            settings.add('guiselectors', os.path.join(scriptpath, 'res/guisettings_selectors.json'))
         return settings
         
     def setupVPath(self, config):
@@ -67,22 +63,39 @@ class Application(object):
         guidir = config.guidir
         scriptspkg = config.scriptspkg
         guipkg = config.guipkg
+        if pkgdir is not None and not os.path.isdir(pkgdir):
+            raise FileNotFoundError('not found pkgdir: {}'.format(pkgdir))
+        if scriptsdir is not None and not os.path.isdir(scriptsdir):
+            raise FileNotFoundError('not found scriptsdir: {}'.format(scriptsdir))
+        if guidir is not None and not os.path.isdir(guidir):
+            raise FileNotFoundError('not found guidir: {}'.format(guidir))
+        if scriptspkg is not None and not os.path.isfile(scriptspkg):
+            raise FileNotFoundError('not found scriptspkg: {}'.format(scriptspkg))
+        if guipkg is not None and not os.path.isfile(guipkg):
+            raise FileNotFoundError('not found guipkg: {}'.format(guipkg))
         vpath = VPath(pkgdir=pkgdir, scriptsdir=scriptsdir, guidir=guidir, scriptspkg=scriptspkg, guipkg=guipkg)
         return vpath
 
     def setupGettext(self, config):
         if config.localedir is None:
-            pkgdir = '/'.join([config.basedir, config.LOCALE_RELPATH])
-        gettext = Gettext(localedir=config.localedir)
+            localedir = os.path.join(config.basedir, config.LOCALE_RELPATH)
+        else:
+            localedir = config.localedir
+        if not os.path.isdir(localedir):
+            raise FileNotFoundError('not found localedir: {}'.format(localedir))
+        gettext = Gettext(localedir=localedir)
         return gettext
 
-    def setupGuiConfig(self, config):
-        with open(self.guisettings_items, 'r') as fp:
-            self.itemgroup = json.load(fp)
-        with open('res/guisettings_titles.json', 'r') as fp:
-            self.titlesdesc = json.load(fp)
-        with open('res/guisettings_selectors.json', 'r') as fp:
-            self.selectorsdesc = json.load(fp)
+    def setupResource(self, config, schema=None, gettext=None):
+        vpath = self.setupVPath(config)
+        strage = Strage()
+        resource = Resource(app=self, strage=strage, vpath=vpath, schema=schema, gettext=gettext)
+        return resource
+
+    def setupDatabase(self, resource=None):
+        vd = VehicleDatabase()
+        vd.setup(resource)
+        return vd
 
 
 class Settings(object):

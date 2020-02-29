@@ -18,6 +18,18 @@ class ApplicationTestCase(unittest.TestCase):
         self.assertEqual('gui/gui_settings.xml', result.path)
         self.assertEqual('test/data/res/packages/gui.pkg', result.pkg)
 
+    def test_setupGettext(self):
+        config = Config()
+        config.localedir = 'missing'
+        app = Application()
+        self.assertRaises(FileNotFoundError, app.setupGettext, config)
+
+    def test_setupSettings(self):
+        config = Config()
+        config.schema = 'missing'
+        app = Application()
+        self.assertRaisesRegex(FileNotFoundError, r'not found schema file: ', app.setupSettings, config)
+
 if __name__ == '__main__':
     unittest.main()
     

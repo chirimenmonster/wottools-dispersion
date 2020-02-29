@@ -48,14 +48,14 @@ def queryVehicleModule(app, vehicles, modules, params, sort=None):
 
     showtags = params.split(',') if params is not None else []
     showtags = list(filter(None, showtags))
-    unknowntag = list(filter(lambda x: x not in app.schema, showtags))
+    unknowntag = list(filter(lambda x: x not in app.settings.schema, showtags))
     if len(unknowntag) > 0:
         sys.stderr.write('unknwon show tags: {}\n'.format(', '.join(map(repr, unknowntag))))
         sys.exit(1)
     sortkeys = sort.split(',') if sort is not None else []
     sortkeys = list(filter(None, sortkeys))
     sorttags = list(map(lambda x:x.strip('-'), sortkeys))
-    unknowntag = list(filter(lambda x: x not in app.schema, sorttags))
+    unknowntag = list(filter(lambda x: x not in app.settings.schema, sorttags))
     if len(unknowntag) > 0:
         sys.stderr.write('unknwon sort tags: {}\n'.format(', '.join(map(repr, unknowntag))))
         sys.exit(1)

@@ -13,7 +13,7 @@ logger.setLevel(logging.WARNING)
 
 class Resource(object):
 
-    def __init__(self, app, strage, vpath, schema, gettext=None):
+    def __init__(self, app=None, strage=None, vpath=None, schema=None, gettext=None):
         self.__app = app
         self.__strage = strage
         self.__vpath = vpath
