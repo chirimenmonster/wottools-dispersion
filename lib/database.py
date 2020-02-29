@@ -25,18 +25,22 @@ class VehicleDatabase(object):
             ctx['id'] = int(self.resource.getValue('vehicle:id', ctx))
             ctx['tier'] = int(self.resource.getValue('vehicle:tier', ctx))
             ctx['type'] = self.resource.getValue('vehicle:type', ctx)
-            ctx['secret'] = True if self.resource.getValue('vehicle:secret', ctx) else False
+            ctx['secret'] = True if self.resource.getValue('vehicle:secret', ctx) == 'secret' else False
             tag = VehicleTag(**ctx)
             self.__keys.append(tag)
             self.__indexes[tag.vehicle] = tag
 
     def getCtx(self, vehicle):
-        result = self.__indexes.get(vehicle, VehicleTag())
+        #result = self.__indexes.get(vehicle, VehicleTag())
+        result = self.__indexes.get(vehicle, None)
+        if result is None:
+            return None
         return result._asdict()
 
     def getVehicleCtx(self, vehicleSpec=None):
         if isinstance(vehicleSpec, list):
             result = [ self.getCtx(v) for v in vehicleSpec ]
+            result = list(filter(lambda x: x is not None, result))
             return result
         if vehicleSpec is None:
             vehicleSpec = VehicleSpec()
@@ -79,9 +83,10 @@ class VehicleDatabase(object):
         return result
 
     def getModuleCtx(self, vehicle, moduleSpec=None):
-        ctxs = [ self.getCtx(vehicle) ]
-        if len(ctxs) == 0:
-            return ctxs
+        ctx = self.getCtx(vehicle)
+        if ctx is None:
+            return []
+        ctxs = [ ctx ]
         for module in MODULE_SELECTABLE:
             attr = getattr(moduleSpec, module) if moduleSpec is not None else None
             if attr is None:

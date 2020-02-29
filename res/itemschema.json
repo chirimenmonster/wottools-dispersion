@@ -208,7 +208,7 @@
         ]
     },
     "vehicle:secret": {
-        "map":     { "secret": "secret" },
+        "map":     { "secret": "secret", "": "" },
         "resources": [
             {
                 "file":     "vehicles/{nation}/list.xml",

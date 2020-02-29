@@ -3,7 +3,6 @@
 import logging
 import os
 import sys
-import io
 import re
 
 from lib.config import parseArgument
@@ -57,11 +56,7 @@ defaultargs = {
 
 
 
-if __name__ == '__main__':
-    sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-    
+if __name__ == '__main__':    
     logging.basicConfig(format='%(levelname)s: %(name)s: %(message)s')
     logger = logging.getLogger(__name__)
     logger.addHandler(logging.StreamHandler())
@@ -79,8 +74,8 @@ if __name__ == '__main__':
     elif config.list_type:
         result = app.resource.getValue('settings:typesOrder')
         print(result)    
-    elif config.list_vehicle:
-        vehicles = config.list_vehicle
+    elif config.vehicle:
+        vehicles = config.vehicle
         modules = config.list_module
         showtags = config.show_params
         headers = config.show_headers
@@ -89,7 +84,7 @@ if __name__ == '__main__':
             if len(vehicles.split(':')) == 4:
                 default = defaultargs.get(modules, defaultargs['secret'])
             else:
-                default = defaultargs.get(modules, defaultargs['empty'])                
+                default = defaultargs.get(modules, defaultargs['empty'])
             showtags = default['show']
             if sorttags is None:
                 sorttags = default['sort']

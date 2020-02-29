@@ -20,7 +20,7 @@ class VehicleStatsCollection(list):
             super(VehicleStatsCollection, self).sort(key=lambda x: x[key].order, reverse=reverse)
 
     def removeEmpty(self):
-        f = lambda x: x.orig is None or x.value == ''
+        f = lambda x: x.orig is None
         g = lambda y: True in map(f, y.values())
         emptyList = list(filter(g, self))
         for emptyRecord in emptyList:

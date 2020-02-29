@@ -42,7 +42,13 @@ class MapDict(MapMeta):
             return None
         result = value.split()
         result = list(filter(None, map(lambda x: self.desc.get(x, None), result)))
-        result = ' '.join(result)
+        if len(result) == 0:
+            if '' in self.desc:
+                result = self.desc['']
+            else:
+                result = None
+        else:
+            result = ' '.join(result)
         return result
 
 class MapRoman(MapMeta):

@@ -67,7 +67,11 @@ class ResourceTestCase(unittest.TestCase):
         expect = {'1':'I', '2':'II', '3':'III', '4':'IV', '5': 'V',
                     '6':'VI', '7':'VII', '8':'VIII', '9':'IX', '10':'X' }
         self.assertEqual(expect, result)
-         
+
+    def test_resource_secret(self):
+        result = self.resource.getValue('vehicle:secret', self.ctx)
+        print('result={}'.format(repr(result)))
+    
 
 if __name__ == '__main__':
     unittest.main()

@@ -35,7 +35,7 @@ class SchemaTestCase(unittest.TestCase):
         self.assertEqual(None, self.resource.getValue('vehicle:shortUserString', self.ctx))
         self.assertEqual('T-34', self.resource.getValue('vehicle:displayString', self.ctx))
         self.assertEqual('', self.resource.getValue('vehicle:secret', self.ctx))
-        self.assertEqual('', self.resource.getValue('vehicle:siegeMode', self.ctx))
+        self.assertEqual(None, self.resource.getValue('vehicle:siegeMode', self.ctx))
         self.assertEqual('MT', self.resource.getValue('vehicle:type', self.ctx))
         self.assertEqual(['T-34_mod_1941', 'T-34_mod_1943'], self.resource.getValue('vehicle:chassis', self.ctx))
         self.assertEqual(['T-34_mod_1940', 'T-34_mod_1942'], self.resource.getValue('vehicle:turrets', self.ctx))

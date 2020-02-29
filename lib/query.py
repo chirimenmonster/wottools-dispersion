@@ -23,7 +23,7 @@ def queryVehicleModule(app, vehicles, modules, params, sort=None):
             elif secrets == '':
                 secrets = [False]
             else:
-                raise ValueError('invalid parameter secret, {}'.format(secrets))
+                raise ValueError('invalid parameter secret="{}", can "secret", "all" or ""'.format(secrets))
         else:
             secrets = None
         vehicleSpec = VehicleSpec(nations=nations, tiers=tiers, types=types, secrets=secrets)

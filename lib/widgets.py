@@ -100,8 +100,6 @@ class GuiApplication(tkinter.Frame):
 
     def changeSpec(self):
         ctx = self.getSelectedValues()
-        #for widget in self.specViewWidgets:
-        #    widget.pack_forget()
         self.app.vehicleStatsPool.fetchStats(ctx)
         #print(self.app.vehicleStatsPool.get(), flush=True)
 
