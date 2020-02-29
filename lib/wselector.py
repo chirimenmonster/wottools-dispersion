@@ -90,6 +90,8 @@ class Selector(tkinter.ttk.Combobox):
         return id
 
     def selectId(self, id):
+        if self.__table is None:
+            return
         for i, item in enumerate(self.__table):
             if item.id == id:
                 break

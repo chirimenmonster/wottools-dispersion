@@ -9,6 +9,29 @@ from lib.wdescription import SpecViewItem, VehicleStatsPool
 
 class GuiApplication(tkinter.Frame):
 
+    vehicleSpecSelectors = {
+        'nation':   '!nationselector',
+        'tier':     '!tierselector',
+        'type':     '!vtypeselector',
+        'secret':   '!secretselector'
+    }
+    vehicleSelectors = {
+        'vehicle':  '!vehicleselector',
+        'siege':    '!siegeselector'
+    }
+    moduleSelectors = {
+        'chassis':  '!chassisselector',
+        'turret':   '!turretselector',
+        'engine':   '!engineselector',
+        'radio':    '!radioselector',
+        'gun':      '!gunselector',
+        'shell':    '!shellselector'
+    }
+    allSelectors = {}
+    allSelectors.update(vehicleSpecSelectors)
+    allSelectors.update(vehicleSelectors)
+    allSelectors.update(moduleSelectors)
+
     def __init__(self, app, master=None):
         super(GuiApplication, self).__init__(master)
         self.app = app
@@ -36,21 +59,17 @@ class GuiApplication(tkinter.Frame):
 
         if app.config.vehicle is not None:
             ctx = app.vd.getCtx(app.config.vehicle)
-            self.app.widgets['!nationselector'].selectId(ctx['nation'])
-            self.app.widgets['!tierselector'].selectId(ctx['tier'])
-            self.app.widgets['!vtypeselector'].selectId(ctx['type'])
-            self.app.widgets['!secretselector'].selectId(ctx['secret'])
-            self.app.widgets['!vehicleselector'].updateTable()
-            self.app.widgets['!vehicleselector'].selectId(ctx['vehicle'])
+            ctx['siege'] = ''
+            for k, w in self.vehicleSpecSelectors.items():
+                self.app.widgets[w].selectId(ctx[k])
+            for k, w in self.vehicleSelectors.items():
+                self.app.widgets[w].updateTable()
+                self.app.widgets[w].selectId(ctx[k])
+            for w in self.moduleSelectors.values():
+                self.app.widgets[w].updateTable()
 
-        self.app.widgets['!vehicleselector'].onSelected.append(self.changeSpec)
-        self.app.widgets['!siegeselector'].onSelected.append(self.changeSpec)
-        self.app.widgets['!chassisselector'].onSelected.append(self.changeSpec)
-        self.app.widgets['!turretselector'].onSelected.append(self.changeSpec)
-        self.app.widgets['!engineselector'].onSelected.append(self.changeSpec)
-        self.app.widgets['!radioselector'].onSelected.append(self.changeSpec)
-        self.app.widgets['!gunselector'].onSelected.append(self.changeSpec)
-        self.app.widgets['!shellselector'].onSelected.append(self.changeSpec)
+        for w in list(self.vehicleSelectors.values()) + list(self.moduleSelectors.values()):
+            self.app.widgets[w].onSelected.append(self.changeSpec)
         
         self.changeSpec()
 
@@ -104,22 +123,12 @@ class GuiApplication(tkinter.Frame):
         #print(self.app.vehicleStatsPool.get(), flush=True)
 
     def getSelectedValues(self):
-        source = {
-            'nation':   '!nationselector',
-            'vehicle':  '!vehicleselector',
-            'siege':    '!siegeselector',
-            'chassis':  '!chassisselector',
-            'turret':   '!turretselector',
-            'engine':   '!engineselector',
-            'radio':    '!radioselector',
-            'gun':      '!gunselector',
-            'shell':    '!shellselector'
-        }
         if len(self.app.widgets) == 0:
             return None
         ctx = {}
-        for k, v in source.items():
-            ctx[k] = self.app.widgets[v].getId()
+        for k in ('nation', 'vehicle', 'siege', 'chassis', 'turret', 'engine', 'radio', 'gun', 'shell'):
+            w = self.allSelectors[k]
+            ctx[k] = self.app.widgets[w].getId()
         return ctx
  
     def createMessage(self):

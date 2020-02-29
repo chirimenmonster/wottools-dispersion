@@ -59,7 +59,7 @@ class Resource(object):
                 value = src.getValue(ctx)
             except KeyError as e:
                 raise KeyError('{}, resources={}, ctx={}'.format(e.args, resources, ctx)) from e
-            if value is not None and value is not []:
+            if value is not None and value != []:
                 break
         value = converter.getValue(value)
         value = mapper.getValue(value)
