@@ -48,14 +48,15 @@ class ResourceTestCase(unittest.TestCase):
         self.assertEqual([16.565073330933274, 14.016600510789694, 7.922426375663741], result)
 
     def test_resource_getValue_1(self):
-        return
-        self.assertEqual('T-34', self.resource.getValue('vehicle:shortUserString', self.ctx))
+        self.assertEqual('R04_T-34', self.resource.getValue('vehicle:index', self.ctx))
+        self.assertEqual('T-34', self.resource.getValue('vehicle:userString', self.ctx))
+        self.assertEqual(None, self.resource.getValue('vehicle:shortUserString', self.ctx))
+        self.assertEqual('T-34', self.resource.getValue('vehicle:displayString', self.ctx))
 
     def test_resource_getValue_2(self):
-        return
         resources = [{'file':'vehicles/{nation}/list.xml', 'xpath':'name(*)'}]
         result = self.resource.getValue(ctx=self.ctx, resources=resources, type='list')
-        self.assertEqual(['Observer', 'R04_T-34', 'R02_SU-85', 'R01_IS', 'R03_BT-7'], result)
+        self.assertEqual(['Observer', 'R04_T-34', 'R02_SU-85', 'R01_IS', 'R03_BT-7'], result[:5])
 
     def test_resource_getValue_3(self):
         resources = [{'file':'vehicles/{nation}/list.xml', 'xpath':'position(R04_T-34)'}]
@@ -68,9 +69,10 @@ class ResourceTestCase(unittest.TestCase):
                     '6':'VI', '7':'VII', '8':'VIII', '9':'IX', '10':'X' }
         self.assertEqual(expect, result)
 
-    def test_resource_secret(self):
-        result = self.resource.getValue('vehicle:secret', self.ctx)
-        print('result={}'.format(repr(result)))
+    def test_resource_getValue_5(self):
+        self.assertEqual('', self.resource.getValue('vehicle:secret', self.ctx))
+        self.assertEqual(None, self.resource.getValue('vehicle:siegeMode', self.ctx))
+        self.assertRaises(KeyError, self.resource.getValue, 'vehicle:siege', self.ctx)
     
 
 if __name__ == '__main__':
