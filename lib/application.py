@@ -99,6 +99,7 @@ class Application(object):
 
 
 class Settings(object):
+    schema = None
 
     def load(self, path):
         with open(path, 'r') as fp:

@@ -16,6 +16,15 @@ class Config:
     guipkg = None
     localedir = None
     schema = None
+    show_version = False
+    list_nation = False
+    list_tier = False
+    list_type = False
+    list_tag = False
+    vehicle = None
+    list_module = None
+    show_params = None
+    show_headers = None
     suppress_unique = False
     suppress_empty = False
     output_type = 'text'
